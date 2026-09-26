@@ -48,6 +48,7 @@ namespace opts {
         // General options
         boost::program_options::options_description general_opts("General options");
         general_opts.add_options()
+            ("session-file", boost::program_options::value<std::string>(), "load an immutable model snapshot and serve isolated JSON Lines queries")
             ("query-file", boost::program_options::value<std::string>(), "execute a typed query request and emit one JSON result")
             (
                 "help",
@@ -693,3 +694,5 @@ namespace opts {
 }; // namespace opts
 
 std::string opts::OptsMgr::query_file() const { return f_vm.count("query-file") ? f_vm["query-file"].as<std::string>() : ""; }
+
+std::string opts::OptsMgr::session_file() const { return f_vm.count("session-file") ? f_vm["session-file"].as<std::string>() : ""; }

@@ -15,13 +15,16 @@ function remember() {
   localStorage.setItem('yasmv-session', JSON.stringify({revision: state.revision?.id, trace: state.artifact?.id, comparison: state.comparison?.id, job: state.job, step: state.step, scenario: state.scenario?.id}));
 }
 function markDirty() { state.dirty = true; $('dirty').textContent = 'Unsaved changes'; }
-for (const id of ['source', 'model-name', 'root', 'inputs', 'goals', 'watches', 'scenario-metadata']) $(id).addEventListener('input', markDirty);
+for (const id of ['source', 'model-name', 'root', 'inputs', 'goals', 'watches', 'properties', 'scenario-metadata']) $(id).addEventListener('input', markDirty);
 function fillEditor(revision) {
   $('model-name').value = revision.name;
   $('source').value = revision.source;
   $('root').value = revision.root || '';
   $('scenario-metadata').value = JSON.stringify(revision.scenario || null, null, 2);
-  for (const name of ['inputs', 'goals', 'watches']) $(name).value = JSON.stringify(revision[name] || {}, null, 2);
+  for (const name of ['inputs', 'goals', 'watches', 'properties']) $(name).value = JSON.stringify(revision[name] || {}, null, 2);
+  $('property').replaceChildren(option('Select a safety property…', ''));
+  for (const name of Object.keys(revision.properties || {})) $('property').append(option(name, name));
+  if ($('property').options.length > 1) $('property').selectedIndex = 1;
   $('goal').replaceChildren(option('Custom expression', ''));
   for (const [name, expression] of Object.entries(revision.goals || {})) $('goal').append(option(name, expression));
   if ($('goal').options.length > 1) { $('goal').selectedIndex = 1; $('target').value = $('goal').value; }
@@ -44,7 +47,7 @@ async function selectRevision(id) {
   $('result-title').textContent = 'Revision selected';
   $('result-detail').textContent = 'Validate or query this saved revision, or select a previous job.';
   $('result-panel').className = 'panel result-panel';
-  for (const id of ['cancel', 'progress', 'diagnostics', 'explanation', 'replay-difference']) $(id).hidden = true;
+  for (const id of ['cancel', 'progress', 'diagnostics', 'explanation', 'replay-difference', 'proof-detail']) $(id).hidden = true;
   renderTrace(); await refreshTraces(); state.scenario = null; await refreshScenarios(); remember();
 }
 $('revision').addEventListener('change', async () => { try { if ($('revision').value) await selectRevision($('revision').value); } catch (e) { notice(e); } });
@@ -71,7 +74,7 @@ async function submit(query) {
 }
 action('save', async () => {
   const revision = {name: $('model-name').value, source: $('source').value, root: $('root').value};
-  for (const name of ['inputs', 'goals', 'watches']) revision[name] = JSON.parse($(name).value);
+  for (const name of ['inputs', 'goals', 'watches', 'properties']) revision[name] = JSON.parse($(name).value);
   const mapping = JSON.parse($('scenario-metadata').value);
   if (mapping !== null) revision.scenario = mapping;
   const saved = await api('revisions', revision);
@@ -83,11 +86,24 @@ action('search', async () => {
   if (!target) throw new Error('Enter a target expression.');
   await submit({operation: 'reach', target, limits: {depth: number('depth', 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
 });
+action('shortest', async () => {
+  const target = $('target').value.trim();
+  if (!target) throw new Error('Enter a target expression.');
+  await submit({operation: 'shortest-reach', target, limits: {depth: number('depth', 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
+});
+for (const operation of ['check-property', 'prove-property']) action(operation, () => {
+  if (!$('property').value) throw new Error('Save and select a named safety property.');
+  return submit({operation, property: $('property').value, limits: {depth: number('depth', operation === 'prove-property' ? 1 : 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
+});
 action('pick', () => submit({operation: 'pick-state', assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)}));
 action('cancel', () => api('jobs/' + state.job + '/cancel', {}));
 function describeResult(result, query) {
   if (result.status === 'error') return ['Query failed', 'Read the diagnostics below. The saved revision is unchanged.', 'error'];
   if (result.status === 'unknown') return ['Inconclusive · ' + result.stop_reason.replaceAll('_', ' '), 'No reachability or safety conclusion follows from this interrupted or incomplete computation.', 'unknown'];
+  if (result.outcome === 'proven') return ['Safety property proved', 'Verified k-induction establishes the selected property for all reachable states under the recorded assumptions.', 'success'];
+  if (result.outcome === 'violated') return ['Safety property violated at depth ' + (result.trace.steps.length - 1), 'A shortest reachable counterexample passed model replay.', 'error'];
+  if (result.outcome === 'holds_bounded') return ['Property holds through depth ' + query.limits.depth, result.proof?.step_status === 'satisfiable' ? 'Induction was inconclusive. Its step assignment may be unreachable; unbounded safety is unknown.' : 'No counterexample within this bound. Unbounded safety is unknown.', 'unknown'];
+  if (query.operation === 'shortest-reach' && result.outcome === 'reachable') return ['Shortest witness at depth ' + result.optimality.depth, 'Every smaller depth was UNSAT. This witness passed model replay; the certificate measures transitions.', 'success'];
   if (query.operation.startsWith('explain-')) {
     if (result.outcome === 'satisfiable') return ['Query is feasible', 'No impossibility explanation applies. Run a search to obtain a concrete trace.', 'success'];
     return [query.operation === 'explain-step' ? 'No valid next transition' : query.operation === 'explain-init' ? 'Initial constraints are inconsistent' : 'Goal impossible through depth ' + query.limits.depth,
@@ -107,6 +123,25 @@ function describeResult(result, query) {
   if (query.operation === 'validate-trace') return result.outcome === 'valid' ? ['Trace passed replay', 'Identity, values, transitions, generating constraints, and parent prefix were checked.', 'success'] : ['Trace failed replay', 'This import remains untrusted and cannot be used as evidence.', 'error'];
   return result.outcome === 'satisfiable' ? ['Initial state found', 'This initial state has passed replay validation.', 'success'] : ['No initial state', 'The model and current assumptions admit no initial state.', 'unknown'];
 }
+function renderAnalysisEvidence(result) {
+  const container = $('proof-detail'); container.replaceChildren();
+  container.hidden = !result.proof && !result.optimality;
+  if (container.hidden) return;
+  const depths = values => !values?.length ? 'none required' : values.length > 12 ? `${values[0]} through ${values.at(-1)}` : values.join(', ');
+  if (result.optimality) container.append(node('p', `Shortest witness: ${result.optimality.depth} transitions. UNSAT at smaller depths: ${depths(result.optimality.unsat_depths)}.`));
+  const proof = result.proof;
+  if (proof) {
+    container.append(node('p', `Property: ${proof.property.name} · ${proof.property.expression}`));
+    if (proof.assumptions.length) container.append(node('p', 'Under assumptions: ' + proof.assumptions.join('; ')));
+    if (proof.base_unsat_depths.length) container.append(node('p', 'No reachable violation at depths: ' + depths(proof.base_unsat_depths) + '.'));
+    if (proof.step_status) container.append(node('p', `Induction step at k = ${proof.induction_depth}: ${proof.step_status === 'unsatisfiable' ? 'UNSAT' : 'SAT; the assignment may be unreachable'}.`));
+    if (proof.verified) container.append(node('p', 'All base obligations and the induction step were rechecked in fresh solvers.'));
+  }
+  const details = node('details');
+  details.append(node('summary', proof?.induction_counterexample ? 'Inspect induction assignment and analysis evidence' : 'Inspect analysis evidence'));
+  details.append(node('pre', JSON.stringify({optimality: result.optimality, proof}, null, 2)));
+  container.append(details);
+}
 let lastPublished = null;
 async function refreshJobs() {
   state.jobs = await api('jobs');
@@ -125,6 +160,7 @@ async function refreshJobs() {
   $('diagnostics').hidden = true;
   $('explanation').hidden = true;
   $('replay-difference').hidden = true;
+  $('proof-detail').hidden = true;
   if (job.running) {
     $('result-panel').className = 'panel result-panel';
     $('result-title').textContent = 'Working · ' + job.request.query.operation;
@@ -138,6 +174,7 @@ async function refreshJobs() {
     $('result-detail').textContent = detail + ' · Revision ' + job.request.revision.slice(0, 8);
     $('result-panel').className = 'panel result-panel ' + style;
     renderExplanation(job);
+    renderAnalysisEvidence(job.result);
     if (job.result.implementation_replay?.first_divergence) {
       $('replay-difference').hidden = false;
       $('replay-difference').textContent = JSON.stringify(job.result.implementation_replay.first_divergence, null, 2);
@@ -315,7 +352,7 @@ async function init() {
   state.step = Math.min(saved.step || 0, Math.max(0, (state.artifact?.trace.steps.length || 1) - 1));
   state.job = saved.job || null; lastPublished = state.job;
   if (saved.scenario) { try { await selectScenario(saved.scenario); } catch (_) {} }
-  renderTrace(); await refreshTraces(); await refreshScenarios(); await refreshJobs();
+  renderTrace(); await refreshTraces(); await refreshScenarios(); await refreshJobs(); remember();
   async function poll() { try { await refreshJobs(); } catch (e) { notice(e); } finally { setTimeout(poll, 700); } }
   setTimeout(poll, 700);
 }

@@ -4,10 +4,10 @@ import math
 import re
 
 VERSION = 1
-OPERATIONS = ('validate-model', 'pick-state', 'reach', 'validate-trace', 'simulate', 'explain-init', 'explain-step', 'explain-reach', 'export-scenario', 'replay-scenario')
+OPERATIONS = ('shortest-reach', 'check-property', 'prove-property', 'validate-model', 'pick-state', 'reach', 'validate-trace', 'simulate', 'explain-init', 'explain-step', 'explain-reach', 'export-scenario', 'replay-scenario')
 CAPABILITIES = {
     'version': VERSION, 'operations': list(OPERATIONS), 'events': ['started', 'progress', 'result'],
-    'trace_version': 1, 'bounded_only': True, 'watch_types': ['boolean'],
+    'trace_version': 1, 'bounded_only': False, 'proof_methods': ['k-induction'], 'shortest_witnesses': True, 'compiled_sessions': 'process-snapshot', 'watch_types': ['boolean'],
     'explanations': ['initial', 'single_step_continuation', 'bounded_reach'],
     'scenario_adapters': ['retry-protocol-v1'], 'selected_prefix': True, 'process_isolation': True,
     'limits': ['depth', 'wall_ms', 'conflicts', 'propagations'],
@@ -63,19 +63,21 @@ def expressions(value):
 
 
 def revision(value):
-    fields(value, ('source', 'name', 'root', 'inputs', 'goals', 'watches', 'scenario'), ('source',))
+    fields(value, ('source', 'name', 'root', 'inputs', 'goals', 'watches', 'scenario', 'properties'), ('source',))
     if not isinstance(value['source'], str) or not value['source'].strip() or len(value['source'].encode()) > 1024 * 1024:
         raise ValueError('Source must contain 1 byte to 1 MiB')
     for key in ('name', 'root'):
         if key in value and (not isinstance(value[key], str) or len(value[key]) > 200):
             raise ValueError('Invalid ' + key)
-    for key in ('inputs', 'goals', 'watches'):
+    for key in ('inputs', 'goals', 'watches', 'properties'):
         expressions(value.get(key, {}))
     if value.get('scenario') is not None:
         from tools.scenario.format import metadata
         metadata(value['scenario'])
     result = dict(source=value['source'], name=value.get('name', 'Untitled model'), root=value.get('root', ''),
                 inputs=value.get('inputs', {}), goals=value.get('goals', {}), watches=value.get('watches', {}))
+    if 'properties' in value:
+        result['properties'] = value['properties']
     if value.get('scenario') is not None:
         result['scenario'] = value['scenario']
     return result
@@ -92,21 +94,26 @@ def request(value):
     if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0.05 <= timeout <= 300:
         raise ValueError('Hard timeout must be between 0.05 and 300 seconds')
     q = value['query']
-    fields(q, ('operation', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation'), ('operation',))
+    fields(q, ('operation', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation', 'property'), ('operation',))
     op = q['operation']
     if op not in OPERATIONS:
         raise ValueError('Unsupported operation')
     for key in ('target', 'until'):
         if key in q and (not isinstance(q[key], str) or not q[key].strip() or len(q[key]) > 4096):
             raise ValueError('Invalid ' + key)
-    if ('target' in q) != (op in ('reach', 'explain-reach')) or ('until' in q and op != 'simulate'):
+    if ('target' in q) != (op in ('reach', 'shortest-reach', 'explain-reach')) or ('until' in q and op != 'simulate'):
         raise ValueError('Target is required only for reach; until is supported only for simulate')
+    if op in ('check-property', 'prove-property'):
+        if not isinstance(q.get('property'), str) or not q['property'].strip() or len(q['property']) > 120:
+            raise ValueError('Select a named safety property from the revision')
+    elif 'property' in q:
+        raise ValueError('Property applies only to safety queries')
     limits = q.get('limits', {})
     fields(limits, CAPABILITIES['limits'])
     for key, val in limits.items():
         integer(val, 0, 10000 if key == 'depth' else 2147483647, key)
-    if op in ('reach', 'simulate', 'explain-reach'):
-        integer(limits.get('depth'), 1 if op == 'simulate' else 0, 10000, 'depth')
+    if op in ('reach', 'shortest-reach', 'simulate', 'explain-reach', 'check-property', 'prove-property'):
+        integer(limits.get('depth'), 1 if op in ('simulate', 'prove-property') else 0, 10000, 'depth')
     elif 'depth' in limits and not (op == 'explain-step' and limits['depth'] == 1):
         raise ValueError('Depth applies only to reach and simulate')
     assumptions = q.get('assumptions', [])

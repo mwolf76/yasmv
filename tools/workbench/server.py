@@ -17,7 +17,7 @@ def examples():
     directory = ROOT / 'examples/retry-protocol'
     scenario = read(directory / 'scenario.json')
     return [dict(name=m['name'], source=(directory / m['file']).read_text(),
-                 goals=scenario['goals'], watches=scenario['watches'], description=scenario['description'],
+                 properties={'At most once': '!DUPLICATE'}, goals=scenario['goals'], watches=scenario['watches'], description=scenario['description'],
                  default_depth=scenario['default_depth'], scenario=scenario) for m in scenario['models']]
 
 

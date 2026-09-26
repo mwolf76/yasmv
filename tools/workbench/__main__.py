@@ -15,6 +15,7 @@ def main():
     parser.add_argument('--store', type=Path, default=Path('.yasmv-workbench'))
     parser.add_argument('--binary', type=Path)
     parser.add_argument('--home', type=Path)
+    parser.add_argument('--reuse-models', action='store_true', help='reuse immutable compiled snapshots with isolated query processes')
     commands = parser.add_subparsers(dest='command', required=True)
     commands.add_parser('capabilities')
     serve = commands.add_parser('serve')
@@ -30,7 +31,7 @@ def main():
     engine = None
     identifier = ''
     try:
-        engine = Engine(args.store, args.binary, args.home)
+        engine = Engine(args.store, args.binary, args.home, reuse_models=args.reuse_models)
         if args.command == 'revision':
             print(json.dumps(engine.save_revision(loads(args.file.read_text()))))
         elif args.command == 'serve':

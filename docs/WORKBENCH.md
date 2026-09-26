@@ -1,11 +1,13 @@
-# Local model workbench (M2 and M3)
+# Local model workbench (M2–M4)
 
 M2 implemented work packages 10–12: an artifact runner, a browser workbench, and
 a retry-protocol demonstration. The server and CLI use Python 3.10+ standard
 library modules; the browser uses ordinary HTML, CSS, and JavaScript. There are
 no runtime npm dependencies or external web assets. M3 adds bounded
 explanations and executable scenario export/replay; see
-[EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md).
+[EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md). M4 adds shortest
+witnesses, named safety checks, induction proofs, and optional compiled sessions;
+see [STRONGER_ANALYSIS.md](STRONGER_ANALYSIS.md).
 
 ## Start
 
@@ -21,7 +23,7 @@ python3 -m tools.workbench --store /tmp/my-exploration --binary ./yasmv serve --
 Open `http://127.0.0.1:8765`. Choose an example, save and validate its revision,
 select a goal and explicit depth/deadline, then search. Pick initial state is
 also available. Editing source, root module, compile-time inputs, named goals,
-or watches creates a new revision when saved. Query assumptions do not mutate
+safety properties, or watches creates a new revision when saved. Query assumptions do not mutate
 that revision. Word widths are set in the source, using the existing directive.
 
 Results distinguish completed positive/negative computations, execution errors,
@@ -219,3 +221,11 @@ The retry witness first reaches duplicate execution at depth 5 and passes both
 checker replay and the independent Python state machine. The deduplicating
 model has no duplicate witness through depth 12. These are the M2 exit gates;
 M3 acceptance evidence is recorded in the explanation and scenario guide.
+
+## M4 additions
+
+Revisions may include `properties`, a map of names to Boolean state assertions.
+The UI offers shortest search, bounded safety checks, and verified k-induction.
+Start with `python3 -m tools.workbench --reuse-models serve` to opt into owned
+compiled snapshots. Existing jobs and artifacts retain their format and replay
+requirements. See [STRONGER_ANALYSIS.md](STRONGER_ANALYSIS.md).

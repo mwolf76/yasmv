@@ -126,3 +126,40 @@ BOOST_AUTO_TEST_CASE(internal_errors_remain_execution_failures)
     BOOST_CHECK(r.outcome == query::Outcome::none);
     BOOST_CHECK(r.trace.isNull());
 }
+
+BOOST_AUTO_TEST_CASE(shortest_and_proof_cancellation_never_publish_claims)
+{
+    load_model();
+    query::QuerySpec spec;
+    spec.operation = query::Operation::prove_property;
+    spec.property["name"] = "tautology";
+    spec.property["expression"] = "x || !x";
+    spec.limits.depth = 2;
+    auto proof = query::execute(spec);
+    BOOST_REQUIRE(proof.outcome == query::Outcome::proven);
+    BOOST_CHECK(proof.proof["verified"].asBool());
+    // Three incremental base solves, then the induction step, then fresh checks.
+    for (unsigned stop_at : { 1u, 4u, 5u, 8u }) {
+        query::QueryContext context(spec.limits);
+        unsigned calls = 0;
+        context.checkpoint_hook = [&](query::Phase phase) {
+            if (phase == query::Phase::solving && ++calls == stop_at) context.cancel();
+        };
+        auto interrupted = query::execute(spec, context);
+        BOOST_CHECK(interrupted.status == query::ExecutionStatus::unknown);
+        BOOST_CHECK(interrupted.proof.isNull());
+        BOOST_CHECK(interrupted.trace.isNull());
+        BOOST_CHECK(interrupted.optimality.isNull());
+    }
+    spec = reach(3);
+    spec.operation = query::Operation::shortest_reach;
+    query::QueryContext context(spec.limits);
+    unsigned calls = 0;
+    context.checkpoint_hook = [&](query::Phase phase) {
+        if (phase == query::Phase::solving && ++calls == 2) context.cancel();
+    };
+    const auto interrupted = query::execute(spec, context);
+    BOOST_CHECK(interrupted.status == query::ExecutionStatus::unknown);
+    BOOST_CHECK(interrupted.optimality.isNull());
+    BOOST_CHECK(query::execute(spec).optimality["certified"].asBool());
+}

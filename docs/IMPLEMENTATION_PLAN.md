@@ -1,13 +1,15 @@
 # Implementation plan: model exploration and scenario generation
 
-Status: M0 (packages 01–05), M1 (packages 06–09), M2 (packages 10–12), and
-M3 (packages 13–14) are implemented and locally verified on 2026-09-26.
-M4 remains planned. Current behavior, API usage, migration
-notes, and acceptance evidence are documented in
+Status: M0 (packages 01–05), M1 (packages 06–09), M2 (packages 10–12),
+M3 (packages 13–14), and M4 (packages 15–17) are implemented and locally
+verified on 2026-09-26. M4 compilation reuse uses process-owned snapshots; the
+full in-process ownership migration remains follow-on work. Current behavior,
+API usage, migration notes, and acceptance evidence are documented in
 [CORRECTNESS_BASELINE.md](CORRECTNESS_BASELINE.md),
 [QUERY_AND_TRACE_CONTRACTS.md](QUERY_AND_TRACE_CONTRACTS.md),
-[WORKBENCH.md](WORKBENCH.md), and
-[EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md).
+[WORKBENCH.md](WORKBENCH.md),
+[EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md), and
+[STRONGER_ANALYSIS.md](STRONGER_ANALYSIS.md).
 
 Prepared 2026-09-26 against commit `2077efeb`. The accepted direction and evidence are in [ARCHITECTURE.md](../ARCHITECTURE.md). The findings below describe the original planning baseline; the correctness baseline document records the implemented repairs and their verification.
 
@@ -44,7 +46,7 @@ These choices let the first product use the core without making full singleton r
 | M1: query and trace contracts | Typed requests/results, bounded jobs, diagnostics, exact trace interchange and replay | 06–09 | An external client can distinguish outcomes and validate every displayed witness |
 | M2: first workbench | Artifact protocol, local runner, timeline, branching, protocol example | 10–12 | The complete load/search/inspect/branch workflow works without interpreting console output |
 | M3: useful developer workflow | Bounded explanations and executable scenario export | 13–14 | The protocol failure can be explained and replayed against an implementation |
-| M4: stronger analysis | Shortest witnesses, named properties, induction, reusable sessions | 15–17 | Optimality/proof claims are validated; reuse preserves results and isolates jobs |
+| M4: stronger analysis | Shortest witnesses, named properties, induction, process-owned compilation reuse | 15–17 | Optimality/proof claims are validated; reuse preserves results and isolates jobs |
 
 ```mermaid
 flowchart TD
@@ -253,6 +255,18 @@ Store properties separately from model assumptions, initially in query/project m
 **Dependencies:** 06–09 and the independent small-model oracle established for package 12.
 
 ### 17. Reusable compiled models and owned sessions — L
+
+**M4 implementation refinement:** measured fresh-job overhead justified reuse.
+The delivered owner is an immutable model process with disposable query children,
+transactional publication, content-based invalidation, and a bounded snapshot
+pool. Repeated lifecycle, failed-load, cancellation, and concurrent-revision
+tests verify that boundary. Compiler temporary IDs were repaired to prevent
+aliasing between cached model units and fresh query expressions. See the
+[implementation and acceptance evidence](STRONGER_ANALYSIS.md).
+
+**Follow-on in-process design:** the original ownership refactor below remains
+necessary before allowing multiple model revisions or concurrent queries to
+share a mutable C++ address space. M4 retains process isolation.
 
 Use measured job timings to determine the value of compilation reuse. Introduce owners for expression arenas, declarations, encodings, CUDD state, traces, and caches; repair destructors before normal teardown. Replace manager lookups with session references incrementally. Separate immutable compiled transition systems from query-local solvers and mutable state.
 
