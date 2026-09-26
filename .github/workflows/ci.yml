@@ -47,11 +47,11 @@ jobs:
 
     - name: sanitizer correctness regressions
       if: ${{ matrix.sanitize }}
-      # Managers currently live until process exit; teardown is a later milestone.
+      # Legacy arenas are owned by isolated processes; query children are reclaimed on exit.
       env:
         ASAN_OPTIONS: detect_leaks=0
         UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
-      run: YASMV_HOME=$(pwd) make reliability-test query-test workbench-test developer-workflow-test
+      run: YASMV_HOME=$(pwd) make reliability-test query-test workbench-test developer-workflow-test analysis-test
 
     - name: set up browser test runtime
       if: ${{ !matrix.sanitize && matrix.llvm == 'no' }}

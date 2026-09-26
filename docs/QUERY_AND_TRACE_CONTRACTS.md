@@ -274,3 +274,13 @@ control per-depth subset minimization and explicit subset rechecks. Result
 cores; interrupted decisions have no explanation. See
 [EXPLANATIONS_AND_SCENARIOS.md](EXPLANATIONS_AND_SCENARIOS.md) for the complete
 contract and the separate executable scenario/implementation replay workflow.
+
+## M4 additions
+
+`shortest-reach`, `check-property`, and `prove-property` add shortest-witness
+evidence and named safety checks. Bounded reachable results now include an
+`optimality` certificate; safety results use `violated`, `holds_bounded`, or
+`proven` with explicit base/step verification evidence. Trace replay recognizes
+resolved safety properties and verifies the final violation. Existing version 1
+requests and traces remain valid. See [STRONGER_ANALYSIS.md](STRONGER_ANALYSIS.md)
+for result scope, assumption semantics, optional compiled sessions, and limits.

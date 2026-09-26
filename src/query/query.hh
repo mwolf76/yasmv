@@ -4,7 +4,10 @@
 #include <query/source.hh>
 #include <witness/witness.hh>
 namespace query {
-    enum class Operation { explain_init,
+    enum class Operation { shortest_reach,
+                           check_property,
+                           prove_property,
+                           explain_init,
                            explain_step,
                            explain_reach,
                            validate_model,
@@ -18,7 +21,10 @@ namespace query {
     enum class ExecutionStatus { completed,
                                  unknown,
                                  error };
-    enum class Outcome { none,
+    enum class Outcome { holds_bounded,
+                         violated,
+                         proven,
+                         none,
                          satisfiable,
                          unsatisfiable,
                          reachable,
@@ -38,7 +44,7 @@ namespace query {
         QueryLimits limits;
         bool enumerate = false, count = false;
         std::string trace_id;
-        Json::Value trace, parent_trace, explanation;
+        Json::Value trace, parent_trace, explanation, property;
     };
     struct QueryResult {
         std::string request_id;
@@ -50,11 +56,13 @@ namespace query {
         int64_t value = 0;
         std::vector<unsigned> checked_depths;
         witness::Witness_ptr witness = nullptr;
-        Json::Value identity, trace, statistics, watches, explanation;
+        Json::Value identity, trace, statistics, watches, explanation, optimality, proof;
         std::vector<source::Diagnostic> diagnostics;
         int exit_code() const;
         Json::Value json() const;
     };
+    void analyze_property(const QuerySpec&, QueryResult&, QueryContext&);
+    void bounded_reach(const QuerySpec&, QueryResult&);
     void explain(const QuerySpec&, QueryResult&, QueryContext&);
     QueryResult execute(const QuerySpec&, QueryContext&);
     QueryResult execute(const QuerySpec&);
@@ -62,6 +70,7 @@ namespace query {
     Json::Value identity();
     Json::Value spec_json(const QuerySpec&);
     QuerySpec spec_from_json(const Json::Value&);
+    int run_session(const std::string&);
     int run_file(const std::string&);
 } // namespace query
 #endif

@@ -1,0 +1,94 @@
+{
+  "machine": "Linux-6.8.0-142-generic-aarch64-with-glibc2.39",
+  "processor": "aarch64",
+  "python": "3.12.3",
+  "compiler": "c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0",
+  "cxxflags": "-std=c++20 -O2 -g -Wall -Wno-deprecated-declarations -Werror",
+  "binary_sha256": "21181aef051e008319432539427b02fd678372b2e4e0b9a79486069797dfbcbd",
+  "source_sha256": "075bb962e7426d69a4e348b81ecb54f68d1b6d4c25d0a882743c0ca5dc21d5ca",
+  "query": {
+    "request_id": "benchmark",
+    "operation": "shortest-reach",
+    "target": "DUPLICATE",
+    "limits": {
+      "depth": 12
+    }
+  },
+  "samples_ms": {
+    "fresh": [
+      1304.0615450008772,
+      1281.4561060076812,
+      1282.7498779952293,
+      1294.7635099990293,
+      1292.1331670077052
+    ],
+    "warm_snapshot": [
+      177.61358199641109,
+      177.56841599475592,
+      181.35636899387464,
+      180.77416199957952,
+      182.65832599718124
+    ]
+  },
+  "snapshot_initial_ms": 1628.6760450020665,
+  "session_key": "8779888e567f7ebd1f82ad8ed3040627b70a755ec2e3b21862c37f7374f97826",
+  "result": {
+    "status": "completed",
+    "outcome": "reachable",
+    "identity": {
+      "engine": "yasmv-0.0.10/minisat",
+      "environment_constraints": [
+        [],
+        [],
+        []
+      ],
+      "inputs": {},
+      "microcode_revision": "sha1:8d6c15340a294e399fc2107a84e85cae1fa77c50",
+      "model_revision": "sha1:866739db98d815fd10c156ed9a903b6e6b77bc3c",
+      "options": {
+        "cnf_duplicate_removal": true,
+        "cnf_self_subsumption": false,
+        "cnf_subsumption": false,
+        "cnf_tautology_removal": true,
+        "sat_asymm": false,
+        "sat_ccmin_mode": 2,
+        "sat_clause_decay": 0.999,
+        "sat_clause_lim": 20,
+        "sat_elim": true,
+        "sat_garbage_frac": 0.3,
+        "sat_grow": 0,
+        "sat_luby_restart": false,
+        "sat_phase_saving": 2,
+        "sat_random_init_act": true,
+        "sat_random_seed": 91648253,
+        "sat_random_var_freq": 0.02,
+        "sat_rcheck": false,
+        "sat_restart_first": 100,
+        "sat_restart_inc": 2,
+        "sat_simp_garbage_frac": 0.5,
+        "sat_subsumption_lim": 1000,
+        "sat_var_decay": 0.95,
+        "word_width": 4
+      },
+      "root": "main",
+      "source_revision": "sha1:3d531687e527ba0d614fbf294231f87de092ff49"
+    },
+    "optimality": {
+      "certified": true,
+      "criterion": "transitions",
+      "depth": 5,
+      "method": "increasing-depth-exhaustion",
+      "unsat_depths": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "median_ms": {
+    "fresh": 1292.1331670077052,
+    "warm_snapshot": 180.77416199957952
+  }
+}

@@ -44,7 +44,10 @@
             "explain-step",
             "explain-reach",
             "export-scenario",
-            "replay-scenario"
+            "replay-scenario",
+            "shortest-reach",
+            "check-property",
+            "prove-property"
           ]
         },
         "target": {
@@ -154,6 +157,11 @@
             "faulty",
             "deduplicating"
           ]
+        },
+        "property": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
         }
       },
       "allOf": [
@@ -163,7 +171,8 @@
               "operation": {
                 "enum": [
                   "reach",
-                  "explain-reach"
+                  "explain-reach",
+                  "shortest-reach"
                 ]
               }
             }
@@ -466,6 +475,58 @@
                 "properties": {
                   "exact_depth": {
                     "const": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check-property",
+                  "prove-property"
+                ]
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "property",
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "depth"
+                ]
+              }
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "property"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "prove-property"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "properties": {
+                  "depth": {
+                    "minimum": 1
                   }
                 }
               }

@@ -94,3 +94,12 @@ Implementation replay is distinct from checker validation. The adapter drives
 the independent state machine described above; it does not reinterpret the SMV
 model. See [the M3 guide](../../docs/EXPLANATIONS_AND_SCENARIOS.md) for standalone
 export, explicit mappings, result semantics, and the full acceptance workflow.
+
+## Safety proofs and shortest witnesses
+
+The workbench examples include the named property `At most once` (`!DUPLICATE`).
+The faulty model has a certified shortest violation at depth 5. With Max depth
+set to 12, **Prove by induction** proves the deduplicating model safe. Smaller
+induction depths can be inconclusive because the step starts from arbitrary
+states. The result shows that distinction and records every proof obligation.
+See [the M4 guide](../../docs/STRONGER_ANALYSIS.md) for CLI requests and reuse.

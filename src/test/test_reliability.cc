@@ -7,6 +7,7 @@
 #include <cmd/commands/commands.hh>
 #include <model/module.hh>
 #include <sat/engine.hh>
+#include <parse.hh>
 
 namespace {
 class TestCommand : public cmd::Command {
@@ -84,6 +85,20 @@ BOOST_AUTO_TEST_CASE(algorithm_status_and_enumeration)
         module.add_var(id, new symb::Variable(module.name(), id, tm.find_boolean()));
     }
     BOOST_REQUIRE(mm.analyze());
+    // Independently compiled units must never alias their temporary encodings.
+    // This models a cached transition system plus a fresh query compiler.
+    {
+        compiler::Compiler first, second;
+        auto initial = first.process(em.make_empty(), parse::parseExpression("(x ? 1 : 0) = 0"));
+        auto goal = second.process(em.make_empty(), parse::parseExpression("!((x ? 1 : 0) != 0)"));
+        sat::Engine combined("independent-compilers");
+        combined.push(initial, 0);
+        combined.push(goal, 0);
+        BOOST_CHECK(combined.solve() == sat::STATUS_SAT);
+        auto opposite = second.process(em.make_empty(), parse::parseExpression("(x ? 1 : 0) != 0"));
+        combined.push(opposite, 0);
+        BOOST_CHECK(combined.solve() == sat::STATUS_UNSAT);
+    }
     TestCommand command;
     const sat::SolveCallback unknown = [](sat::Engine&) { return sat::STATUS_UNKNOWN; };
 

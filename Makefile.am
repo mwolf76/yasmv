@@ -26,7 +26,9 @@ EXTRA_DIST = tools/test-support.sh tools/run-short-tests.sh tools/run-functional
     examples/retry-protocol/runner.py tests/test_workbench.py tests/workbench-browser.cjs \
     tests/test_explanations.py tests/test_scenarios.py docs/EXPLANATIONS_AND_SCENARIOS.md \
     docs/formats/explanation-v1.schema.json docs/formats/executable-scenario-v1.schema.json \
-    tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py
+    tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py tools/workbench/sessions.py tests/test_analysis.py tests/test_sessions.py \
+    docs/STRONGER_ANALYSIS.md docs/formats/analysis-v1.schema.json tools/benchmark-sessions.py \
+    docs/benchmarks/m4-sessions.json
 
 AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
 -I$(top_srcdir)/src/enc -I$(top_srcdir)/src/expr                    \
@@ -79,7 +81,11 @@ developer-workflow-test: yasmv
 	@YASMV_HOME=`pwd` python3 tests/test_explanations.py
 	@YASMV_HOME=`pwd` python3 tests/test_scenarios.py
 
-test: short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test
+analysis-test: yasmv
+	@YASMV_HOME=`pwd` python3 tests/test_analysis.py
+	@YASMV_HOME=`pwd` python3 tests/test_sessions.py
+
+test: short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: microcode
@@ -90,7 +96,7 @@ microcode:
 tags:
 	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
-query_sources = src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc
+query_sources = src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/session.cc
 yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc $(query_sources)
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\

@@ -113,6 +113,7 @@ int main(int argc, const char* argv[])
             return 0;
         }
 	
+        if (!om.session_file().empty()) return query::run_session(om.session_file());
         if (!om.query_file().empty()) return query::run_file(om.query_file());
 	expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 	(void) em;

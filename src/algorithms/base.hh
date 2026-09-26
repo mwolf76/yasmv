@@ -60,6 +60,8 @@ namespace algorithms {
 
     public:
         Algorithm(model::Model& model);
+        // Only an immutable, single-model snapshot process may install this cache.
+        static void reuse(const Algorithm* compiled);
         virtual ~Algorithm();
 
         /* top-level components */

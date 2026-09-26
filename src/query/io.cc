@@ -5,7 +5,7 @@
 #include <query/query.hh>
 #include <query/trace.hh>
 namespace query {
-    static const std::map<std::string, Operation> operations = { { "explain-init", Operation::explain_init }, { "explain-step", Operation::explain_step }, { "explain-reach", Operation::explain_reach }, { "validate-model", Operation::validate_model }, { "check-init", Operation::check_init }, { "check-trans", Operation::check_trans }, { "pick-state", Operation::pick_state }, { "reach", Operation::reach }, { "simulate", Operation::simulate }, { "diameter", Operation::diameter }, { "validate-trace", Operation::validate_trace } };
+    static const std::map<std::string, Operation> operations = { { "shortest-reach", Operation::shortest_reach }, { "check-property", Operation::check_property }, { "prove-property", Operation::prove_property }, { "explain-init", Operation::explain_init }, { "explain-step", Operation::explain_step }, { "explain-reach", Operation::explain_reach }, { "validate-model", Operation::validate_model }, { "check-init", Operation::check_init }, { "check-trans", Operation::check_trans }, { "pick-state", Operation::pick_state }, { "reach", Operation::reach }, { "simulate", Operation::simulate }, { "diameter", Operation::diameter }, { "validate-trace", Operation::validate_trace } };
     static void require(bool c, const std::string& message)
     {
         if (!c) throw std::invalid_argument(message);
@@ -41,6 +41,7 @@ namespace query {
         v["enumerate"] = s.enumerate;
         v["count"] = s.count;
         v["trace_id"] = s.trace_id;
+        if (!s.property.isNull()) v["property"] = s.property;
         if (!s.explanation.isNull()) v["explanation"] = s.explanation;
         if (s.prefix_length >= 0) v["prefix_length"] = Json::Int64(s.prefix_length);
         if (!s.watches.empty()) {
@@ -58,7 +59,7 @@ namespace query {
     }
     QuerySpec spec_from_json(const Json::Value& v)
     {
-        allowed(v, { "operation", "request_id", "strategy", "target", "until", "assumptions", "limits", "enumerate", "count", "trace_id", "trace", "parent_trace", "prefix_length", "watches", "explanation" });
+        allowed(v, { "operation", "request_id", "strategy", "target", "until", "assumptions", "limits", "enumerate", "count", "trace_id", "trace", "parent_trace", "prefix_length", "watches", "explanation", "property" });
         require(v["operation"].isString() && operations.count(v["operation"].asString()), "Unsupported query operation");
         QuerySpec s;
         s.operation = operations.at(v["operation"].asString());
@@ -109,6 +110,12 @@ namespace query {
                     require(id.isString(), "Constraint IDs must be strings");
             }
             s.explanation = options;
+        }
+        if (v.isMember("property")) {
+            allowed(v["property"], { "name", "expression" });
+            require(v["property"]["name"].isString() && !v["property"]["name"].asString().empty(), "Property requires a name");
+            expression(v["property"]["expression"]);
+            s.property = v["property"];
         }
         s.trace = v["trace"];
         s.parent_trace = v["parent_trace"];

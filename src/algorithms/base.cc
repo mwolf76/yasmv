@@ -38,6 +38,8 @@
 #include <utils/misc.hh>
 
 namespace algorithms {
+    static const Algorithm* compiled_snapshot = nullptr;
+    void Algorithm::reuse(const Algorithm* compiled) { compiled_snapshot = compiled; }
 
     Algorithm::Algorithm(model::Model& model)
         : f_ok(true)
@@ -49,6 +51,13 @@ namespace algorithms {
         , f_witness(nullptr)
     {
         f_mm.require_valid();
+        if (compiled_snapshot) {
+            if (&model != &compiled_snapshot->f_model) throw std::logic_error("Compiled snapshot model mismatch");
+            f_init = compiled_snapshot->f_init;
+            f_invar = compiled_snapshot->f_invar;
+            f_trans = compiled_snapshot->f_trans;
+            return;
+        }
         /* Force mgr to exist */
         sat::EngineMgr& mgr { sat::EngineMgr::INSTANCE() };
         (void) mgr; /* suppress warning */

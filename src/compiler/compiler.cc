@@ -76,7 +76,6 @@ namespace compiler {
         , f_owner(model::ModelMgr::INSTANCE())
         , f_enc(enc::EncodingMgr::INSTANCE())
         , f_preprocessor()
-        , f_temp_auto_index(0)
         , f_status(READY)
     {
         const void* instance { this };
