@@ -4,7 +4,8 @@
 #include <query/source.hh>
 #include <witness/witness.hh>
 namespace query {
-    enum class Operation { check_init,
+    enum class Operation { validate_model,
+                           check_init,
                            check_trans,
                            pick_state,
                            reach,
@@ -29,6 +30,8 @@ namespace query {
         std::string request_id, strategy = "auto";
         expr::Expr_ptr target = nullptr, until = nullptr;
         expr::ExprVector assumptions;
+        std::map<std::string, expr::Expr_ptr> watches;
+        int64_t prefix_length = -1;
         QueryLimits limits;
         bool enumerate = false, count = false;
         std::string trace_id;
@@ -44,7 +47,7 @@ namespace query {
         int64_t value = 0;
         std::vector<unsigned> checked_depths;
         witness::Witness_ptr witness = nullptr;
-        Json::Value identity, trace, statistics;
+        Json::Value identity, trace, statistics, watches;
         std::vector<source::Diagnostic> diagnostics;
         int exit_code() const;
         Json::Value json() const;

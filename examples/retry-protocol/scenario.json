@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "name": "Retrying delivery",
+  "description": "One job, two retries, explicit request and acknowledgement loss. Compare duplicate execution with receiver deduplication.",
+  "models": [{"name": "Faulty receiver", "file": "faulty.smv"}, {"name": "Deduplicating receiver", "file": "deduplicating.smv"}],
+  "goals": {"Duplicate execution": "DUPLICATE", "Successful delivery": "SUCCEEDED", "Retries exhausted": "EXHAUSTED"},
+  "watches": {"Duplicate": "DUPLICATE", "Succeeded": "SUCCEEDED", "Exhausted": "EXHAUSTED"},
+  "default_depth": 12,
+  "actions": {
+    "symbol": "action",
+    "controllable": ["SEND", "DELIVER", "DROP_REQUEST", "ACK", "DROP_ACK", "RETRY", "GIVE_UP", "IDLE"],
+    "observed": ["phase", "retries", "executions", "seen"],
+    "arguments": {"job_id": {"constant": "job-1"}},
+    "timing": "The action at step k drives the transition from k to k+1. The final action is not executed."
+  }
+}

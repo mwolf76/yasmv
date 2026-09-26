@@ -41,8 +41,9 @@ loading, sends TERM and then KILL if necessary, and discards incomplete worker
 output. A forced timeout returns `status: unknown`, `stop_reason: deadline`,
 `forced_termination: true`, and no trace. `--output` replaces the destination
 atomically. Worker crashes or malformed worker output become internal errors.
-This is the M1 isolation primitive; progress events, capability negotiation,
-artifact storage, and the browser workbench belong to M2.
+This remains the M1 isolation primitive. The implemented M2 artifact runner
+adds progress events, capability discovery, persistent artifacts, and a browser
+workbench; see [WORKBENCH.md](WORKBENCH.md).
 
 ## Typed C++ boundary
 
@@ -247,3 +248,19 @@ The 2,432 arithmetic fragments have manifest SHA-256
 `3b9c55919bc04cdfa1e51064a17feb473b95ee362a2e226163d6c28a9728cf1c`.
 Use `tools/build-provenance.py` to regenerate the full toolchain/library/fragment
 inventory for another build.
+
+## Additive native API extensions in M2
+
+Query-v1 accepts `validate-model` (completed `valid`, scope `model`), which checks
+model structure without requiring an initial state. `simulate` accepts optional
+positive `prefix_length`, selecting the number of retained parent states; the
+whole parent is still replayed and embedded for provenance. Its depth limit
+counts new transitions after that prefix.
+
+Optional `watches` maps display names to Boolean state expressions or DEFINE
+names. Temporal and non-Boolean watches are rejected. Result `watches` maps each
+name to its Boolean values in chronological trace order. Values are evaluated
+using SAT with each complete state pinned, preserving the checker's bit-vector
+semantics. Watches do not constrain the generating query. Trace-v1 continues to
+carry the generating specification; evaluated watch views live outside the
+trace in workbench artifacts. Interrupted watch evaluation remains inconclusive.
