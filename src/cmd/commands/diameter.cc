@@ -41,6 +41,7 @@ namespace cmd {
     bool Diameter::check_requirements() const
     {
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.require_valid();
         model::Model& model { mm.model() };
 
         if (0 == model.modules().size()) {
@@ -67,6 +68,10 @@ namespace cmd {
 
             computeDiameter.process();
             const step_t value = computeDiameter.diameter();
+            if (value == UINT_MAX) {
+                f_out << "FSM diameter could not be decided." << std::endl;
+                return utils::Variant(unknownMessage);
+            }
 
             if (!om.quiet()) {
                 f_out

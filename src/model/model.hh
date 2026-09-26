@@ -51,12 +51,14 @@ namespace model {
 
         /* topmost module in the model */
         Module& main_module();
+        void select_root(const std::string& name);
 
         void autoIndexSymbol(expr::Expr_ptr identifier);
         unsigned symbol_index(expr::Expr_ptr identifier);
 
     private:
         Modules f_modules;
+        Module_ptr f_root { nullptr };
 
         unsigned f_autoincrement;
         SymbolIndexMap f_symbol_index_map;

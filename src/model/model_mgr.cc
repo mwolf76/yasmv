@@ -66,6 +66,22 @@ namespace model {
         return mi->second;
     }
 
+    void ModelMgr::require_valid() const
+    {
+        if (!f_valid) {
+            throw SemanticError("No validated model is loaded.");
+        }
+    }
+
+    void ModelMgr::begin_load()
+    {
+        if (f_load_started || !f_model->empty()) {
+            throw SemanticError("Model replacement is not supported in this process; start a new session.");
+        }
+        f_load_started = true;
+        f_valid = false;
+    }
+
     expr::Expr_ptr ModelMgr::rewrite_parameter(expr::Expr_ptr expr)
     {
         ParamMap::const_iterator i { f_param_map.find(expr) };
@@ -413,6 +429,9 @@ namespace model {
      * exact sequence of actions. */
     bool ModelMgr::analyze()
     {
+        f_valid = false;
+        f_analyzed = false;
+        f_model->select_root(opts::OptsMgr::INSTANCE().root());
         analyzer_pass_t pass { (analyzer_pass_t) 0 };
 
         while (pass < MMGR_DONE) {
@@ -430,6 +449,7 @@ namespace model {
 
         f_analyzed = true;
         f_analyzer.generate_framing_conditions();
+        f_valid = true;
 
         TRACE
             << "Model analysis complete"

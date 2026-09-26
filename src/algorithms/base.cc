@@ -46,6 +46,7 @@ namespace algorithms {
         , f_tm(type::TypeMgr::INSTANCE())
         , f_witness(nullptr)
     {
+        f_mm.require_valid();
         /* Force mgr to exist */
         sat::EngineMgr& mgr { sat::EngineMgr::INSTANCE() };
         (void) mgr; /* suppress warning */

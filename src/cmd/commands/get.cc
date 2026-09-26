@@ -26,6 +26,7 @@
 
 #include <cmd/commands/commands.hh>
 #include <cmd/commands/get.hh>
+#include <cmd/interpreter.hh>
 
 #include <expr/expr.hh>
 #include <expr/expr_mgr.hh>
@@ -84,6 +85,7 @@ namespace cmd {
             print_assignment(os, id);
             res = utils::Variant(okMessage);
         } catch (env::NoSuchIdentifier& nsi) {
+            f_owner.record_error();
             const char* what { nsi.what() };
 
             os

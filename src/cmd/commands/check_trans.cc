@@ -47,12 +47,16 @@ namespace cmd {
 
     void CheckTrans::set_limit(const value_t value)
     {
+        if (value <= 0) {
+            throw CommandException("Transition check limit must be positive.");
+        }
         f_limit = value;
     }
 
     bool CheckTrans::check_requirements()
     {
         model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
+        mm.require_valid();
         model::Model& model { mm.model() };
 
         if (0 == model.modules().size()) {
@@ -113,7 +117,7 @@ namespace cmd {
                     f_out
                         << "Could not decide transition relation consistency check."
                         << std::endl;
-                    break;
+                    return utils::Variant(unknownMessage);
 
                 default:
                     assert(false); /* unreachable */
