@@ -250,6 +250,21 @@ namespace query::trace {
         }
         return result;
     }
+    expr::Expr_ptr typed_value(type::Type_ptr type, expr::Expr_ptr value)
+    {
+        auto& em = expr::ExprMgr::INSTANCE();
+        if (type->is_algebraic()) return em.make_cast(type->repr(), value);
+        if (type->is_array()) {
+            auto elements = em.array_literals(value);
+            expr::Expr_ptr acc = nullptr;
+            for (auto it = elements.rbegin(); it != elements.rend(); ++it) {
+                auto element = typed_value(type->as_array()->of(), *it);
+                acc = acc ? em.make_array_comma(element, acc) : element;
+            }
+            return em.make_array(acc);
+        }
+        return value;
+    }
     expr::Expr_ptr valuation(const Json::Value& values)
     {
         auto syms = symbols();
@@ -262,7 +277,7 @@ namespace query::trace {
             auto value = value_expr(s.type, values[s.name]);
             if (s.input) {
                 require(values[s.name] == value_json(s.type, env::Environment::INSTANCE().get(s.key->rhs())), "Input value differs from model binding");
-            } else result = em.make_and(result, em.make_eq(parse::parseExpression(s.name.c_str()), value));
+            } else result = em.make_and(result, em.make_eq(parse::parseExpression(s.name.c_str()), typed_value(s.type, value)));
         }
         return result;
     }

@@ -1,9 +1,10 @@
 # llvm2smv implementation plan
 
-Status: M0 implemented and validated on 2026-09-27, following code review at
+Status: M0 and M1 implemented on 2026-09-27, following code review at
 `84738750`. The current [frontend contract](../llvm2smv/README.md) disables
 legacy SMV generation and provides verified IR inventory and rejection
-diagnostics. Later milestones below remain proposed. The review findings
+diagnostics. M1 adds the internal typed model foundation; M2 and later
+milestones below remain proposed. The review findings
 describe the pre-M0 implementation.
 
 The agreed scope is sequential C with integers, arrays, pointers, calls, and
@@ -38,8 +39,47 @@ Validation used GCC 13.3.0 and LLVM/Clang 18.1.3 on Linux/aarch64:
 * Translator distribution contents, helper shell syntax, documentation links,
   and `git diff --check` passed.
 
-M1 is next: typed transition-system state and a validated writer. The counter
-execution slice remains an M2 acceptance goal; M0 tests its rejection.
+### M1 delivery and validation
+
+The [typed model foundation](../llvm2smv/MODEL_FORMAT.md) supplies immutable,
+checked expressions; Boolean, 1–64-bit word, enum, and flat array types; stable
+symbol identities; simultaneous guarded steps; and explicit initialization and
+frame behavior. The writer preserves exact constants and emits explicit widths.
+Unwritten persistent variables are frozen, while choices remain fresh each step.
+Properties are definitions and metadata, never model invariants.
+
+Deterministic bundles contain SMV, source-key maps, properties, provenance, and a
+SHA-256 manifest covering all payload files. The internal publisher invokes
+native model validation and uses Linux atomic no-replace directory publication.
+It rejects digest errors, invalid models, UNKNOWN, checker failures, and timeouts.
+No existing output is replaced, including in a concurrent publication race.
+
+Native trace replay exposed an existing bug: untyped decoded constants used the
+global word width and crashed replay of narrower variables. Replay and semantic
+valuations now explicitly type scalar and array-element constants. A core query
+regression covers mixed widths, continuation, and a tampered array value.
+
+Validation on the same LLVM 18.1.3 / Linux/aarch64 baseline:
+
+* The 19 frontend/configuration contracts and C++ typed-model self-tests passed.
+* All 14 writer/publication integration tests passed against native yasmv,
+  covering arithmetic and Boolean operators, signed/unsigned boundaries and
+  casts, sequential/simultaneous state updates, arrays, choices, framing,
+  properties, identifier collisions, deterministic bundles, and output failures.
+* The typed-model self-tests and the same 14 integration tests passed with the
+  model generator built under AddressSanitizer/UndefinedBehaviorSanitizer and
+  leak detection. The native checker was the optimized build.
+* The new mixed-width trace replay regression passed.
+* A clean frontend build outside the source tree passed the same tests against
+  the built native checker. Distribution contents and whitespace checks passed.
+* All core test targets passed. The aggregate `make test` run stopped at an
+  existing workbench completion/event race: `result.json` can become visible
+  before its result event is appended. The failing test and full workbench
+  group passed on rerun; the remaining workflow, analysis, and session targets
+  passed separately. No workbench code was changed.
+
+LLVM execution translation remains disabled. The counter execution slice is
+next in M2; the frontend continues testing rejection until that lowering exists.
 
 ## 1. Findings in the current codebase
 

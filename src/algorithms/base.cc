@@ -393,7 +393,7 @@ namespace algorithms {
 
             if (symbol->is_variable()) {
                 expr::Expr_ptr scope { full->lhs() };
-                expr::Expr_ptr expr { em().make_eq(full->rhs(), assignment->rhs()) };
+                expr::Expr_ptr expr { em().make_eq(full->rhs(), query::trace::typed_value(symbol->as_variable().type(), assignment->rhs())) };
 
                 DEBUG
                     << expr

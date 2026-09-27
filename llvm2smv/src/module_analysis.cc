@@ -9,7 +9,7 @@
 #include <set>
 #include <vector>
 
-static_assert(LLVM_VERSION_MAJOR == 18, "llvm2smv M0 requires LLVM 18");
+static_assert(LLVM_VERSION_MAJOR == 18, "llvm2smv requires LLVM 18");
 using namespace llvm;
 
 namespace llvm2smv {
@@ -23,12 +23,12 @@ json::Object diagnostic(StringRef code, StringRef message)
 json::Object capabilities()
 {
     return json::Object{
-        {"version", 1}, {"milestone", "M0"}, {"llvm_version", LLVM_VERSION_STRING},
+        {"version", 1}, {"milestone", "M1"}, {"typed_model_foundation", true}, {"llvm_version", LLVM_VERSION_STRING},
         {"required_llvm_major", 18}, {"translation_available", false},
         {"supported_features", json::Array{}},
         {"operations", json::Array{"analyze", "capabilities"}},
         {"input_formats", json::Array{"llvm-ir", "llvm-bitcode"}},
-        {"message", "M0 provides verified feature inventory and diagnostics. "
+        {"message", "M1 provides typed model infrastructure and verified IR inventory. "
                     "SMV generation is disabled until validated lowering is implemented."}};
 }
 
@@ -168,7 +168,7 @@ json::Object analyzeModule(const Module& module, StringRef entryName)
                     if (callee && seenFunctions.insert(callee).second) pending.push_back(callee);
                 }
                 auto issue = diagnostic("unsupported-instruction",
-                    "No validated instruction lowering is available in M0. See the implementation plan for staged support.");
+                    "No validated instruction lowering is available yet. See the implementation plan for staged support.");
                 issue["function"] = function.getName().str();
                 issue["instruction"] = json::Object(record);
                 issue["source"] = location(instruction);
@@ -183,13 +183,13 @@ json::Object analyzeModule(const Module& module, StringRef entryName)
             {"attributes", std::move(attrs)}, {"instructions", std::move(instructions)}});
     }
     // Inventory-only changes must never accidentally enable the legacy writer.
-    reject("translation-unavailable", "M0 does not generate SMV. Validated execution lowering is required before translation can be enabled.");
+    reject("translation-unavailable", "LLVM translation does not generate SMV yet. Validated execution lowering is required before translation can be enabled.");
     json::Object counts;
     for (const auto& [opcode, count] : opcodes) counts[opcode] = count;
     json::Array typeList;
     for (const auto& type : types) {
         typeList.push_back(type);
-        auto issue = diagnostic("unsupported-type", "No validated type lowering is available in M0.");
+        auto issue = diagnostic("unsupported-type", "No validated type lowering is available yet.");
         issue["type"] = type;
         diagnostics.push_back(std::move(issue));
     }

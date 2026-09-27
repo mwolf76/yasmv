@@ -138,6 +138,18 @@ class QueryTests(unittest.TestCase):
             bad = copy.deepcopy(t); bad['steps'][0]['values']['u'] = value
             self.replay(bad, model, expected=2)
 
+    def test_mixed_width_integer_trace_replay(self):
+        model = ('#word-width 64\nMODULE main\n#inertial\nVAR u:uint8; s:int16; a:uint8[2];\n'
+                 'INIT u=(uint8)255 && s=(int16)-32768;\n'
+                 'INIT a=[(uint8)0,(uint8)255];\n'
+                 'TRANS TRUE ?: u:=u, s:=s, a:=a;\n')
+        trace = self.job(model, {'operation': 'pick-state'})['trace']
+        self.assertEqual(self.replay(trace, model)['outcome'], 'valid')
+        continuation = self.job(model, {'operation': 'simulate', 'trace': trace, 'limits': {'depth': 1}})['trace']
+        self.assertEqual(self.replay(continuation, model)['outcome'], 'valid')
+        bad = copy.deepcopy(continuation); bad['steps'][1]['values']['a'][1] = '254'
+        self.assertEqual(self.replay(bad, model)['outcome'], 'invalid')
+
     def test_backward_trace(self):
         r = self.job(query={'operation': 'reach', 'target': 'x', 'assumptions': ['$0{x}']})
         self.assertEqual(r['outcome'], 'reachable')
