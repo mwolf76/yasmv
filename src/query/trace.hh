@@ -4,6 +4,8 @@
 namespace query::trace {
     Json::Value symbol_catalog();
     Json::Value state_values(sat::Engine&, unsigned);
+    // Add declared widths when using decoded literals as compiler expressions.
+    expr::Expr_ptr typed_value(type::Type_ptr, expr::Expr_ptr);
     expr::Expr_ptr valuation(const Json::Value&);
     Json::Value evaluate_watches(witness::Witness&, const std::map<std::string, expr::Expr_ptr>&);
     void allocate_state(sat::Engine&, unsigned);

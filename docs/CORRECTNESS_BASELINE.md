@@ -20,9 +20,12 @@ make -j4
 YASMV_HOME="$PWD" make test
 ```
 
-Use `--enable-llvm2smv` to include the experimental translator. Its test target
-is a translation smoke test, not evidence of behavioral equivalence to the
-input program.
+Use `--enable-llvm2smv` to include the LLVM 18 frontend. M0 disables the old
+unsound translator and tests IR inventory, diagnostics, and rejection without
+SMV output. M1 adds internal typed-model fixtures, native writer validation,
+and atomic bundle publication tests. M2 adds admitted scalar LLVM execution
+and native semantic regressions; calls and the C safety driver remain later work.
+See [the frontend guide](../llvm2smv/README.md).
 
 `make reliability-test` builds a separate C++ regression executable, exercises
 incremental solving and injected UNKNOWN results under all eight combinations
@@ -46,7 +49,7 @@ YASMV_HOME="$PWD" make test
 Keep the following checks local as well:
 
 - LLVM: configure a normal build with `--enable-llvm2smv`, build it, and run
-  `YASMV_HOME="$PWD" make test`. This includes the translation smoke test.
+  `YASMV_HOME="$PWD" make test`. This includes the M0 frontend contract tests (`make llvm-test`).
 - Sanitizers: use a fresh checkout containing the changes being tested, or a
   clean rebuild, to avoid mixing normal and instrumented objects. Configure
   and run the focused gate as follows:

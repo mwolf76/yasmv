@@ -1,134 +1,131 @@
-# LLVM to SMV Translator
+# LLVM to SMV frontend
 
-This tool translates C programs (via LLVM IR) to SMV models for formal verification with yasmv.
+M2 provides scalar LLVM execution through a validated bundle publisher. It covers
+integer operations, control flow, PHIs, promoted locals, scalar globals, and
+admitted poison semantics. See the [scalar contract](SCALAR_MODEL.md) for the
+supported subset and commands, and the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md)
+for calls, memory, and the later C safety workflow.
 
-## Building
+The historical incorrect writer remains excluded. The M0 inventory interface
+and M1 [typed model foundation](MODEL_FORMAT.md) remain available. Direct raw
+SMV output through `-o` is disabled; publication requires native validation.
 
-### Prerequisites
+## Build
 
-- LLVM development libraries (version 10+ recommended)
-- Make
-- C++20 compiler (g++ 10+ or clang++ 10+)
+Use LLVM **18** development libraries and matching Clang, `opt`, and `llvm-link`
+versions, plus the repository's C++20 and Autotools dependencies. On Debian/Ubuntu
+the LLVM packages are `llvm-18-dev` and `clang-18`. The rest of the build
+requirements are in the [core build guide](../docs/CORRECTNESS_BASELINE.md).
 
-On Ubuntu/Debian:
-```bash
-sudo apt-get install llvm-dev clang build-essential
-```
+From the repository root:
 
-On other systems, install the LLVM development packages for your distribution.
-
-### Compilation
-
-```bash
+```sh
+autoreconf -vif
+./configure --enable-llvm2smv --with-llvm-config=/usr/bin/llvm-config-18
 make
+make llvm-test
 ```
 
-Check dependencies:
-```bash
-make deps
+`./llvm2smv/build.sh` performs those steps; arguments are passed to configure.
+Configure discovers `llvm-config-18` before unversioned `llvm-config`. It selects
+Clang, opt, and llvm-link from that installation's binary directory and requires
+all three version strings to match `llvm-config --version`. Explicit `CLANG`,
+`LLVM_OPT`, and `LLVM_LINK` environment overrides undergo the same checks.
+Unknown LLVM majors and mismatched/missing tools fail configuration.
+
+`--disable-llvm2smv` keeps the core independent: configure does not discover or
+execute LLVM tools. `make llvm-test` then reports that LLVM testing is disabled.
+
+## Inspect C-generated IR
+
+```sh
+CLANG=/usr/lib/llvm-18/bin/clang ./llvm2smv/examples/simple/compile.sh \
+  llvm2smv/examples/simple/counter.c /tmp/counter.ll
+./llvm2smv/llvm2smv --capabilities
+./llvm2smv/llvm2smv --analyze /tmp/counter.ll
 ```
 
-## Usage
+The compile helper uses `CLANG` (default `clang-18`), checks major version 18,
+compiles with `-O0 -g -fno-finite-loops`, and propagates compiler failures. It only generates IR;
+these flags do not establish a source-level verification guarantee.
 
-### Step 1: Compile C to LLVM IR
+`--analyze` prints a version-1 JSON report to stdout and returns **2** because
+the inventory operation does not authorize translation. It accepts textual IR and bitcode,
+verifies the module, selects a defined `main` by default, and traverses every
+block in its direct call-graph closure, including statically infeasible branches.
+Use `--entry=name` to select another defined function. Missing entries never
+fall back to an arbitrary function.
 
-```bash
-clang -S -emit-llvm -O0 program.c -o program.ll
+The inventory records functions, signatures and attributes, instruction types
+and text (including flags), direct call targets, operand-bundle counts, source
+locations, globals/initializers, aliases, indirect resolvers, named metadata,
+types, opcode counts, target triple, and DataLayout. Unresolved/indirect calls
+remain unsupported. Module globals are conservatively inventoried even if not
+referenced by the selected entry. An inventory is not a supported-feature claim;
+`translation_available` is false and `supported` is null in inventory reports.
+Scalar admission runs separately through `--emit-scalar-bundle`; see the scalar
+contract for its target baseline. Neither path infers layout from the host.
+
+## Diagnostics and output preservation
+
+```sh
+./llvm2smv/llvm2smv /tmp/counter.ll -o /tmp/counter.smv --diagnostics=json
 ```
 
-Or use the provided script:
-```bash
-cd examples/simple
-./compile.sh counter.c
+A legacy direct-output request emits diagnostics to stderr, leaves stdout empty, and
+returns 2. It never opens the SMV destination, so an existing file or symlink is
+preserved and a missing file is not created. `--analyze` cannot be combined with
+`-o`; its JSON report is not an SMV artifact. The old `--word-width` and `-v`
+options are removed rather than suggesting that the old translation still works.
+
+Reports have `version`, `status`, `translation_available`, and `diagnostics`.
+Verified-module reports additionally contain `llvm_version`, `entry`,
+`target_triple`, `data_layout`, and `inventory`. Each diagnostic has `severity`,
+`code`, `message`, and nullable `source`; contextual `function`, `global`, `type`,
+`attributes`, and `instruction` fields are included where relevant. Source
+locations come from LLVM debug metadata and may be absent. Their columns follow
+LLVM debug locations and can be zero when unavailable.
+
+| Exit status | Meaning |
+| --- | --- |
+| 0 | Capability/help/version output completed; also successful scalar candidate emission (not native validation). |
+| 1 | LLVM command-line syntax error (LLVM's text diagnostic). |
+| 2 | Invalid input/options or unsupported translation. |
+
+`status: error` indicates input/option/IR verification failure.
+`status: unsupported` in inventory mode marks a verified module without scalar admission,
+including invalid-entry or missing-layout diagnostics. `--diagnostics=json`
+selects a single structured report on stderr for translation failures;
+`--analyze` always writes that report on stdout. Neither claims a verification
+result or proof.
+
+## Scalar translation
+
+```sh
+python3 tools/llvm2smv_translate.py /tmp/counter.ll -o /tmp/counter-model
 ```
 
-### Step 2: Translate LLVM IR to SMV
+This publishes `model.smv` and four sidecars only after native model validation.
+It reports translation success separately from any verification result. All
+subsequent queries use the existing yasmv interface on the published model.
+The capabilities fields `scalar_candidate_available` and `scalar_features`
+describe M2. The older `translation_available: false` and empty
+`supported_features` retain their conservative meaning for legacy direct output.
 
-```bash
-./llvm2smv program.ll -o program.smv
-```
+## Tests
 
-Options:
-- `-o <file>` : Output SMV file (default: stdout)
-- `--word-width <n>` : Default integer width (default: 32)
-- `-v` : Verbose output
+`make llvm-test` and `make -C llvm2smv test` run the process contracts and toolchain
+checks, typed-model self-tests, writer/publication integration, and scalar semantics tests.
+The integration tests require a built yasmv and extracted microcode (see the core
+build guide); `make llvm-test` also builds yasmv. Direct subdirectory tests may
+use `YASMV=/path/to/yasmv YASMV_HOME=/path/to/installation`.
+The full local `make test` includes this gate when LLVM is enabled.
+Fixtures cover direct and indirect calls, recursion, infeasible blocks, unknown
+features, arithmetic flags, source locations, malformed and invalid SSA, bitcode,
+compiler errors, deterministic reports, and preservation of output files.
 
-## Examples
-
-### Simple Counter
-```c
-int counter = 0;
-const int limit = 10;
-
-int main() {
-    while (counter < limit) {
-        counter = counter + 1;
-    }
-    return 0;
-}
-```
-
-Translates to SMV model with:
-- Variables for counter and limit
-- Program counter tracking control flow
-- Transitions modeling the loop
-
-### Running with yasmv
-
-```bash
-# Compile and translate
-clang -S -emit-llvm -O0 counter.c -o counter.ll
-./llvm2smv counter.ll -o counter.smv
-
-# Verify with yasmv
-yasmv counter.smv
->> reach counter = 10
-```
-
-## Current Limitations
-
-1. **Bounded loops only** - All loops must terminate
-2. **No dynamic memory** - malloc/free not supported
-3. **No function pointers** - Direct calls only
-4. **Limited pointer support** - Pointers abstracted as integers
-5. **No floating point** - Integer arithmetic only
-6. **No I/O operations** - Pure computation only
-
-## Architecture
-
-The translator works in phases:
-
-1. **Type Translation**: LLVM types → SMV types
-2. **Variable Extraction**: Function arguments, locals → SMV variables
-3. **Control Flow**: Basic blocks → Program counter states
-4. **Expression Translation**: LLVM instructions → SMV expressions
-5. **SMV Generation**: Output well-formed SMV model
-
-## Extending
-
-To add support for new LLVM instructions:
-
-1. Add handler in `ExprTranslator::translateInstruction()`
-2. Implement translation logic
-3. Add test case
-
-To support new C features:
-
-1. Identify LLVM IR pattern
-2. Design SMV representation
-3. Implement translation
-
-## Troubleshooting
-
-- **"Unknown instruction"**: Not all LLVM instructions are supported yet
-- **"Struct types not supported"**: Flatten structs or use separate variables
-- **Large state space**: Use smaller data types or abstract the problem
-
-## Future Work
-
-- [ ] Memory modeling with arrays
-- [ ] Function call support via modules
-- [ ] Automatic property generation
-- [ ] Pointer analysis
-- [ ] Loop bound inference
-- [ ] Floating point abstraction
+The counter now has semantic tests: it ends at ten and cannot reach 99 within
+the checked bound. Scalar tests also compare small integer domains with an
+independent interpreter, exercise PHI swaps, nested loops, and nontermination,
+and reject unsupported features before and after promotion. Calls and the C
+assertion workflow remain M3; addressable memory remains M4.

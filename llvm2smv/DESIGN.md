@@ -1,5 +1,9 @@
 # LLVM to SMV Compiler Design
 
+> Historical design sketch. The [current implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md)
+> supersedes this document, including its loop-bounding, assignment, and
+> assertion-encoding proposals. The current translator remains a prototype.
+
 ## Overview
 
 This document outlines the design for an LLVM-based compiler that translates C programs into SMV models suitable for verification with yasmv.
