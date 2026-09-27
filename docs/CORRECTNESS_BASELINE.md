@@ -26,7 +26,8 @@ SMV output. M1 adds internal typed-model fixtures, native writer validation,
 and atomic bundle publication tests. M2 adds admitted scalar LLVM execution
 and native semantic regressions. M3 adds acyclic direct calls, verifier hooks,
 a controlled C driver, source projection, and native evidence replay.
-See [the frontend guide](../llvm2smv/README.md).
+M4 adds bounded byte memory, provenance, aggregates, and explicit memory coverage
+obligations. See [the frontend guide](../llvm2smv/README.md).
 
 `make reliability-test` builds a separate C++ regression executable, exercises
 incremental solving and injected UNKNOWN results under all eight combinations

@@ -87,7 +87,8 @@ def compile_candidate(args, temporary):
     linked = temporary / 'linked.bc'
     checked([args.llvm_link, *objects, '-o', linked], args.timeout)
     artifact = read_json(checked([args.translator, '--emit-scalar-bundle', '--diagnostics=json',
-                                 '--entry=' + args.entry, linked], args.timeout))
+                                 '--entry=' + args.entry, '--memory-bytes=' + str(args.memory_bytes),
+                                 '--allocation-generations=' + str(args.allocation_generations), linked], args.timeout))
     files = check_artifact(artifact)
     provenance = read_json(files['provenance.json'])
     provenance['c_build'] = dict(policy='clang18-scalar-c-v1', tools=tools, flags=FLAGS,
@@ -134,6 +135,14 @@ def project(trace, source_map):
                                   poison=values.get('v_' + (b'global-poison.' + bytes.fromhex(detail['key_hex'])[7:]).hex()))
                              for symbol, detail in source_map['symbols'].items()
                              if bytes.fromhex(detail['key_hex']).startswith(b'global.')}
+        if source_map.get('memory'):
+            record['memory'] = []
+            for obj in source_map['memory']['objects']:
+                key = obj['key']
+                field = lambda suffix: values['v_' + (key + suffix).encode().hex()]
+                record['memory'].append(dict(id=obj['id'], name=obj['name'], live=field('.live'),
+                    generation=field('.generation'), bytes=[dict(bits=field(f'.byte.{i}.0'),
+                    initialized_mask=field(f'.byte.{i}.1'), poison_mask=field(f'.byte.{i}.2')) for i in range(obj['bytes'])]))
         frames.append(record)
     return dict(version=1, kind='model-trace-source-projection', frames=frames,
                 local_variables='unavailable', translation_independently_certified=False)
@@ -155,9 +164,9 @@ def check(args, bundle, temporary):
     wall = max(1, int(args.timeout * 1000))
     initial = ask(dict(operation='check-init', limits=dict(wall_ms=wall)))
     report = dict(version=1, status='unknown', check=args.check, artifact_id=manifest['artifact_id'],
-                  bundle=str(bundle), scope='configured LLVM scalar model',
+                  bundle=str(bundle), scope='configured LLVM memory model' if source_map.get('memory') else 'configured LLVM scalar model',
                   assumptions='false verifier assumptions exit to ASSUMED_OUT; no fairness',
-                  translation_certified=False, admitted_execution='unknown', trace=None, source_trace=None)
+                  memory_policy=source_map.get('memory', {}), translation_certified=False, admitted_execution='unknown', trace=None, source_trace=None)
     if initial['status'] == 'unknown':
         report['backend'] = initial
         return report
@@ -167,7 +176,7 @@ def check(args, bundle, temporary):
         request = dict(operation='check-progress', target=prop('progress_goal'), limits=dict(states=args.states, wall_ms=wall))
     else:
         request = dict(operation='prove-property' if args.prove else 'check-property',
-                       property=dict(name='scalar_safety', expression=prop('safe')),
+                       property=dict(name='safety_and_memory_coverage', expression=' && '.join(prop(p) for p in ('safe', 'memory_supported', 'memory_within_bound'))),
                        limits=dict(depth=args.depth, wall_ms=wall))
     result = ask(request)
     report['backend'] = result
@@ -187,6 +196,9 @@ def check(args, bundle, temporary):
             report['source_trace'] = project(report['trace'], source_map)
             report['failure_kind'] = 'progress_' + result['progress']['kind']
             report['loop_start'] = result['progress'].get('loop_start')
+            pc = report['source_trace']['frames'][-1]['pc']
+            if pc == 'e_7063_' + 'MEMORY_BOUND'.encode().hex(): report['status'] = 'resource_bound_reached'
+            if pc == 'e_7063_' + 'UNSUPPORTED_MEMORY'.encode().hex(): report['status'] = 'unsupported'
         # Prove exclusion separately. A bounded absence of normal exit is not vacuity.
         vacuity = ask(dict(operation='check-progress', target=prop('assumed_out'), limits=dict(states=args.states, wall_ms=wall)))
         report['admission_check'] = vacuity
@@ -210,6 +222,10 @@ def check(args, bundle, temporary):
         frames = report['source_trace']['frames']
         report['failure_site'] = frames[-2]['location'] if len(frames) > 1 else None
         report['failure_kind'] = 'runtime_error' if frames[-1]['pc'] == 'e_7063_4552524f52' else 'assertion'
+        if frames[-1]['pc'] == 'e_7063_' + 'MEMORY_BOUND'.encode().hex():
+            report.update(status='resource_bound_reached', failure_kind='allocation_generation_bound')
+        if frames[-1]['pc'] == 'e_7063_' + 'UNSUPPORTED_MEMORY'.encode().hex():
+            report.update(status='unsupported', failure_kind='opaque_pointer_operation')
     elif outcome == 'holds_bounded':
         if result.get('scope') != 'through_depth':
             raise ArtifactError('Unexpected bounded result scope')
@@ -229,6 +245,8 @@ def main(argv=None):
     parser.add_argument('--check', choices=('safety', 'termination'), default='safety')
     parser.add_argument('--depth', type=int, default=100, help='Safety bound in model transitions')
     parser.add_argument('--prove', action='store_true', help='Try safety induction through --depth')
+    parser.add_argument('--memory-bytes', type=int, default=128)
+    parser.add_argument('--allocation-generations', type=int, default=4)
     parser.add_argument('--states', type=int, default=1000, help='Progress exploration budget')
     parser.add_argument('--timeout', type=float, default=30, help='Wall seconds per tool/query process')
     parser.add_argument('-I', '--include', action='append', default=[])
@@ -241,8 +259,8 @@ def main(argv=None):
     os.environ.setdefault('YASMV_HOME', str(ROOT))
     report = None
     try:
-        if not math.isfinite(args.timeout) or args.timeout <= 0 or args.depth < 0 or args.states < 1:
-            raise ArtifactError('Timeout/states must be positive; depth must be nonnegative')
+        if not math.isfinite(args.timeout) or args.timeout <= 0 or args.depth < 0 or args.states < 1 or not 0 < args.memory_bytes <= 4096 or not 0 < args.allocation_generations <= 255:
+            raise ArtifactError('Timeout/states must be positive; depth nonnegative; memory bytes 1..4096; allocation generations 1..255')
         if args.prove and args.check != 'safety':
             raise ArtifactError('--prove applies only to safety')
         if os.path.lexists(args.output):
@@ -261,4 +279,4 @@ def main(argv=None):
     except KeyboardInterrupt:
         report = dict(version=1, status='unknown', reason='cancelled', verification_result=None)
     print(json.dumps(report, sort_keys=True))
-    return {'error': 2, 'unknown': 3, 'violation': 1}.get(report['status'], 0)
+    return {'error': 2, 'unknown': 3, 'violation': 1, 'resource_bound_reached': 3, 'unsupported': 2}.get(report['status'], 0)

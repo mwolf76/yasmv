@@ -198,7 +198,7 @@ exit: ret i8 0 }''')
     def test_unsupported_c_and_disabled_assertions_never_publish(self):
         for source, options in [('#include <assert.h>\nint main(void) { assert(0); }',['-D','NDEBUG']),
                                 ('#define NDEBUG\n#include <assert.h>\nint main(void) { assert(0); }',[]),
-                                ('int main(void) { int a[2]={0,1}; return a[1]; }',[]),
+                                ('int main(void) { int x; return (int)(long)&x; }',[]),
                                 ('int main(void) { return missing(); }',[])]:
             with self.subTest(source=source):
                 _,destination,_=self.driver(source,*options,status='error',code=2)

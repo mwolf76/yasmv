@@ -40,6 +40,14 @@ Model fixture(const std::string& name)
         if (name == "sequence") { first(); second(); } else { second(); first(); }
         m.property("done", eq(value(pc), literal("done")));
         m.property("false", Expr::boolean(false));
+    } else if (name == "constant-propagation") {
+        auto dependent = m.variable("a_dependent", Type::word(8), Mode::State, word(8, 0));
+        auto source = m.variable("z_source", Type::word(8), Mode::State, word(8, 0));
+        auto left = m.variable("left", Type::word(8), Mode::State, word(8, 7));
+        auto right = m.variable("right", Type::word(8), Mode::State, word(8, 7));
+        m.variable("unconstrained", Type::word(8), Mode::Frozen, std::nullopt);
+        m.step("tick", Expr::boolean(true), {{dependent, value(source)}, {source, word(8, 1)},
+            {left, value(right)}, {right, value(left)}});
     } else if (name == "swap") {
         auto x = m.variable("x", Type::word(8), Mode::State, word(8, 1));
         auto y = m.variable("y", Type::word(8), Mode::State, word(8, 2));
