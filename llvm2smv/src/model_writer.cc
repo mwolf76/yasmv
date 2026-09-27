@@ -114,9 +114,10 @@ std::string sha256(const std::string& bytes)
     return hexKey(std::string(reinterpret_cast<const char*>(digest.data()), digest.size()));
 }
 
-llvm::json::Object artifact(const Model& model, const std::map<std::string, std::string>& provenance)
+llvm::json::Object artifact(const Model& model, const std::map<std::string, std::string>& provenance, const std::string& scope)
 {
     using namespace llvm;
+    if (scope.empty() || !json::isUTF8(scope)) throw ModelError("Artifact scope must be nonempty UTF-8");
     std::map<std::string, std::string> files;
     files["model.smv"] = render(model);
     json::Object symbols, steps, properties, origin;
@@ -133,7 +134,7 @@ llvm::json::Object artifact(const Model& model, const std::map<std::string, std:
     files["source-map.json"] = jsonText(json::Object{{"version", 1}, {"symbols", std::move(symbols)}, {"steps", std::move(steps)}});
     files["properties.json"] = jsonText(json::Object{{"version", 1}, {"properties", std::move(properties)}});
     files["provenance.json"] = jsonText(json::Object{{"version", 1}, {"llvm_version", LLVM_VERSION_STRING},
-        {"scope", "typed-model-only"}, {"origin", std::move(origin)}});
+        {"scope", scope}, {"origin", std::move(origin)}});
     std::string identity = "llvm2smv-model-v1\n";
     json::Object hashes;
     for (const auto& [name, content] : files) {

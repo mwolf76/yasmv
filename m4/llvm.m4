@@ -37,7 +37,7 @@ AC_DEFUN([AC_LLVM],
     done
     LLVM_CPPFLAGS=`"$LLVM_CONFIG" --cppflags` || AC_MSG_ERROR([cannot read LLVM compiler flags])
     LLVM_LDFLAGS=`"$LLVM_CONFIG" --ldflags` || AC_MSG_ERROR([cannot read LLVM linker flags])
-    LLVM_LIBS=`"$LLVM_CONFIG" --libs core irreader support --system-libs` || AC_MSG_ERROR([cannot read LLVM libraries])
+    LLVM_LIBS=`"$LLVM_CONFIG" --libs core irreader support analysis transformutils targetparser --system-libs` || AC_MSG_ERROR([cannot read LLVM libraries])
     AC_DEFINE([HAVE_LLVM], [1], [Define if LLVM is available])
   ], [
     AC_MSG_NOTICE([LLVM2SMV support disabled])

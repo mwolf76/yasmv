@@ -1,12 +1,14 @@
 # LLVM to SMV frontend
 
-The frontend establishes the LLVM toolchain, verified IR inventory, and rejection
-boundary
-for the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md).
-**LLVM-to-SMV translation is disabled.** The previous writer produced incorrect
-execution models and is no longer linked into the executable. There is no legacy-output
-switch. M1 supplies the internal [typed model foundation](MODEL_FORMAT.md);
-LLVM instruction lowering begins in M2.
+M2 provides scalar LLVM execution through a validated bundle publisher. It covers
+integer operations, control flow, PHIs, promoted locals, scalar globals, and
+admitted poison semantics. See the [scalar contract](SCALAR_MODEL.md) for the
+supported subset and commands, and the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md)
+for calls, memory, and the later C safety workflow.
+
+The historical incorrect writer remains excluded. The M0 inventory interface
+and M1 [typed model foundation](MODEL_FORMAT.md) remain available. Direct raw
+SMV output through `-o` is disabled; publication requires native validation.
 
 ## Build
 
@@ -44,11 +46,11 @@ CLANG=/usr/lib/llvm-18/bin/clang ./llvm2smv/examples/simple/compile.sh \
 ```
 
 The compile helper uses `CLANG` (default `clang-18`), checks major version 18,
-compiles with `-O0 -g`, and propagates compiler failures. It only generates IR;
+compiles with `-O0 -g -fno-finite-loops`, and propagates compiler failures. It only generates IR;
 these flags do not establish a source-level verification guarantee.
 
 `--analyze` prints a version-1 JSON report to stdout and returns **2** because
-LLVM execution lowering is not implemented. It accepts textual IR and bitcode,
+the inventory operation does not authorize translation. It accepts textual IR and bitcode,
 verifies the module, selects a defined `main` by default, and traverses every
 block in its direct call-graph closure, including statically infeasible branches.
 Use `--entry=name` to select another defined function. Missing entries never
@@ -60,9 +62,9 @@ locations, globals/initializers, aliases, indirect resolvers, named metadata,
 types, opcode counts, target triple, and DataLayout. Unresolved/indirect calls
 remain unsupported. Module globals are conservatively inventoried even if not
 referenced by the selected entry. An inventory is not a supported-feature claim;
-`translation_available` and every instruction's `supported` field are false.
-The frontend accepts no target ABI for translation and never infers missing
-target layout from the host.
+`translation_available` is false and `supported` is null in inventory reports.
+Scalar admission runs separately through `--emit-scalar-bundle`; see the scalar
+contract for its target baseline. Neither path infers layout from the host.
 
 ## Diagnostics and output preservation
 
@@ -70,7 +72,7 @@ target layout from the host.
 ./llvm2smv/llvm2smv /tmp/counter.ll -o /tmp/counter.smv --diagnostics=json
 ```
 
-A translation request emits diagnostics to stderr, leaves stdout empty, and
+A legacy direct-output request emits diagnostics to stderr, leaves stdout empty, and
 returns 2. It never opens the SMV destination, so an existing file or symlink is
 preserved and a missing file is not created. `--analyze` cannot be combined with
 `-o`; its JSON report is not an SMV artifact. The old `--word-width` and `-v`
@@ -86,21 +88,34 @@ LLVM debug locations and can be zero when unavailable.
 
 | Exit status | Meaning |
 | --- | --- |
-| 0 | Capability/help/version output completed; never a translation success yet. |
+| 0 | Capability/help/version output completed; also successful scalar candidate emission (not native validation). |
 | 1 | LLVM command-line syntax error (LLVM's text diagnostic). |
 | 2 | Invalid input/options or unsupported translation. |
 
 `status: error` indicates input/option/IR verification failure.
-`status: unsupported` reports a verified module that cannot be translated,
+`status: unsupported` in inventory mode marks a verified module without scalar admission,
 including invalid-entry or missing-layout diagnostics. `--diagnostics=json`
 selects a single structured report on stderr for translation failures;
 `--analyze` always writes that report on stdout. Neither claims a verification
 result or proof.
 
+## Scalar translation
+
+```sh
+python3 tools/llvm2smv_translate.py /tmp/counter.ll -o /tmp/counter-model
+```
+
+This publishes `model.smv` and four sidecars only after native model validation.
+It reports translation success separately from any verification result. All
+subsequent queries use the existing yasmv interface on the published model.
+The capabilities fields `scalar_candidate_available` and `scalar_features`
+describe M2. The older `translation_available: false` and empty
+`supported_features` retain their conservative meaning for legacy direct output.
+
 ## Tests
 
 `make llvm-test` and `make -C llvm2smv test` run the process contracts and toolchain
-checks, typed-model self-tests, and native writer/publication integration tests.
+checks, typed-model self-tests, writer/publication integration, and scalar semantics tests.
 The integration tests require a built yasmv and extracted microcode (see the core
 build guide); `make llvm-test` also builds yasmv. Direct subdirectory tests may
 use `YASMV=/path/to/yasmv YASMV_HOME=/path/to/installation`.
@@ -109,7 +124,8 @@ Fixtures cover direct and indirect calls, recursion, infeasible blocks, unknown
 features, arithmetic flags, source locations, malformed and invalid SSA, bitcode,
 compiler errors, deterministic reports, and preservation of output files.
 
-The counter currently tests rejection of the old unsound translation. The
-expected counter behavior and forbidden reachability of 99 become semantic
-acceptance tests when CFG lowering is implemented in M2. See the implementation
-plan for the supported sequential C release and later memory/call milestones.
+The counter now has semantic tests: it ends at ten and cannot reach 99 within
+the checked bound. Scalar tests also compare small integer domains with an
+independent interpreter, exercise PHI swaps, nested loops, and nontermination,
+and reject unsupported features before and after promotion. Calls and the C
+assertion workflow remain M3; addressable memory remains M4.

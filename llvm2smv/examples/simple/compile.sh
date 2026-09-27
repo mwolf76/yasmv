@@ -13,5 +13,5 @@ if [[ ! "$compiler_version" =~ version\ 18\. ]]; then
 fi
 source_file=$1
 output_file=${2:-$(basename -- "$source_file" .c).ll}
-"$compiler" -S -emit-llvm -O0 -g "$source_file" -o "$output_file"
+"$compiler" -S -emit-llvm -O0 -g -fno-finite-loops "$source_file" -o "$output_file"
 echo "Generated $output_file"

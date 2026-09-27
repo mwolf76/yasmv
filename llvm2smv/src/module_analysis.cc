@@ -23,13 +23,15 @@ json::Object diagnostic(StringRef code, StringRef message)
 json::Object capabilities()
 {
     return json::Object{
-        {"version", 1}, {"milestone", "M1"}, {"typed_model_foundation", true}, {"llvm_version", LLVM_VERSION_STRING},
+        {"version", 1}, {"milestone", "M2"}, {"typed_model_foundation", true}, {"llvm_version", LLVM_VERSION_STRING},
         {"required_llvm_major", 18}, {"translation_available", false},
         {"supported_features", json::Array{}},
-        {"operations", json::Array{"analyze", "capabilities"}},
+        {"scalar_candidate_available", true},
+        {"scalar_features", json::Array{"integer-1..64", "scalar-globals", "mem2reg", "cfg", "phi", "poison", "freeze"}},
+        {"operations", json::Array{"analyze", "capabilities", "emit-scalar-bundle"}},
         {"input_formats", json::Array{"llvm-ir", "llvm-bitcode"}},
-        {"message", "M1 provides typed model infrastructure and verified IR inventory. "
-                    "SMV generation is disabled until validated lowering is implemented."}};
+        {"message", "M2 emits scalar candidates. Publish through tools/llvm2smv_translate.py for mandatory native validation. "
+                    "Direct SMV output remains disabled; inventory is not scalar admission."}};
 }
 
 namespace {
@@ -158,7 +160,7 @@ json::Object analyzeModule(const Module& module, StringRef entryName)
                     {"block", blockIndex}, {"block_name", block.getName().str()},
                     {"index", instructionIndex++}, {"opcode", instruction.getOpcodeName()},
                     {"type", typeName(instruction.getType())}, {"ir", valueText(instruction)},
-                    {"source", location(instruction)}, {"supported", false}};
+                    {"source", location(instruction)}, {"supported", nullptr}};
                 if (const auto* call = dyn_cast<CallBase>(&instruction)) {
                     const auto* callee = dyn_cast<Function>(call->getCalledOperand()->stripPointerCasts());
                     record["callee"] = callee ? json::Value(callee->getName().str()) : json::Value(nullptr);
@@ -168,7 +170,7 @@ json::Object analyzeModule(const Module& module, StringRef entryName)
                     if (callee && seenFunctions.insert(callee).second) pending.push_back(callee);
                 }
                 auto issue = diagnostic("unsupported-instruction",
-                    "No validated instruction lowering is available yet. See the implementation plan for staged support.");
+                    "Inventory does not authorize lowering; scalar admission is checked separately by --emit-scalar-bundle.");
                 issue["function"] = function.getName().str();
                 issue["instruction"] = json::Object(record);
                 issue["source"] = location(instruction);
@@ -183,18 +185,18 @@ json::Object analyzeModule(const Module& module, StringRef entryName)
             {"attributes", std::move(attrs)}, {"instructions", std::move(instructions)}});
     }
     // Inventory-only changes must never accidentally enable the legacy writer.
-    reject("translation-unavailable", "LLVM translation does not generate SMV yet. Validated execution lowering is required before translation can be enabled.");
+    reject("translation-unavailable", "This inventory path does not generate SMV. Use the validated scalar bundle publisher.");
     json::Object counts;
     for (const auto& [opcode, count] : opcodes) counts[opcode] = count;
     json::Array typeList;
     for (const auto& type : types) {
         typeList.push_back(type);
-        auto issue = diagnostic("unsupported-type", "No validated type lowering is available yet.");
+        auto issue = diagnostic("unsupported-type", "Type inventoried only; scalar admission is checked by --emit-scalar-bundle.");
         issue["type"] = type;
         diagnostics.push_back(std::move(issue));
     }
     return json::Object{
-        {"version", 1}, {"status", "unsupported"}, {"translation_available", false},
+        {"version", 1}, {"status", "unsupported"}, {"translation_available", false}, {"inventory_only", true},
         {"llvm_version", LLVM_VERSION_STRING}, {"entry", entryName.str()},
         {"target_triple", module.getTargetTriple()}, {"data_layout", module.getDataLayoutStr()},
         {"inventory", json::Object{{"functions", std::move(functions)}, {"globals", std::move(globals)},

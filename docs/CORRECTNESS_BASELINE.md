@@ -23,7 +23,8 @@ YASMV_HOME="$PWD" make test
 Use `--enable-llvm2smv` to include the LLVM 18 frontend. M0 disables the old
 unsound translator and tests IR inventory, diagnostics, and rejection without
 SMV output. M1 adds internal typed-model fixtures, native writer validation,
-and atomic bundle publication tests without enabling LLVM translation.
+and atomic bundle publication tests. M2 adds admitted scalar LLVM execution
+and native semantic regressions; calls and the C safety driver remain later work.
 See [the frontend guide](../llvm2smv/README.md).
 
 `make reliability-test` builds a separate C++ regression executable, exercises
