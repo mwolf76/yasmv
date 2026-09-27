@@ -104,3 +104,8 @@ sequential and simultaneous updates, exact integer boundaries and casts,
 arrays, initialization/framing, fresh choices, properties, hostile identifiers,
 deterministic identity, and atomic publication failures. LLVM-generated C
 execution fixtures begin in M2.
+
+M5 source maps add `call_stack` policy/frame metadata and an owning `frame` on
+instruction locations. Memory objects add frame/dynamic metadata; dynamic extents
+and allocation status are trace variables. See [the call-stack contract](CALL_STACK.md)
+for the versioned scalar/memory scopes and required coverage properties.

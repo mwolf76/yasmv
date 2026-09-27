@@ -259,12 +259,10 @@ define i8 @main() { store i8 86,ptr @g,align 1
             'define void @main() { %a=alloca inalloca i8\nret void }',
             '@g=global [2 x i8] zeroinitializer\n@p=global ptr getelementptr inbounds ([2 x i8],ptr @g,i64 0,inrange i64 1)\ndefine void @main() { ret void }',
             'declare void @llvm.memcpy.p0.p0.i64(ptr,ptr,i64,i1)\ndefine void @main() { call void @llvm.memcpy.p0.p0.i64(ptr nonnull null,ptr null,i64 0,i1 false)\nret void }',
-            'define i8 @main() { %n=add i64 1,1\n%a=alloca i8,i64 %n\nret i8 0 }',
             '@g=global [129 x i8] zeroinitializer\ndefine void @main() { ret void }',
             '@g=global i8 1\ndefine i64 @main() { %n=ptrtoint ptr @g to i64\nret i64 %n }',
             '@g=global [1 x i8] zeroinitializer\ndefine i8 @main() { %v=load volatile i8,ptr @g\nret i8 %v }',
             '@g=global [1 x i8] zeroinitializer\ndefine i8 @main() { %v=load atomic i8,ptr @g seq_cst,align 1\nret i8 %v }',
-            'define void @main() { br label %next\nnext: %a=alloca [1 x i8]\nret void }',
         ]
         for source in sources:
             with self.subTest(source=source): self.candidate(source,ok=False)

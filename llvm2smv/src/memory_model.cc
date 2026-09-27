@@ -100,29 +100,35 @@ const MemoryModel::Object& MemoryModel::object(const Value* value) const
     for(auto& o:objects) if(o.source==value) return o;
     throw ScalarError("Pointer has no modeled object");
 }
-MemoryModel::MemoryModel(Model& m,Module& mod,Function& f,MemoryLimits lim):model(m),module(mod),limits(lim)
+MemoryModel::MemoryModel(Model& m,Module& mod,Function& f,MemoryLimits lim,const std::map<const Instruction*,unsigned>& owners):model(m),module(mod),limits(lim)
 {
     need(limits.bytes>0 && limits.bytes<=4096 && limits.generations>0 && limits.generations<=255,"Memory budgets must be positive (at most 4096 bytes)");
+    need(limits.dynamicBytes>0 && limits.dynamicBytes<=4096,"Dynamic stack capacity must be 1..4096 bytes per allocation site");
     need(module.getDataLayout().getIndexSizeInBits(0)==64 && !module.getDataLayout().isNonIntegralAddressSpace(0),"Memory baseline requires integral 64-bit pointer indices");
     offsetWidth=1; for(unsigned bytes=limits.bytes;bytes;bytes>>=1) ++offsetWidth;
     unsigned total=0;
-    auto add=[&](const Value& value,llvm::Type* type,unsigned count,uint64_t align,bool writable,bool stack) {
-        auto bytes=uint64_t(size(type))*count;
+    auto add=[&](const Value& value,llvm::Type* type,unsigned count,uint64_t align,bool writable,bool stack,unsigned frame,bool dynamic) {
+        auto bytes=dynamic ? std::min(limits.dynamicBytes,limits.bytes) : uint64_t(size(type))*count;
         need(bytes>0 && bytes<=limits.bytes && total+bytes<=limits.bytes,"Static object storage exceeds the configured memory-byte budget (or is zero-sized)");
         total+=bytes;
         need(objects.size()<255,"Object identity budget exceeded (255 objects)");
-        objects.push_back({&value,unsigned(objects.size()+1),unsigned(bytes),align,writable,stack,{},{},{}});
+        objects.push_back({&value,unsigned(objects.size()+1),unsigned(bytes),frame,dynamic,align,writable,stack,{},{},{},{},{}});
         tags |= containsPointer(type);
     };
-    for(auto& g:module.globals()) add(g,g.getValueType(),1,(g.getAlign() ? g.getAlign()->value() : module.getDataLayout().getABITypeAlign(g.getValueType()).value()),!g.isConstant(),false);
+    for(auto& g:module.globals()) add(g,g.getValueType(),1,(g.getAlign() ? g.getAlign()->value() : module.getDataLayout().getABITypeAlign(g.getValueType()).value()),!g.isConstant(),false,0,false);
     for(auto& block:f) for(auto& i:block) {
-        if(auto* a=dyn_cast<AllocaInst>(&i)) add(*a,a->getAllocatedType(),cast<ConstantInt>(a->getArraySize())->getZExtValue(),a->getAlign().value(),true,true);
+        if(auto* a=dyn_cast<AllocaInst>(&i)) {
+            auto* count=dyn_cast<ConstantInt>(a->getArraySize());
+            add(*a,a->getAllocatedType(),count ? count->getZExtValue() : 0,a->getAlign().value(),true,true,owners.at(a),!count);
+        }
         if(auto* l=dyn_cast<LoadInst>(&i)) tags |= containsPointer(l->getType());
         if(auto* s=dyn_cast<StoreInst>(&i)) tags |= containsPointer(s->getValueOperand()->getType());
     }
     for(auto& o:objects) {
         auto key="memory."+std::to_string(o.id);
         o.live=model.variable(key+".live",ts::Type::boolean(),Mode::State,b(!o.stack));
+        o.allocated=model.variable(key+".allocated",ts::Type::boolean(),Mode::State,b(!o.stack));
+        if(o.dynamic) o.extent=model.variable(key+".extent",ts::Type::word(offsetWidth),Mode::State,n(0,offsetWidth));
         o.generation=model.variable(key+".generation",ts::Type::word(8),Mode::State,n(0,8));
         std::vector<Byte> initial(o.size,blank());
         if(auto* g=dyn_cast<GlobalVariable>(o.source)) initial=encode(g->getValueType(),constant(g->getInitializer()));
@@ -135,6 +141,12 @@ MemoryModel::MemoryModel(Model& m,Module& mod,Function& f,MemoryLimits lim):mode
                 bytes.push_back(model.variable(key+".byte."+std::to_string(i)+"."+std::to_string(field),fields[field].type(),Mode::State,fields[field]));
             o.bytes.push_back(std::move(bytes));
         }
+    }
+    for(auto& block:f) for(auto& i:block) if(auto* call=dyn_cast<IntrinsicInst>(&i); call && call->getIntrinsicID()==Intrinsic::stacksave) {
+        auto& snapshot=saves[call];
+        auto key="stack.save."+std::to_string(saves.size());
+        for(auto& o:objects) if(o.stack && o.frame==owners.at(call))
+            snapshot.push_back({o.id,model.variable(key+"."+std::to_string(o.id),ts::Type::word(8),Mode::State,n(0,8))});
     }
 }
 Pieces MemoryModel::knownAddress(const Value* value,Pieces p) const
@@ -189,15 +201,18 @@ Expr MemoryModel::identity(const Pieces& p,const Object& o,bool live) const
     match=all(match,eq(p[2].bits,v(o.generation)));
     return live ? all(match,v(o.live)) : match;
 }
+Expr MemoryModel::extent(const Object& o) const { return o.dynamic ? v(o.extent) : n(o.size,offsetWidth); }
 Expr MemoryModel::valid(const Pieces& p,Expr count,uint64_t align,bool writing) const
 {
     Expr ok=b(false);
     for(auto& o:objects) {
         if((writing && !o.writable) || align>o.alignment) continue;
         Expr inside=b(false);
-        if(count.kind()==Expr::Kind::Integer) {
+        if(!o.dynamic && count.kind()==Expr::Kind::Integer) {
             if(count.bits().ule(o.size)) inside=op(Op::LessEqual,p[1].bits,n(o.size-count.bits().getZExtValue(),offsetWidth));
-        } else inside=all(op(Op::LessEqual,p[1].bits,n(o.size,offsetWidth)),op(Op::LessEqual,count,cast(op(Op::Sub,n(o.size,offsetWidth),p[1].bits),64)));
+        } else if(count.kind()==Expr::Kind::Integer) {
+            if(count.bits().ule(o.size)) inside=all(op(Op::LessEqual,p[1].bits,extent(o)),op(Op::LessEqual,cast(count,offsetWidth),op(Op::Sub,extent(o),p[1].bits)));
+        } else inside=all(op(Op::LessEqual,p[1].bits,extent(o)),op(Op::LessEqual,count,cast(op(Op::Sub,extent(o),p[1].bits),64)));
         auto aligned=eq(op(Op::BitAnd,p[1].bits,n(align-1,offsetWidth)),n(0,offsetWidth));
         ok=any(ok,all(identity(p,o,true),all(inside,aligned)));
     }
@@ -206,8 +221,17 @@ Expr MemoryModel::valid(const Pieces& p,Expr count,uint64_t align,bool writing) 
 Expr MemoryModel::inRange(const Pieces& p) const
 {
     Expr ok=all(eq(p[0].bits,n(0,8)),all(eq(p[1].bits,n(0,offsetWidth)),eq(p[2].bits,n(0,8))));
-    for(auto& o:objects) ok=any(ok,all(eq(p[0].bits,n(o.id,8)),op(Op::LessEqual,p[1].bits,n(o.size,offsetWidth))));
+    for(auto& o:objects) ok=any(ok,all(eq(p[0].bits,n(o.id,8)),op(Op::LessEqual,p[1].bits,extent(o))));
     return ok;
+}
+Expr MemoryModel::unknownExtent(const Pieces& p) const
+{
+    // Reallocation can change a dynamic object's size. Do not use the new
+    // extent to decide inbounds/comparison semantics for an older generation.
+    Expr unknown=b(false);
+    for(auto& o:objects) if(o.dynamic)
+        unknown=any(unknown,all(eq(p[0].bits,n(o.id,8)),no(eq(p[2].bits,v(o.generation)))));
+    return all(no(poison(p)),unknown);
 }
 MemoryModel::Byte MemoryModel::readAt(const Pieces& p,Expr index) const
 {
@@ -309,23 +333,57 @@ MemoryEffect MemoryModel::store(const Pieces& ptr,llvm::Type* t,const Pieces& va
     }
     return e;
 }
-MemoryEffect MemoryModel::allocate(const AllocaInst& a)
+MemoryEffect MemoryModel::allocate(const AllocaInst& a,ValueExpr count)
 {
     auto& o=object(&a); MemoryEffect e; auto generation=op(Op::Add,v(o.generation),n(1,8));
     e.bound=op(Op::GreaterEqual,v(o.generation),n(limits.generations,8));
+    e.capacity=v(o.allocated);
+    if(o.dynamic) {
+        unsigned stride=size(a.getAllocatedType()); need(stride>0,"Zero-sized dynamic allocation elements are unsupported");
+        e.error=count.poison;
+        e.unsupported=eq(count.bits,n(0,count.bits.type().width()));
+        e.capacity=any(e.capacity,op(Op::Greater,cast(count.bits,64),n(o.size/stride)));
+        e.writes.push_back({o.extent,op(Op::Mul,cast(count.bits,offsetWidth),n(stride,offsetWidth))});
+    }
     e.value={{n(o.id,8),b(false)},{n(0,offsetWidth),b(false)},{generation,b(false)}};
     bool lifetimeMarked=false;
     for(auto* user:a.users()) if(auto* intrinsic=dyn_cast<IntrinsicInst>(user))
         lifetimeMarked |= intrinsic->getIntrinsicID()==Intrinsic::lifetime_start;
-    e.writes={{o.live,b(!lifetimeMarked)},{o.generation,generation}};
+    e.writes.insert(e.writes.end(),{{o.live,b(!lifetimeMarked)},{o.generation,generation},{o.allocated,b(true)}});
     for(unsigned j=0;j<o.size;++j) writeByte(e,o,j,blank());
+    return e;
+}
+MemoryEffect MemoryModel::endFrame(unsigned frame) const
+{
+    MemoryEffect e;
+    for(auto& o:objects) if(o.stack && o.frame==frame) {
+        e.writes.push_back({o.live,b(false)}); e.writes.push_back({o.allocated,b(false)});
+    }
+    return e;
+}
+MemoryEffect MemoryModel::saveStack(const CallInst& call) const
+{
+    MemoryEffect e; e.value={{n(0,8),b(false)},{n(0,offsetWidth),b(false)},{n(0,8),b(false)}};
+    for(auto [id,saved]:saves.at(&call)) e.writes.push_back({saved,v(objects.at(id-1).generation)});
+    return e;
+}
+MemoryEffect MemoryModel::restoreStack(const CallInst& call) const
+{
+    auto* saved=dyn_cast<CallInst>(call.getArgOperand(0));
+    need(saved && saves.count(saved),"Stack restore requires a directly retained stacksave token");
+    MemoryEffect e;
+    for(auto [id,generation]:saves.at(saved)) {
+        auto& o=objects.at(id-1); auto keep=eq(v(o.generation),v(generation));
+        e.writes.push_back({o.live,all(v(o.live),keep)});
+        e.writes.push_back({o.allocated,all(v(o.allocated),keep)});
+    }
     return e;
 }
 MemoryEffect MemoryModel::lifetime(const Pieces& ptr,bool start) const
 {
     MemoryEffect e; Expr found=b(false);
     for(auto& o:objects) if(o.stack) {
-        auto matches=all(identity(ptr,o,false),eq(ptr[1].bits,n(0,offsetWidth))); found=any(found,matches);
+        auto matches=all(v(o.allocated),all(identity(ptr,o,false),eq(ptr[1].bits,n(0,offsetWidth)))); found=any(found,matches);
         e.writes.push_back({o.live,sel(matches,b(start),v(o.live))});
         if(start) for(unsigned j=0;j<o.size;++j) writeByte(e,o,j,chooseByte(matches,blank(),readByte(o,j)));
     }
@@ -407,7 +465,7 @@ Pieces MemoryModel::gep(const GEPOperator& g,const Pieces& base,const std::vecto
     }
     auto narrow=cast(p[1].bits,offsetWidth);
     auto tooWide=all(no(bad),no(eq(p[1].bits,cast(cast(narrow,offsetWidth,true),mathWidth))));
-    if(unsupported) *unsupported=tooWide;
+    if(unsupported) *unsupported=any(tooWide,g.isInBounds() ? unknownExtent(base) : b(false));
     else need(tooWide.kind()==Expr::Kind::Boolean && !tooWide.booleanValue(),"Constant pointer displacement exceeds supported offset range");
     p[1].bits=narrow;
     for(auto& x:p) x.poison=bad;
@@ -427,14 +485,15 @@ ValueExpr MemoryModel::compare(CmpInst::Predicate predicate,const Pieces& a,cons
         Op operation=predicate==CmpInst::ICMP_ULT ? Op::Less : predicate==CmpInst::ICMP_ULE ? Op::LessEqual : predicate==CmpInst::ICMP_UGT ? Op::Greater : Op::GreaterEqual;
         result=op(operation,cast(a[1].bits,offsetWidth,true),cast(d[1].bits,offsetWidth,true));
     }
+    unsupported=any(unsupported,any(unknownExtent(a),unknownExtent(d)));
     return {sel(result,n(1,1),n(0,1)),any(poison(a),poison(d))};
 }
 json::Object MemoryModel::describe() const
 {
     json::Array list;
     for(auto& o:objects) list.push_back(json::Object{{"id",o.id},{"name",o.source->getName().str()},{"bytes",o.size},
-        {"alignment",o.alignment},{"stack",o.stack},{"writable",o.writable},{"key","memory."+std::to_string(o.id)}});
+        {"alignment",o.alignment},{"stack",o.stack},{"frame",o.frame},{"dynamic",o.dynamic},{"writable",o.writable},{"key","memory."+std::to_string(o.id)}});
     return json::Object{{"policy","opaque-provenance-bytes-v1; strict-uninitialized-read"},{"byte_budget",limits.bytes},{"offset_bits",offsetWidth},{"object_limit",255},
-        {"allocation_generations",limits.generations},{"objects",std::move(list)}};
+        {"dynamic_stack_bytes",limits.dynamicBytes},{"allocations_per_site_per_frame",1},{"allocation_generations",limits.generations},{"objects",std::move(list)}};
 }
 }

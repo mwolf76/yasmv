@@ -140,7 +140,6 @@ exit: ret i8 0 }''')
 
     def test_hook_signatures_and_full_call_graph_rejections(self):
         cases=[
-            'define i8 @f(i8 %x) { %v=call i8 @f(i8 %x)\nret i8 %v }\ndefine i8 @main() { %v=call i8 @f(i8 0)\nret i8 %v }',
             'declare void @unknown()\ndefine void @f() { call void @unknown()\nret void }\ndefine void @main() { br i1 false,label %dead,label %done\ndead: call void @f()\nbr label %done\ndone: ret void }',
             'define i8 @f(i8 %x) mustprogress { ret i8 %x }\ndefine i8 @main() { %v=call i8 @f(i8 0)\nret i8 %v }',
             'declare i32 @__VERIFIER_nondet_bool()\ndefine i32 @main() { %v=call i32 @__VERIFIER_nondet_bool()\nret i32 %v }',

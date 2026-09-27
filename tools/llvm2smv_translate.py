@@ -16,6 +16,8 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', type=Path)
     parser.add_argument('-o', '--output', required=True, type=Path, help='New bundle directory (never replaced)')
+    parser.add_argument('--stack-depth', type=int, default=8)
+    parser.add_argument('--dynamic-stack-bytes', type=int, default=16)
     parser.add_argument('--memory-bytes', type=int, default=128)
     parser.add_argument('--allocation-generations', type=int, default=4)
     parser.add_argument('--entry', default='main')
@@ -29,7 +31,8 @@ def main(argv=None):
             raise ArtifactError('Timeout must be positive and finite')
         process = subprocess.run([args.translator, '--emit-scalar-bundle', '--diagnostics=json',
             '--entry=' + args.entry, '--memory-bytes=' + str(args.memory_bytes),
-            '--allocation-generations=' + str(args.allocation_generations), str(args.input.resolve())], capture_output=True, text=True, timeout=args.timeout)
+            '--allocation-generations=' + str(args.allocation_generations),
+            '--stack-depth=' + str(args.stack_depth), '--dynamic-stack-bytes=' + str(args.dynamic_stack_bytes), str(args.input.resolve())], capture_output=True, text=True, timeout=args.timeout)
         if process.returncode != 0:
             sys.stderr.write(process.stderr)
             return 2

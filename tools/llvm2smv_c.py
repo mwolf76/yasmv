@@ -88,7 +88,8 @@ def compile_candidate(args, temporary):
     checked([args.llvm_link, *objects, '-o', linked], args.timeout)
     artifact = read_json(checked([args.translator, '--emit-scalar-bundle', '--diagnostics=json',
                                  '--entry=' + args.entry, '--memory-bytes=' + str(args.memory_bytes),
-                                 '--allocation-generations=' + str(args.allocation_generations), linked], args.timeout))
+                                 '--allocation-generations=' + str(args.allocation_generations),
+            '--stack-depth=' + str(args.stack_depth), '--dynamic-stack-bytes=' + str(args.dynamic_stack_bytes), linked], args.timeout))
     files = check_artifact(artifact)
     provenance = read_json(files['provenance.json'])
     provenance['c_build'] = dict(policy='clang18-scalar-c-v1', tools=tools, flags=FLAGS,
@@ -129,6 +130,16 @@ def project(trace, source_map):
         pc = values['v_7063']
         location = locations.get(pc)
         record = dict(step=frame['step'], pc=pc, location=location)
+        record['stack_depth'] = values.get('v_' + b'stack.depth'.hex())
+        record['call_stack'] = []
+        if location and 'frame' in location:
+            frames_by_id = {f['id']: f for f in source_map.get('call_stack', {}).get('frames', [])}
+            owner = location['frame']
+            while owner in frames_by_id:
+                info = frames_by_id[owner]; record['call_stack'].append(info)
+                if owner == 0: break
+                owner = info['parent']
+            record['call_stack'].reverse()
         if location and 'choice_symbol' in location:
             record['nondeterministic_value'] = values[location['choice_symbol']]
         record['globals'] = {bytes.fromhex(detail['key_hex']).decode(errors='backslashreplace')[7:]: dict(bits=values[symbol],
@@ -141,7 +152,8 @@ def project(trace, source_map):
                 key = obj['key']
                 field = lambda suffix: values['v_' + (key + suffix).encode().hex()]
                 record['memory'].append(dict(id=obj['id'], name=obj['name'], live=field('.live'),
-                    generation=field('.generation'), bytes=[dict(bits=field(f'.byte.{i}.0'),
+                    generation=field('.generation'), allocated=field('.allocated'),
+                    extent=field('.extent') if obj.get('dynamic') else obj['bytes'], frame=obj.get('frame'), bytes=[dict(bits=field(f'.byte.{i}.0'),
                     initialized_mask=field(f'.byte.{i}.1'), poison_mask=field(f'.byte.{i}.2')) for i in range(obj['bytes'])]))
         frames.append(record)
     return dict(version=1, kind='model-trace-source-projection', frames=frames,
@@ -166,7 +178,7 @@ def check(args, bundle, temporary):
     report = dict(version=1, status='unknown', check=args.check, artifact_id=manifest['artifact_id'],
                   bundle=str(bundle), scope='configured LLVM memory model' if source_map.get('memory') else 'configured LLVM scalar model',
                   assumptions='false verifier assumptions exit to ASSUMED_OUT; no fairness',
-                  memory_policy=source_map.get('memory', {}), translation_certified=False, admitted_execution='unknown', trace=None, source_trace=None)
+                  memory_policy=source_map.get('memory', {}), call_stack_policy=source_map.get('call_stack', {}), translation_certified=False, admitted_execution='unknown', trace=None, source_trace=None)
     if initial['status'] == 'unknown':
         report['backend'] = initial
         return report
@@ -176,7 +188,7 @@ def check(args, bundle, temporary):
         request = dict(operation='check-progress', target=prop('progress_goal'), limits=dict(states=args.states, wall_ms=wall))
     else:
         request = dict(operation='prove-property' if args.prove else 'check-property',
-                       property=dict(name='safety_and_memory_coverage', expression=' && '.join(prop(p) for p in ('safe', 'memory_supported', 'memory_within_bound'))),
+                       property=dict(name='safety_and_memory_coverage', expression=' && '.join(prop(p) for p in ('safe', 'memory_supported', 'memory_within_bound', 'stack_within_bound', 'stack_allocation_within_bound'))),
                        limits=dict(depth=args.depth, wall_ms=wall))
     result = ask(request)
     report['backend'] = result
@@ -197,6 +209,9 @@ def check(args, bundle, temporary):
             report['failure_kind'] = 'progress_' + result['progress']['kind']
             report['loop_start'] = result['progress'].get('loop_start')
             pc = report['source_trace']['frames'][-1]['pc']
+            for sink, kind in [('STACK_BOUND', 'stack_depth_bound'), ('STACK_ALLOCATION_BOUND', 'stack_allocation_capacity')]:
+                if pc == 'e_7063_' + sink.encode().hex():
+                    report.update(status='resource_bound_reached', failure_kind=kind)
             if pc == 'e_7063_' + 'MEMORY_BOUND'.encode().hex(): report['status'] = 'resource_bound_reached'
             if pc == 'e_7063_' + 'UNSUPPORTED_MEMORY'.encode().hex(): report['status'] = 'unsupported'
         # Prove exclusion separately. A bounded absence of normal exit is not vacuity.
@@ -222,10 +237,13 @@ def check(args, bundle, temporary):
         frames = report['source_trace']['frames']
         report['failure_site'] = frames[-2]['location'] if len(frames) > 1 else None
         report['failure_kind'] = 'runtime_error' if frames[-1]['pc'] == 'e_7063_4552524f52' else 'assertion'
+        for sink, kind in [('STACK_BOUND', 'stack_depth_bound'), ('STACK_ALLOCATION_BOUND', 'stack_allocation_capacity')]:
+            if frames[-1]['pc'] == 'e_7063_' + sink.encode().hex():
+                report.update(status='resource_bound_reached', failure_kind=kind)
         if frames[-1]['pc'] == 'e_7063_' + 'MEMORY_BOUND'.encode().hex():
             report.update(status='resource_bound_reached', failure_kind='allocation_generation_bound')
         if frames[-1]['pc'] == 'e_7063_' + 'UNSUPPORTED_MEMORY'.encode().hex():
-            report.update(status='unsupported', failure_kind='opaque_pointer_operation')
+            report.update(status='unsupported', failure_kind='unsupported_memory_operation')
     elif outcome == 'holds_bounded':
         if result.get('scope') != 'through_depth':
             raise ArtifactError('Unexpected bounded result scope')
@@ -245,6 +263,8 @@ def main(argv=None):
     parser.add_argument('--check', choices=('safety', 'termination'), default='safety')
     parser.add_argument('--depth', type=int, default=100, help='Safety bound in model transitions')
     parser.add_argument('--prove', action='store_true', help='Try safety induction through --depth')
+    parser.add_argument('--stack-depth', type=int, default=8)
+    parser.add_argument('--dynamic-stack-bytes', type=int, default=16)
     parser.add_argument('--memory-bytes', type=int, default=128)
     parser.add_argument('--allocation-generations', type=int, default=4)
     parser.add_argument('--states', type=int, default=1000, help='Progress exploration budget')
@@ -259,8 +279,8 @@ def main(argv=None):
     os.environ.setdefault('YASMV_HOME', str(ROOT))
     report = None
     try:
-        if not math.isfinite(args.timeout) or args.timeout <= 0 or args.depth < 0 or args.states < 1 or not 0 < args.memory_bytes <= 4096 or not 0 < args.allocation_generations <= 255:
-            raise ArtifactError('Timeout/states must be positive; depth nonnegative; memory bytes 1..4096; allocation generations 1..255')
+        if not math.isfinite(args.timeout) or args.timeout <= 0 or args.depth < 0 or args.states < 1 or not 0 < args.stack_depth <= 64 or not 0 < args.dynamic_stack_bytes <= 4096 or not 0 < args.memory_bytes <= 4096 or not 0 < args.allocation_generations <= 255:
+            raise ArtifactError('Timeout/states must be positive; depth nonnegative; memory/dynamic-stack bytes 1..4096; allocation generations 1..255; stack depth 1..64')
         if args.prove and args.check != 'safety':
             raise ArtifactError('--prove applies only to safety')
         if os.path.lexists(args.output):

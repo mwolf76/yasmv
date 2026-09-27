@@ -1,5 +1,6 @@
 # Scalar LLVM execution (M2–M3)
 
+The M5 [call-stack contract](CALL_STACK.md) adds bounded recursive calls.
 The M4 [memory contract](MEMORY_MODEL.md) extends the scalar-only restrictions
 below when addressable memory is needed.
 
@@ -51,7 +52,7 @@ is not a proof that every possible execution terminates.
 The entry must be a defined zero-argument, non-variadic C-convention function,
 returning void or an integer of 1–64 bits. The baseline requires an explicit
 little-endian Linux aarch64/x86_64 triple and DataLayout with 64-bit pointers.
-There is no linker interposition. All blocks in the acyclic direct-call closure
+There is no linker interposition. All blocks in the direct-call closure
 are inspected, including unreachable blocks. Only admitted scalar definitions,
 verifier hooks, and recognized debug intrinsics can be called. Unknown external
 calls are rejected even on dead branches; all module globals are checked.
@@ -121,7 +122,7 @@ successful translation.
 
 ## Identity and tests
 
-Bundles use scope `llvm18-scalar-v2`. Provenance records the entry, target,
+Bundles use scope `llvm18-scalar-v3`. Provenance records the entry, target,
 DataLayout, closed environment, normalization/semantic policy, and SHA-256 hashes
 of input and normalized serialized IR. The module identifier is excluded;
 source/debug filenames, including LLVM's default source filename when absent,
