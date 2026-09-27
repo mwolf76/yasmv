@@ -1,10 +1,10 @@
 # llvm2smv implementation plan
 
-Status: M0 and M1 implemented on 2026-09-27, following code review at
+Status: M0, M1, and M2 implemented on 2026-09-27, following code review at
 `84738750`. The current [frontend contract](../llvm2smv/README.md) disables
 legacy SMV generation and provides verified IR inventory and rejection
-diagnostics. M1 adds the internal typed model foundation; M2 and later
-milestones below remain proposed. The review findings
+diagnostics. M1 adds the internal typed model foundation; M2 adds admitted scalar execution.
+M3 and later milestones below remain proposed. The review findings
 describe the pre-M0 implementation.
 
 The agreed scope is sequential C with integers, arrays, pointers, calls, and
@@ -78,8 +78,51 @@ Validation on the same LLVM 18.1.3 / Linux/aarch64 baseline:
   group passed on rerun; the remaining workflow, analysis, and session targets
   passed separately. No workbench code was changed.
 
-LLVM execution translation remains disabled. The counter execution slice is
-next in M2; the frontend continues testing rejection until that lowering exists.
+### M2 scalar execution
+
+The [scalar model contract](../llvm2smv/SCALAR_MODEL.md) describes the admitted
+LLVM 18 subset and the validated publisher. `--emit-scalar-bundle` creates an
+unpublished candidate; `tools/llvm2smv_translate.py` validates and atomically
+publishes it. Legacy direct `-o` output remains disabled, and inventory reports
+remain separate from scalar admission.
+
+Execution uses one active instruction location, simultaneous incoming PHIs,
+explicit branch/switch edges, and stable normal/error exits. Scalar globals and
+promotable locals support sequential C examples. Preflight checks precede the
+versioned mem2reg normalization, followed by verification and a second check.
+The controlled compile helper disables finite-loop assumptions.
+
+The lowering implements 1–64-bit integers, signed/unsigned operations, casts,
+comparisons, select, freeze, and admitted poison/overflow flags. Poison travels
+with registers and scalar memory; unused/unselected poison does not immediately
+fail. UB at admitted use sites enters an error sink. Unsupported calls, pointers,
+aggregates, `undef`, progress assumptions, metadata, and attributes fail closed.
+Constant multiplier bounds and powers-of-two shifts avoid unnecessary arithmetic
+circuits while preserving widths and poison behavior.
+
+Native acceptance checks cover the counter's return at ten and forbidden 99,
+conditional stores, nested loops, intentional nontermination, PHI swaps, switch,
+poison uses, casts, and integer boundaries. Exhaustive two-bit operand pairs
+(and selected one-bit cases) are compared with an independent Python integer
+interpreter. The larger nested-loop check at depth 250 hit its 90-second process
+limit; regression checks now cover the observed normal-exit depth plus stuttering
+steps. This is bounded evidence, and deeper expensive queries remain inconclusive
+when resource limits are reached.
+
+Validation on LLVM 18.1.3 / Linux/aarch64:
+
+* All 19 frontend/configuration tests, typed-model C++ self-tests, and 14 native
+  writer/publication tests passed.
+* The full scalar suite passed normally and under ASan/UBSan with leak detection.
+  Subsequent global-name collision and debug-intrinsic admission regressions
+  passed, with the final changes also checked against counter execution,
+  admission failures, poison behavior, and publication under sanitizers.
+* A clean out-of-tree frontend build passed the frontend/configuration and C++
+  checks; its final binary passed counter, debug-intrinsic, and global-name
+  regressions. Distribution contents and whitespace checks passed.
+
+The next milestone is M3: direct-call inlining, verifier hooks, a C compilation
+driver, source mapping, and a usable scalar safety workflow.
 
 ## 1. Findings in the current codebase
 

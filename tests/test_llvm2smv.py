@@ -46,7 +46,8 @@ class TranslatorTests(unittest.TestCase):
         result = self.run_tool('--capabilities', expected=0)
         report = json.loads(result.stdout)
         self.assertEqual(report['required_llvm_major'], 18)
-        self.assertEqual(report['milestone'], 'M1')
+        self.assertEqual(report['milestone'], 'M2')
+        self.assertTrue(report['scalar_candidate_available'])
         self.assertTrue(report['typed_model_foundation'])
         self.assertEqual(report['supported_features'], [])
         self.assertFalse(report['translation_available'])
@@ -288,7 +289,7 @@ class ConfigureTests(unittest.TestCase):
         self.assertIn('config=' + str(self.config), result)
         for tool in ('clang', 'opt', 'llvm-link'):
             self.assertIn(str(self.bin / tool), result)
-        self.assertIn('--system-libs', self.log.read_text())
+        self.assertIn('--libs core irreader support analysis transformutils targetparser --system-libs', self.log.read_text())
 
     def test_core_only_never_invokes_llvm(self):
         self.script(self.config, 'echo invoked > ' + shlex.quote(str(self.log)) + '\nexit 99\n')
