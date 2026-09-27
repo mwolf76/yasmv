@@ -11,7 +11,8 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
-EXTRA_DIST = tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
+EXTRA_DIST = tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
+    tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \
     docs/formats/progress-counterexample-v1.schema.json docs/formats/progress-proof-v1.schema.json \
     tools/test-support.sh tools/run-short-tests.sh tools/run-functional-tests.sh \
@@ -66,8 +67,11 @@ unit-test: yasmv yasmv_tests
 functional-test: yasmv yasmv_tests
 	@tools/run-functional-tests.sh
 if ENABLE_LLVM2SMV
-	@echo "Running llvm2smv tests..."
+llvm-test:
 	@$(MAKE) -C llvm2smv test
+else
+llvm-test:
+	@echo "LLVM tests disabled in this core-only build."
 endif
 
 reliability-test: yasmv yasmv_reliability_tests
@@ -97,8 +101,10 @@ cli-test: yasmv
 progress-test: yasmv
 	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
 
-test: progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test
+test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
+
+.PHONY: llvm-test
 
 .PHONY: microcode
 microcode:
