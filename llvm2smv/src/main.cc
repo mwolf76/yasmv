@@ -1,99 +1,65 @@
-#include <chrono>
-#include <iomanip>
-#include <sstream>
-#include <string>
-
-#include "llvm2smv/llvm2smv_pass.hh"
+#include "llvm2smv/module_analysis.hh"
 #include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/IRReader/IRReader.h"
 #include "llvm/Support/CommandLine.h"
-#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/ToolOutputFile.h"
-#include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
 
-static std::string getCurrentTimestamp()
-{
-    auto now = std::chrono::system_clock::now();
-    auto time_t = std::chrono::system_clock::to_time_t(now);
-
-    std::stringstream ss;
-    ss << std::put_time(std::localtime(&time_t), "%Y-%m-%d %H:%M:%S");
-    return ss.str();
-}
-
-static cl::opt<std::string> InputFilename(cl::Positional,
-                                          cl::desc("<input LLVM IR file>"), cl::Required);
-
-static cl::opt<std::string> OutputFilename("o",
-                                           cl::desc("Output SMV file"), cl::value_desc("filename"),
-                                           cl::init("-"));
-
-static cl::opt<unsigned> WordWidth("word-width",
-                                   cl::desc("Default word width for integers"), cl::init(32));
-
-static cl::opt<bool> Verbose("v", cl::desc("Enable verbose output"),
-                             cl::init(false));
+static cl::opt<std::string> InputFilename(cl::Positional, cl::desc("<LLVM IR or bitcode>"), cl::init(""));
+static cl::opt<std::string> OutputFilename("o", cl::desc("SMV destination (never written in M0)"));
+static cl::opt<std::string> Entry("entry", cl::desc("Defined entry function"), cl::init("main"));
+static cl::opt<bool> Analyze("analyze", cl::desc("Print feature inventory and rejection diagnostics as JSON"));
+static cl::opt<bool> Capabilities("capabilities", cl::desc("Print supported operations as JSON"));
+enum DiagnosticFormat { Text, JSON };
+static cl::opt<DiagnosticFormat> Diagnostics("diagnostics", cl::desc("Diagnostic format"),
+    cl::values(clEnumValN(Text, "text", "Human-readable diagnostics"),
+               clEnumValN(JSON, "json", "Structured JSON diagnostics")), cl::init(Text));
 
 int main(int argc, char** argv)
 {
-    InitLLVM X(argc, argv);
-
-    cl::ParseCommandLineOptions(argc, argv, "LLVM to SMV translator\n");
-
-    // Set up the context and module
-    LLVMContext Context;
-    SMDiagnostic Err;
-
-    // Parse the input LLVM IR file
-    std::unique_ptr<Module> M = parseIRFile(InputFilename, Err, Context);
-    if (!M) {
-        Err.print(argv[0], errs());
-        return 1;
+    InitLLVM init(argc, argv);
+    cl::ParseCommandLineOptions(argc, argv, "LLVM to SMV: M0 analysis and rejection gate\n");
+    auto fail = [](StringRef code, StringRef message) {
+        json::Array diagnostics;
+        diagnostics.push_back(llvm2smv::diagnostic(code, message));
+        json::Object report{{"version", 1}, {"status", "error"},
+                            {"translation_available", false}, {"diagnostics", std::move(diagnostics)}};
+        if (Analyze) outs() << formatv("{0:2}\n", json::Value(std::move(report)));
+        else llvm2smv::printDiagnostics(report, Diagnostics == JSON);
+        return 2;
+    };
+    if (Capabilities) {
+        if (Analyze || !InputFilename.empty() || OutputFilename.getNumOccurrences() || Entry.getNumOccurrences())
+            return fail("invalid-options", "--capabilities cannot be combined with an input, --analyze, --entry, or -o.");
+        outs() << formatv("{0:2}\n", json::Value(llvm2smv::capabilities()));
+        return 0;
     }
+    if (InputFilename.empty()) return fail("missing-input", "An LLVM IR or bitcode input is required.");
+    if (Entry.empty()) return fail("invalid-entry", "The entry name must not be empty.");
+    if (Analyze && OutputFilename.getNumOccurrences())
+        return fail("invalid-options", "--analyze writes JSON to stdout and does not accept an SMV destination.");
 
-    if (Verbose) {
-        errs() << "Loaded module: " << M->getName() << "\n";
-        errs() << "Functions: " << M->size() << "\n";
-        errs() << "Global variables: " << M->global_size() << "\n";
+    LLVMContext context;
+    SMDiagnostic error;
+    auto module = parseIRFile(InputFilename, error, context);
+    if (!module) {
+        std::string message;
+        raw_string_ostream stream(message);
+        error.print(argv[0], stream);
+        return fail("invalid-ir", message);
     }
+    std::string verification;
+    raw_string_ostream verifier(verification);
+    if (verifyModule(*module, &verifier)) return fail("invalid-ir", verification);
 
-    // Set up output file
-    std::error_code EC;
-    std::unique_ptr<ToolOutputFile> Out;
-    if (OutputFilename == "-") {
-        Out = std::make_unique<ToolOutputFile>("-", EC, sys::fs::OF_Text);
-    } else {
-        Out = std::make_unique<ToolOutputFile>(OutputFilename, EC,
-                                               sys::fs::OF_Text);
-    }
-
-    if (EC) {
-        errs() << "Error opening output file: " << EC.message() << "\n";
-        return 1;
-    }
-
-    // Write header comment and word width directive
-    Out->os() << "-- This SMV model was generated by llvm2smv on "
-              << getCurrentTimestamp()
-              << ", out of LLVM IR file " << InputFilename << "\n\n";
-    Out->os() << "#word-width " << WordWidth << "\n\n";
-
-    // Run the translation pass
-    llvm2smv::LLVM2SMVPass Translator(Out->os());
-    Translator.runOnModule(*M);
-
-    // Keep the output file
-    Out->keep();
-
-    if (Verbose) {
-        errs() << "Translation complete. Output written to "
-               << (OutputFilename.getValue() == "-" ? "stdout" : OutputFilename.getValue()) << "\n";
-    }
-
-    return 0;
+    auto report = llvm2smv::analyzeModule(*module, Entry);
+    if (Analyze) outs() << formatv("{0:2}\n", json::Value(std::move(report)));
+    else llvm2smv::printDiagnostics(report, Diagnostics == JSON);
+    // Do not even open OutputFilename: preserve existing files and leave stdout
+    // empty for failed translation. There is deliberately no legacy escape hatch.
+    return 2;
 }
