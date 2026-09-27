@@ -5,6 +5,9 @@
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/Dominators.h"
 #include "llvm/IR/IntrinsicInst.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/Transforms/Utils/Cloning.h"
+#include <functional>
 #include "llvm/IR/Operator.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/TargetParser/Triple.h"
@@ -70,9 +73,62 @@ void attributes(const Function& f)
                     ok = k == Attribute::NoInline || k == Attribute::OptimizeNone || k == Attribute::NoUnwind
                         || k == Attribute::UWTable;
                 }
-            } else if (index == AttributeList::ReturnIndex) ok = a.hasAttribute(Attribute::NoUndef);
+            } else ok = a.hasAttribute(Attribute::NoUndef) || a.hasAttribute(Attribute::SExt) || a.hasAttribute(Attribute::ZExt);
             require(ok, "Unhandled entry attribute: " + a.getAsString());
         }
+    }
+}
+enum class Hook { None, Assert, Assume, Error, Nondet, Defined };
+Hook hook(const Function& f)
+{
+    auto name=f.getName();
+    if (name=="__VERIFIER_assert") return Hook::Assert;
+    if (name=="__VERIFIER_assume") return Hook::Assume;
+    if (name=="__VERIFIER_error") return Hook::Error;
+    if (name.starts_with("__llvm2smv_defined_")) return Hook::Defined;
+    static const std::map<std::string,unsigned> widths{{"bool",1},{"char",8},{"uchar",8},
+        {"short",16},{"ushort",16},{"int",32},{"uint",32},{"long",64},{"ulong",64},
+        {"longlong",64},{"ulonglong",64}};
+    if (name.starts_with("__VERIFIER_nondet_")) {
+        auto it=widths.find(name.drop_front(18).str());
+        require(it!=widths.end() && f.getReturnType()->isIntegerTy(it->second), "Unknown nondeterministic hook or incorrect return width");
+        return Hook::Nondet;
+    }
+    return Hook::None;
+}
+void signature(const Function& f)
+{
+    SmallVector<std::pair<unsigned,MDNode*>,4> metadata;
+    f.getAllMetadata(metadata);
+    for (auto [kind,node] : metadata) { (void)node; require(kind==LLVMContext::MD_dbg,"Unhandled function metadata"); }
+    require(!f.isVarArg() && f.getCallingConv()==CallingConv::C && !f.hasPersonalityFn()
+        && !f.hasPrefixData() && !f.hasPrologueData() && !f.hasGC() && !f.hasComdat() && !f.hasSection()
+        && f.getAddressSpace()==0 && (f.hasExternalLinkage() || f.hasInternalLinkage() || f.hasPrivateLinkage()),
+        "Only ordinary scalar C function signatures/linkage are supported");
+    if (!f.getReturnType()->isVoidTy()) width(f.getReturnType());
+    for (const auto& arg : f.args()) width(arg.getType());
+    attributes(f);
+    auto h=hook(f);
+    if (h==Hook::None) require(!f.isDeclaration(),"Unknown external function: "+f.getName().str());
+    else {
+        require(f.isDeclaration(),"Verifier hooks must be declarations, not overridden definitions");
+        bool unary=h==Hook::Assert || h==Hook::Assume || h==Hook::Defined;
+        require(f.arg_size()==(unary ? 1u : 0u) && (h==Hook::Nondet ? f.getReturnType()->isIntegerTy() : f.getReturnType()->isVoidTy()),
+            "Incorrect verifier hook signature");
+        if (h==Hook::Assert || h==Hook::Assume) require(f.getArg(0)->getType()->isIntegerTy(32),"Verifier predicates take an i32 argument");
+    }
+}
+void callContract(const CallInst& call)
+{
+    auto* callee=call.getCalledFunction();
+    require(callee && call.getFunctionType()==callee->getFunctionType() && !call.isMustTailCall()
+        && call.getCallingConv()==CallingConv::C && call.getNumOperandBundles()==0,
+        "Only direct, type-matched scalar calls without operand bundles are supported", &call);
+    signature(*callee);
+    for (unsigned index : call.getAttributes().indexes()) for (Attribute a : call.getAttributes().getAttributes(index)) {
+        bool ok=index==AttributeList::FunctionIndex ? a.hasAttribute(Attribute::NoUnwind) :
+            a.hasAttribute(Attribute::NoUndef) || a.hasAttribute(Attribute::SExt) || a.hasAttribute(Attribute::ZExt);
+        require(ok,"Unhandled call-site attribute: "+a.getAsString(),&call);
     }
 }
 void checkMemory(const Instruction& i, const DataLayout& dl)
@@ -132,6 +188,11 @@ void inspect(Function& f, bool normalized)
         case Instruction::Br: case Instruction::Switch: case Instruction::Ret: case Instruction::Unreachable:
             break;
         case Instruction::Load: case Instruction::Store: checkMemory(i,dl); break;
+        case Instruction::Call: {
+            auto& call=cast<CallInst>(i); callContract(call);
+            require(!normalized || hook(*call.getCalledFunction())!=Hook::None,"Call was not inlined",&i);
+            break;
+        }
         case Instruction::Alloca: {
             auto& a = cast<AllocaInst>(i);
             require(!normalized && &b == &f.getEntryBlock() && a.getAddressSpace() == 0 && a.isStaticAlloca()
@@ -142,6 +203,121 @@ void inspect(Function& f, bool normalized)
         default: throw ScalarError("Unsupported scalar instruction: " + std::string(i.getOpcodeName()), &i);
         }
     }
+}
+
+// Unlike InlineFunction's clone-and-prune path, preserve even unused UB sites.
+void inlineExact(CallInst& call)
+{
+    auto& callee=*call.getCalledFunction();
+    auto& caller=*call.getFunction();
+    ValueToValueMapTy map;
+    for (auto& arg : callee.args()) map[&arg]=call.getArgOperand(arg.getArgNo());
+    SmallVector<BasicBlock*,16> blocks;
+    for (auto& b : callee) {
+        auto* clone=CloneBasicBlock(&b,map,".inline",&caller);
+        map[&b]=clone; blocks.push_back(clone);
+    }
+    std::map<const DILocation*,DILocation*> cache;
+    std::function<DILocation*(DILocation*)> append = [&](DILocation* loc) {
+        if (!loc) return call.getDebugLoc().get();
+        auto found=cache.find(loc);
+        if (found!=cache.end()) return found->second;
+        auto* result=DILocation::get(caller.getContext(),loc->getLine(),loc->getColumn(),loc->getScope(),
+            append(loc->getInlinedAt()),loc->isImplicitCode());
+        cache[loc]=result; return result;
+    };
+    SmallVector<ReturnInst*,4> returns;
+    for (auto* b : blocks) for (auto& i : *b) {
+        RemapInstruction(&i,map,RF_NoModuleLevelChanges);
+        if (auto loc=i.getDebugLoc(); loc && call.getDebugLoc())
+            i.setDebugLoc(append(loc.get()));
+        if (auto* ret=dyn_cast<ReturnInst>(&i)) returns.push_back(ret);
+    }
+    auto* before=call.getParent();
+    auto* after=before->splitBasicBlock(call.getNextNode(),"call.continue");
+    before->getTerminator()->eraseFromParent();
+    auto* jump=BranchInst::Create(blocks.front(),before); jump->setDebugLoc(call.getDebugLoc());
+    if (!call.getType()->isVoidTy()) {
+        if (returns.empty()) call.replaceAllUsesWith(PoisonValue::get(call.getType()));
+        else {
+            auto* phi=PHINode::Create(call.getType(),returns.size(),"call.result",&after->front());
+            phi->setDebugLoc(call.getDebugLoc());
+            for (auto* ret : returns) phi->addIncoming(ret->getReturnValue(),ret->getParent());
+            call.replaceAllUsesWith(phi);
+        }
+    }
+    for (auto* ret : returns) {
+        auto* branch=BranchInst::Create(after,ret); branch->setDebugLoc(ret->getDebugLoc()); ret->eraseFromParent();
+    }
+    call.eraseFromParent();
+}
+
+// Validate every syntactically reachable body before normalization changes it.
+void normalizeCalls(Function& entry)
+{
+    std::map<Function*,unsigned> colors;
+    std::vector<Function*> closure;
+    std::function<void(Function&,unsigned)> visit = [&](Function& f,unsigned depth) {
+        require(depth<256,"Call-graph inspection depth budget exceeded");
+        require(colors[&f]!=1,"Recursive call graphs require a later milestone");
+        if (colors[&f]==2) return;
+        colors[&f]=1; signature(f); inspect(f,false); closure.push_back(&f);
+        for (auto& b : f) for (auto& i : b) if (auto* call=dyn_cast<CallInst>(&i)) {
+            if (isa<DbgInfoIntrinsic>(i)) continue;
+            auto& callee=*call->getCalledFunction();
+            if (hook(callee)==Hook::None) visit(callee,depth+1);
+        }
+        colors[&f]=2;
+    };
+    visit(entry,0);
+    // Preserve noundef boundaries explicitly; inlining must not erase these UB sites.
+    auto defined = [&](Value* value, Instruction* before, DebugLoc loc) {
+        auto& m=*entry.getParent();
+        auto type=FunctionType::get(Type::getVoidTy(m.getContext()),{value->getType()},false);
+        auto fn=m.getOrInsertFunction("__llvm2smv_defined_"+std::to_string(width(value->getType())),type);
+        IRBuilder<> builder(before); builder.SetCurrentDebugLocation(loc); builder.CreateCall(fn,{value});
+    };
+    for (auto* f : closure) {
+        SmallVector<AllocaInst*,8> allocas;
+        for (auto& i : f->getEntryBlock()) if (auto* a=dyn_cast<AllocaInst>(&i)) allocas.push_back(a);
+        DominatorTree dom(*f); PromoteMemToReg(allocas,dom);
+        inspect(*f,false);
+        for (auto& arg : f->args()) if (arg.hasAttribute(Attribute::NoUndef))
+            defined(&arg,&*f->getEntryBlock().getFirstInsertionPt(),{});
+        SmallVector<Instruction*,16> original;
+        for (auto& b : *f) for (auto& i : b) original.push_back(&i);
+        for (auto* i : original) {
+            if (auto* ret=dyn_cast<ReturnInst>(i); ret && f->hasRetAttribute(Attribute::NoUndef))
+                defined(ret->getReturnValue(),ret,ret->getDebugLoc());
+            if (auto* call=dyn_cast<CallInst>(i); call && !isa<DbgInfoIntrinsic>(i)) {
+                for (unsigned n=0;n<call->arg_size();++n) if (call->paramHasAttr(n,Attribute::NoUndef))
+                    defined(call->getArgOperand(n),call,call->getDebugLoc());
+                if (call->hasRetAttr(Attribute::NoUndef)) defined(call,call->getNextNode(),call->getDebugLoc());
+            }
+        }
+    }
+    unsigned expansions=0;
+    while (true) {
+        CallInst* target=nullptr; size_t count=0;
+        for (auto& b : entry) for (auto& i : b) {
+            ++count;
+            if (auto* call=dyn_cast<CallInst>(&i); call && !isa<DbgInfoIntrinsic>(i) && !call->getCalledFunction()->isDeclaration()) target=call;
+        }
+        require(count<=100000 && expansions<=10000,"Inlining translation budget exceeded");
+        if (!target) break;
+        inlineExact(*target); ++expansions;
+    }
+}
+json::Object source(const Instruction& i)
+{
+    json::Array chain;
+    for (auto* loc=i.getDebugLoc().get();loc;loc=loc->getInlinedAt()) {
+        std::string function;
+        if (auto* scope=dyn_cast<DILocalScope>(loc->getScope())) if (auto* sub=scope->getSubprogram()) function=sub->getName().str();
+        chain.push_back(json::Object{{"file",loc->getFilename().str()},{"directory",loc->getDirectory().str()},
+            {"line",loc->getLine()},{"column",loc->getColumn()},{"function",function}});
+    }
+    return json::Object{{"ir",ir(i)},{"inline_chain",std::move(chain)}};
 }
 
 class Lowering {
@@ -305,7 +481,18 @@ ValueExpr Lowering::integer(const BinaryOperator& i, Expr& ub) const
 void Lowering::lower(const Instruction& i)
 {
     Expr ub=bit(false);
-    if (auto* op=dyn_cast<BinaryOperator>(&i)) { auto value=integer(*op,ub); result(i,value,ub); }
+    if (auto* call=dyn_cast<CallInst>(&i)) {
+        auto h=hook(*call->getCalledFunction());
+        if (h==Hook::Nondet) result(i,{v(choices.at(&i)),bit(false)},ub);
+        else if (h==Hook::Error) step(i,".assertion",bit(true),{{pc,label("ASSERT."+locations.at(&i))}},ub);
+        else {
+            auto a=read(call->getArgOperand(0)); ub=a.poison;
+            auto condition=h==Hook::Defined ? bit(true) : no(eq(a.bits,number(a.bits.type().width(),0)));
+            step(i,".continue",condition,{{pc,label(locations.at(next(i)))}},ub);
+            if (h!=Hook::Defined) step(i,".excluded",no(condition),{{pc,label(h==Hook::Assume ? "ASSUMED_OUT" : "ASSERT."+locations.at(&i))}},ub);
+        }
+    }
+    else if (auto* op=dyn_cast<BinaryOperator>(&i)) { auto value=integer(*op,ub); result(i,value,ub); }
     else if (auto* cmp=dyn_cast<ICmpInst>(&i)) {
         auto a=read(cmp->getOperand(0)), b=read(cmp->getOperand(1));
         Expr lhs=cmp->isSigned() ? asSigned(a.bits) : a.bits, rhs=cmp->isSigned() ? asSigned(b.bits) : b.bits;
@@ -363,7 +550,7 @@ void Lowering::lower(const Instruction& i)
 }
 json::Object Lowering::run(const std::string& inputHash)
 {
-    std::vector<std::string> labels{"DONE","ERROR"}; unsigned bi=0;
+    std::vector<std::string> labels{"DONE","ERROR","ASSUMED_OUT"}; unsigned bi=0;
     for (const auto& b : function) {
         unsigned ii=0;
         for (const auto& i : b) {
@@ -372,7 +559,9 @@ json::Object Lowering::run(const std::string& inputHash)
             if (!i.getType()->isVoidTy()) allocate(i,"ssa."+key,Mode::State,std::nullopt);
             if (isa<PHINode>(i)) continue;
             locations.emplace(&i,key); labels.push_back(key);
-            if (isa<FreezeInst>(i)) choices[&i]=model.variable("choice."+key,ts::Type::word(width(i.getType())),Mode::Choice,std::nullopt);
+            if (auto* call=dyn_cast<CallInst>(&i); call && (hook(*call->getCalledFunction())==Hook::Assert || hook(*call->getCalledFunction())==Hook::Error))
+                labels.push_back("ASSERT."+key);
+            if (isa<FreezeInst>(i) || (isa<CallInst>(i) && hook(*cast<CallInst>(i).getCalledFunction())==Hook::Nondet)) choices[&i]=model.variable("choice."+key,ts::Type::word(width(i.getType())),Mode::Choice,std::nullopt);
         }
         ++bi;
     }
@@ -390,11 +579,37 @@ json::Object Lowering::run(const std::string& inputHash)
     model.property("terminated",eq(v(pc),label("DONE")));
     model.property("runtime_error",eq(v(pc),label("ERROR")));
     if (returned) model.property("return_defined",both(eq(v(pc),label("DONE")),no(v(returned->poison))));
-    return ts::artifact(model,{{"lowering","scalar-v1"},{"normalization","checked-scalar-mem2reg-v1"},
+    Expr failed=bit(false);
+    json::Object locationsJson;
+    for (const auto& block : function) for (const auto& item : block) {
+        auto* instruction=&item;
+        auto found=locations.find(instruction);
+        if (found==locations.end()) continue;
+        const auto& key=found->second;
+        auto record=source(*instruction);
+        record["key"]=key;
+        if (auto* call=dyn_cast<CallInst>(instruction)) {
+            auto h=hook(*call->getCalledFunction());
+            record["hook"]=call->getCalledFunction()->getName().str();
+            if (h==Hook::Assert || h==Hook::Error) {
+                auto failure=eq(v(pc),label("ASSERT."+key)); failed=either(failed,failure);
+                auto property="assertion."+key;
+                model.property(property,no(failure));
+                record["assertion_property"]=ts::propertyName(property);
+            }
+            if (h==Hook::Nondet) record["choice_symbol"]=ts::symbolName(choices.at(instruction)->key);
+        }
+        locationsJson[ts::literalName(*pcType,key)]=std::move(record);
+    }
+    model.property("assertion_failed",failed);
+    model.property("safe",no(either(failed,eq(v(pc),label("ERROR")))));
+    model.property("assumed_out",eq(v(pc),label("ASSUMED_OUT")));
+    model.property("progress_goal",either(eq(v(pc),label("DONE")),eq(v(pc),label("ASSUMED_OUT"))));
+    return ts::artifact(model,{{"lowering","scalar-v2"},{"normalization","checked-inline-mem2reg-v2"},
         {"input_ir_sha256",inputHash},{"normalized_ir_sha256",ts::sha256(moduleText(module))},
         {"entry",function.getName().str()},{"target_triple",module.getTargetTriple()},
-        {"data_layout",module.getDataLayoutStr()},{"environment","closed-module; no interposition; no external calls"},
-        {"semantics","LLVM18 scalar bitvectors and poison; error sink at admitted UB; undef rejected"}},"llvm18-scalar-v1");
+        {"data_layout",module.getDataLayoutStr()},{"environment","closed-module; no interposition; verifier-hooks-v1"},
+        {"semantics","LLVM18 scalar bitvectors and poison; error sink at admitted UB; undef rejected"}},"llvm18-scalar-v2",std::move(locationsJson));
 }
 } // namespace
 ScalarError::ScalarError(std::string message, const Instruction* instruction)
@@ -409,6 +624,7 @@ ScalarError::ScalarError(std::string message, const Instruction* instruction)
 }
 json::Object lowerScalar(Module& module, StringRef entry)
 {
+    for (auto& f : module) require(!f.getName().starts_with("__llvm2smv_"),"Reserved internal runtime name");
     module.setModuleIdentifier(""); // The IR storage path is not semantic provenance.
     auto inputHash=ts::sha256(moduleText(module));
     for (const auto& node : module.named_metadata())
@@ -435,10 +651,7 @@ json::Object lowerScalar(Module& module, StringRef entry)
     require(f->arg_empty() && !f->isVarArg() && f->getCallingConv()==CallingConv::C && !f->hasPersonalityFn()
         && !f->hasPrefixData() && !f->hasPrologueData(),"Entry requires a zero-argument C calling convention and no exceptional ABI");
     if (!f->getReturnType()->isVoidTy()) width(f->getReturnType());
-    inspect(*f,false);
-    SmallVector<AllocaInst*,8> allocas;
-    for (auto& i : f->getEntryBlock()) if (auto* a=dyn_cast<AllocaInst>(&i)) allocas.push_back(a);
-    DominatorTree dom(*f); PromoteMemToReg(allocas,dom);
+    normalizeCalls(*f);
     std::string errors; raw_string_ostream stream(errors);
     bool invalid=verifyModule(module,&stream);
     require(!invalid,"Normalization produced invalid LLVM IR: "+errors);

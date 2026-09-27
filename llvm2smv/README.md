@@ -1,10 +1,11 @@
 # LLVM to SMV frontend
 
-M2 provides scalar LLVM execution through a validated bundle publisher. It covers
-integer operations, control flow, PHIs, promoted locals, scalar globals, and
-admitted poison semantics. See the [scalar contract](SCALAR_MODEL.md) for the
-supported subset and commands, and the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md)
-for calls, memory, and the later C safety workflow.
+M3 provides a scalar C safety workflow with direct-call inlining, verifier
+hooks, source locations, and replayed model evidence. Start with the
+[C workflow guide](C_WORKFLOW.md). The [scalar contract](SCALAR_MODEL.md)
+describes integer operations, control flow, scalar memory, and poison semantics;
+the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md) tracks later
+addressable memory and general calls.
 
 The historical incorrect writer remains excluded. The M0 inventory interface
 and M1 [typed model foundation](MODEL_FORMAT.md) remain available. Direct raw

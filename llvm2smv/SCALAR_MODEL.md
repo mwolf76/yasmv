@@ -1,9 +1,9 @@
-# Scalar LLVM execution (M2)
+# Scalar LLVM execution (M2–M3)
 
-M2 translates an admitted LLVM 18 entry into the typed model introduced in M1.
-It is an LLVM execution model with explicit error instrumentation. It is not a
-complete C verifier: the C driver, assertion hooks, calls, and source evidence
-are later milestones. [LLVM 18 semantics](https://releases.llvm.org/18.1.8/docs/LangRef.html)
+The scalar frontend translates admitted LLVM 18 entries into the typed model
+introduced in M1. M3 adds acyclic direct calls, verifier hooks, and a controlled
+[C safety workflow](C_WORKFLOW.md). It remains a restricted LLVM execution model
+with explicit error instrumentation. [LLVM 18 semantics](https://releases.llvm.org/18.1.8/docs/LangRef.html)
 govern the admitted bitvectors and poison operations.
 
 ## Generate and check a bundle
@@ -36,7 +36,7 @@ are named by the M1 hexadecimal encoding: `p_7465726d696e61746564` is `terminate
 `source-map.json` decodes variable keys such as `pc`, `return`, `global.counter`,
 and `ssa.b2.i1`. Every integer has a Boolean poison companion: `global-poison.<name>` for
 globals and `<key>.poison` for SSA registers and the return value. Integer bits are not meaningful while their companion is true.
-Source-level trace projection is not part of M2.
+M3 adds instruction locations and inline chains; local variable reconstruction remains unavailable.
 
 For the counter, search for `terminated`, inspect `global.counter` in the trace,
 and check the forbidden target `global.counter == 99` through a sufficient
@@ -48,10 +48,10 @@ is not a proof that every possible execution terminates.
 The entry must be a defined zero-argument, non-variadic C-convention function,
 returning void or an integer of 1–64 bits. The baseline requires an explicit
 little-endian Linux aarch64/x86_64 triple and DataLayout with 64-bit pointers.
-There are no external calls or linker interposition in the modeled environment.
-All blocks of the entry are inspected, including unreachable blocks. Calls
-other than recognized debug intrinsics are rejected, including calls on dead
-branches. Other functions cannot execute; all module globals are checked.
+There is no linker interposition. All blocks in the acyclic direct-call closure
+are inspected, including unreachable blocks. Only admitted scalar definitions,
+verifier hooks, and recognized debug intrinsics can be called. Unknown external
+calls are rejected even on dead branches; all module globals are checked.
 
 Globals must be initialized scalar integer definitions with ordinary external,
 internal, or private linkage. Thread-local, externally initialized, sectioned,
@@ -61,9 +61,11 @@ object guarantees. Volatile/atomic access and stores to constants are rejected.
 No GEP, pointer arithmetic, byte reinterpretation, aggregate, vector, or floating
 point operations are admitted.
 
-The versioned pipeline `checked-scalar-mem2reg-v1` checks instructions, flags,
+The versioned pipeline `checked-inline-mem2reg-v2` checks instructions, flags,
 attributes, and metadata before promoting scalar entry-block allocas with
-LLVM's `PromoteMemToReg`. It then verifies and checks the normalized module.
+LLVM's `PromoteMemToReg` in each function. M3 then explicitly clones direct
+calls without pruning instructions and preserves noundef checks. It verifies
+and checks the normalized entry.
 This deliberate normalization applies even with `optnone`; no general optimizer
 or CFG simplifier is run. Eligible locals become SSA slots and PHIs.
 
@@ -71,7 +73,7 @@ Unhandled semantic attributes and metadata are rejected, including
 `mustprogress`, `willreturn`, range annotations, and loop progress assumptions.
 Debug metadata and debug-only loop locations are retained as non-executable
 information. Supported entry attributes are `noinline`, `optnone`, `nounwind`,
-`uwtable`, return `noundef`, and the enumerated Clang target/frame/code-generation
+`uwtable`, argument/return `noundef`, integer ABI `signext`/`zeroext`, and the enumerated Clang target/frame/code-generation
 string attributes in the admission code. Module flags and compiler/debug
 identification are recorded through the IR hashes, not applied as link passes.
 
@@ -116,7 +118,7 @@ successful translation.
 
 ## Identity and tests
 
-Bundles use scope `llvm18-scalar-v1`. Provenance records the entry, target,
+Bundles use scope `llvm18-scalar-v2`. Provenance records the entry, target,
 DataLayout, closed environment, normalization/semantic policy, and SHA-256 hashes
 of input and normalized serialized IR. The module identifier is excluded;
 source/debug filenames, including LLVM's default source filename when absent,
