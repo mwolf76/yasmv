@@ -19,6 +19,10 @@ class ArtifactError(ValueError):
     pass
 
 
+class ArtifactUnknown(ArtifactError):
+    """Validation exhausted its budget; the candidate was not published."""
+
+
 FILES = {'model.smv', 'properties.json', 'source-map.json', 'provenance.json'}
 
 
@@ -106,7 +110,7 @@ def publish(artifact, destination, checker, timeout=30):
             stdout, stderr = process.communicate(timeout=timeout)
         except subprocess.TimeoutExpired as error:
             _stop(process)
-            raise ArtifactError('Model validation timed out') from error
+            raise ArtifactUnknown('Model validation timed out') from error
         except BaseException:
             _stop(process)
             raise
@@ -114,6 +118,9 @@ def publish(artifact, destination, checker, timeout=30):
             result = read_json(stdout)
         except (ValueError, TypeError) as error:
             raise ArtifactError('Invalid model validation response') from error
+        if (process.returncode == 3 and isinstance(result, dict) and result.get('version') == 1
+                and result.get('status') == 'unknown'):
+            raise ArtifactUnknown('Model validation was inconclusive')
         if (process.returncode != 0 or not isinstance(result, dict)
                 or type(result.get('version')) is not int or result.get('version') != 1 or result.get('status') != 'completed'
                 or result.get('outcome') != 'valid'):

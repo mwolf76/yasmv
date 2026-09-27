@@ -81,6 +81,17 @@ class Models(unittest.TestCase):
         self.assertEqual(r['trace']['steps'][1]['values'][symbol('y')], '1')
         self.assertEqual(self.reach(model, f'{symbol("x")}={symbol("y")}', 3)['outcome'], 'unreachable')
 
+    def test_constant_propagation_preserves_changing_dependencies(self):
+        model = self.publish('constant-propagation')
+        target = f'{symbol("a_dependent")}=(uint8)1'
+        self.assertEqual(self.reach(model, target, 1)['outcome'], 'unreachable')
+        result = self.reach(model, target, 2)
+        self.assertEqual(result['outcome'], 'reachable')
+        self.assertEqual(self.query(model, {'operation': 'validate-trace', 'trace': result['trace']})['outcome'], 'valid')
+        self.assertEqual(self.reach(model, f'{symbol("left")}!=(uint8)7 || {symbol("right")}!=(uint8)7', 3)['outcome'], 'unreachable')
+        for value in (0, 255):
+            self.assertEqual(self.reach(model, f'{symbol("unconstrained")}=(uint8){value}', 0)['outcome'], 'reachable')
+
     def test_widths_and_exact_constants(self):
         model = self.publish('constants')
         trace = self.query(model, {'operation': 'pick-state'})['trace']

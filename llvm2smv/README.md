@@ -1,10 +1,13 @@
 # LLVM to SMV frontend
 
-M2 provides scalar LLVM execution through a validated bundle publisher. It covers
-integer operations, control flow, PHIs, promoted locals, scalar globals, and
-admitted poison semantics. See the [scalar contract](SCALAR_MODEL.md) for the
-supported subset and commands, and the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md)
-for calls, memory, and the later C safety workflow.
+M5 extends the C safety workflow with bounded recursive call frames and dynamic
+stack objects. See the [call-stack contract](CALL_STACK.md) and
+[memory contract](MEMORY_MODEL.md) for bounds, supported ABI forms, and policies.
+The workflow includes direct-call inlining, verifier
+hooks, source locations, and replayed model evidence. Start with the
+[C workflow guide](C_WORKFLOW.md). The [scalar contract](SCALAR_MODEL.md)
+describes integer operations, control flow, scalar memory, and poison semantics;
+the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md) tracks heap support and source evidence.
 
 The historical incorrect writer remains excluded. The M0 inventory interface
 and M1 [typed model foundation](MODEL_FORMAT.md) remain available. Direct raw
@@ -109,7 +112,7 @@ This publishes `model.smv` and four sidecars only after native model validation.
 It reports translation success separately from any verification result. All
 subsequent queries use the existing yasmv interface on the published model.
 The capabilities fields `scalar_candidate_available` and `scalar_features`
-describe M2. The older `translation_available: false` and empty
+describe the admitted features through M5. The older `translation_available: false` and empty
 `supported_features` retain their conservative meaning for legacy direct output.
 
 ## Tests
@@ -127,5 +130,7 @@ compiler errors, deterministic reports, and preservation of output files.
 The counter now has semantic tests: it ends at ten and cannot reach 99 within
 the checked bound. Scalar tests also compare small integer domains with an
 independent interpreter, exercise PHI swaps, nested loops, and nontermination,
-and reject unsupported features before and after promotion. Calls and the C
-assertion workflow remain M3; addressable memory remains M4.
+and reject unsupported features before and after promotion. C workflow tests cover compilation and source evidence. Memory tests cover
+byte aliases, layouts, provenance, copies, lifetimes, and coverage failures.
+Stack tests cover recursion, caller preservation, aggregate boundaries, dynamic
+extents, save/restore, and explicit depth/allocation limits.

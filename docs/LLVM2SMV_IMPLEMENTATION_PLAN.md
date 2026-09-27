@@ -1,10 +1,12 @@
 # llvm2smv implementation plan
 
-Status: M0, M1, and M2 implemented on 2026-09-27, following code review at
+Status: M0–M5 implemented on 2026-09-27, following code review at
 `84738750`. The current [frontend contract](../llvm2smv/README.md) disables
 legacy SMV generation and provides verified IR inventory and rejection
 diagnostics. M1 adds the internal typed model foundation; M2 adds admitted scalar execution.
-M3 and later milestones below remain proposed. The review findings
+M3 adds the controlled scalar C safety workflow. M4 adds bounded addressable
+memory with explicit coverage obligations. M5 adds bounded recursive frames and
+dynamic stack allocation. M6 and later milestones remain proposed. The review findings
 describe the pre-M0 implementation.
 
 The agreed scope is sequential C with integers, arrays, pointers, calls, and
@@ -121,8 +123,154 @@ Validation on LLVM 18.1.3 / Linux/aarch64:
   checks; its final binary passed counter, debug-intrinsic, and global-name
   regressions. Distribution contents and whitespace checks passed.
 
-The next milestone is M3: direct-call inlining, verifier hooks, a C compilation
-driver, source mapping, and a usable scalar safety workflow.
+### M3 scalar C safety workflow
+
+Implemented on `feat/llvm2smv-m3`, based on merged master `c5977c80`.
+The [C workflow guide](../llvm2smv/C_WORKFLOW.md) documents the supported entry,
+hooks, compilation policy, source evidence, and result scopes.
+
+The frontend checks the full syntactic acyclic call closure, promotes scalar
+locals, and inlines by cloning blocks and joining returns with PHIs. It preserves
+instruction execution, including unused immediate-UB sites, and explicitly
+instruments noundef call boundaries. This deliberately avoids LLVM's ordinary
+clone-and-prune inlining: a regression demonstrated that it folded away an
+unused division by zero. Source locations retain nested inline call chains.
+
+Checked verifier declarations implement assertions, error, assumptions, and
+fresh scalar nondeterminism. Assertions enter persistent per-site failure
+locations and export properties, never invariants. False assumptions enter
+ASSUMED_OUT; progress discharges that exclusion without treating it as normal
+termination. A separate replayed universal-exclusion proof distinguishes
+no-admitted-execution from ordinary success.
+
+`tools/verify-c.py` compiles one or more C units with matched LLVM 18 tools and
+controlled assertion headers, links bitcode, validates and atomically publishes
+the model, checks initialization, and runs bounded safety, optional induction,
+or universal progress. The compiled preprocessed snapshots, expanded-header
+content hashes, flags, tool identities, and hook policy are retained in bundle
+provenance. Checks use a private copy of the digest-validated model.
+
+Safety violations require native trace replay and include basic C instruction
+locations, inline chains, global bits/poison, and chosen nondeterministic values.
+Progress evidence is independently replayed through validate-progress. Missing
+local-variable reconstruction is explicit. No result claims independently
+certified translation or complete ISO C undefined-behavior detection. Depth,
+state, and time limits never become an unbounded proof.
+
+Validation on LLVM/Clang 18.1.3, GCC 13.3.0, Linux/aarch64:
+
+* All 19 frontend/configuration contracts, typed-model C++ self-tests, 14 native
+  writer/publication tests, and 14 scalar semantic regressions passed across
+  batches. No core source was changed.
+* All 11 new C workflow tests passed normally and with the translator built
+  under ASan/UBSan and leak detection. Coverage includes nested calls, looped
+  calls, multiple returns, unused immediate UB, noundef, fresh choices,
+  assertion sites, multi-unit source chains, assumption exclusion, induction,
+  time/state limits, output preservation, and tampered evidence.
+* Native C harness execution independently reproduced the safe/unsafe examples
+  with the model witness input. Native model traces and progress evidence were
+  replayed before accepting their conclusions.
+* A fresh out-of-tree frontend build passed C++ self-tests and four workflow
+  groups covering calls, UB boundaries, assumptions, and source evidence.
+  Frontend distribution contents, Python syntax, and whitespace checks passed.
+
+### M4 bounded addressable memory
+
+Continued after M3 commit `64b6e9bc`. The [memory contract](../llvm2smv/MEMORY_MODEL.md)
+specifies DataLayout-driven arrays/structures, byte aliases, global and stack
+objects, aggregate operations, opaque pointer provenance, and memory intrinsics.
+Acyclic direct calls now accept and return data pointers. Return instrumentation
+expires local objects, and allocation generations prevent stale-pointer reuse.
+
+Byte storage carries initialized and poison bit masks plus ordered pointer
+fragments when needed. Typed accesses, partial writes, relocations, overlapping
+memmove, equal-address memcpy, memset, and whole-object lifetime markers use the
+same storage. Reading uninitialized required bits is an explicitly strict
+diagnostic policy, stronger than general LLVM undef semantics. Claimed access
+alignment must be guaranteed by object alignment and offset.
+
+Static object storage is bounded and oversized candidates are rejected. Runtime
+allocation-generation exhaustion and unmodeled pointer operations enter separate
+coverage sinks. The C driver checks those obligations alongside safety, replays
+witnesses, and distinguishes `resource_bound_reached` and `unsupported`. Memory
+policy, bounds, layouts, and byte-state source projections accompany artifacts.
+
+Initial encodings timed out on small dynamic-pointer and copy fixtures. Disjoint
+byte selection, statically known addresses, provably bounded internal GEP
+arithmetic, and fixed-point propagation of constant model slots reduced that
+cost without narrowing C integers or pruning instruction execution. Larger
+models can still exhaust checker resources; no timeout is a successful check.
+
+Validation on LLVM/Clang 18.1.3 and Linux/aarch64:
+
+* All 19 frontend/configuration contracts, C++ model self-tests, and 15 native
+  writer/publication regressions passed. The writer gate includes changing
+  dependencies and unconstrained state under constant propagation.
+* All 19 memory groups passed across a full suite and final focused runs. They
+  cover partial writes, bit masks, aggregate layout, dynamic indices, pointer
+  selection and call-return PHIs, provenance copies, memset, lifetime errors,
+  generation bounds, offset coverage, full-width GEP wrap, and fail-closed
+  admission. The C alias fixture and its failing variant agree with independent
+  native C execution; model witnesses replay successfully.
+* The memory groups also passed under ASan/UBSan with leak detection, across the
+  initial full suite and focused final regressions. The native checker remained
+  the optimized build. No core source was changed.
+* A clean out-of-tree frontend build passed model self-tests, C alias checks,
+  admission, and pointer-call boundaries. Distribution contents, Python syntax,
+  documentation links, and whitespace checks passed.
+* All 14 existing scalar semantic groups and 11 C-workflow groups passed using
+  a fixed translator binary. An earlier scalar run overlapped a frontend relink
+  and failed to launch the executable; that run was discarded and rerun.
+
+M5 below extends this foundation to recursive calls and dynamic stack storage.
+Heap allocation and general numeric pointer representations remain later work.
+
+### M5 bounded call frames
+
+The [call-stack contract](../llvm2smv/CALL_STACK.md) extends the existing execution
+model to recursive and mutually recursive direct calls. Frames are specialized
+by bounded static call path: each has distinct registers/objects, explicit CFG
+return continuations, argument wiring, return PHIs, and tracked active depth.
+This refines the proposed runtime-array representation while preserving its
+bounded sequential behavior. It reuses the checked CFG machinery but can expand
+exponentially for branching recursion; translation budgets remain explicit.
+
+Direct LLVM aggregate arguments/results preserve noundef checks. Special ABI
+attributes such as byval/sret remain rejected. Dynamic allocas track actual size
+within a declared per-site capacity; one allocation may remain outstanding per
+site/frame. Repeated unreleased allocas stop at a resource bound. Same-frame
+stacksave/restore releases later allocations, return releases callee objects,
+and allocation generations never wrap. Older dynamic extents are not retained;
+operations requiring those extents stop with unsupported coverage.
+
+`stack_within_bound` and `stack_allocation_within_bound` join the memory/safety
+obligations. Depth/capacity failures are replayed resource results for safety
+and termination queries. Source maps record frame ownership and the static
+frame tree; projected traces expose active call chains and dynamic memory state.
+The driver and IR publisher both forward and record the new limits.
+
+Validation on LLVM/Clang 18.1.3 and Linux/aarch64:
+
+* All 96 process regression groups passed: 19 frontend, 15 writer/publication,
+  14 scalar, 11 C workflow, 19 memory, and 18 stack groups. The stack total
+  includes a full 16-group run followed by two added focused boundary/identity
+  groups. C++ typed-model self-tests also passed.
+* Recursive and mutually recursive fixtures preserve callers; dynamic extents,
+  stale generations, stack restoration, aggregate noundef boundaries, token/ABI
+  rejection, and safety/progress resource classifications have native checks.
+  The recursive C example and both nondeterministic VLA sizes agree with
+  independent native C execution.
+* All 19 frontend groups and 10 focused stack groups passed under ASan/UBSan
+  with leak detection. The checker remained the optimized native build; this
+  is frontend sanitizer coverage, not a core sanitizer run.
+* A clean out-of-tree frontend build passed typed-model self-tests and recursive
+  C/rejection checks. Distribution inclusion, Python syntax, documentation links,
+  and whitespace checks passed. No core source was changed.
+
+Larger recursive-object and VLA configurations hit solver wall limits during
+validation and returned inconclusive results. The final semantic fixtures use
+small explicit capacities; scalability work remains M8. The next milestone is
+M6: bounded heap allocation and closed-world indirect call targets.
 
 ## 1. Findings in the current codebase
 

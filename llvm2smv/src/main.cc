@@ -15,7 +15,11 @@ static cl::opt<std::string> OutputFilename("o", cl::desc("SMV destination (not y
 static cl::opt<std::string> Entry("entry", cl::desc("Defined entry function"), cl::init("main"));
 static cl::opt<bool> Analyze("analyze", cl::desc("Print feature inventory and rejection diagnostics as JSON"));
 static cl::opt<bool> Capabilities("capabilities", cl::desc("Print supported operations as JSON"));
-static cl::opt<bool> EmitScalar("emit-scalar-bundle", cl::desc("Emit an M2 scalar candidate bundle for native validation by the publisher"));
+static cl::opt<bool> EmitScalar("emit-scalar-bundle", cl::desc("Emit an M5 bounded-frame candidate bundle for native validation by the publisher"));
+static cl::opt<unsigned> StackDepth("stack-depth", cl::desc("Maximum active call frames, including entry"), cl::init(8));
+static cl::opt<unsigned> DynamicBytes("dynamic-stack-bytes", cl::desc("Byte capacity per dynamic stack allocation site"), cl::init(16));
+static cl::opt<unsigned> MemoryBytes("memory-bytes", cl::desc("Static addressable storage budget"), cl::init(128));
+static cl::opt<unsigned> Generations("allocation-generations", cl::desc("Allocation generations per stack site"), cl::init(4));
 enum DiagnosticFormat { Text, JSON };
 static cl::opt<DiagnosticFormat> Diagnostics("diagnostics", cl::desc("Diagnostic format"),
     cl::values(clEnumValN(Text, "text", "Human-readable diagnostics"),
@@ -35,13 +39,15 @@ int main(int argc, char** argv)
         return 2;
     };
     if (Capabilities) {
-        if (EmitScalar || Analyze || !InputFilename.empty() || OutputFilename.getNumOccurrences() || Entry.getNumOccurrences())
+        if (StackDepth.getNumOccurrences() || DynamicBytes.getNumOccurrences() || MemoryBytes.getNumOccurrences() || Generations.getNumOccurrences() || EmitScalar || Analyze || !InputFilename.empty() || OutputFilename.getNumOccurrences() || Entry.getNumOccurrences())
             return fail("invalid-options", "--capabilities cannot be combined with an input, --analyze, --entry, or -o.");
         outs() << formatv("{0:2}\n", json::Value(llvm2smv::capabilities()));
         return 0;
     }
     if (InputFilename.empty()) return fail("missing-input", "An LLVM IR or bitcode input is required.");
     if (Entry.empty()) return fail("invalid-entry", "The entry name must not be empty.");
+    if (StackDepth < 1 || StackDepth > 64 || DynamicBytes < 1 || DynamicBytes > 4096 || MemoryBytes < 1 || MemoryBytes > 4096 || Generations < 1 || Generations > 255)
+        return fail("invalid-options", "Memory/dynamic bytes must be 1..4096, stack depth 1..64, and allocation generations 1..255.");
     if (Analyze && OutputFilename.getNumOccurrences())
         return fail("invalid-options", "--analyze writes JSON to stdout and does not accept an SMV destination.");
 
@@ -63,7 +69,7 @@ int main(int argc, char** argv)
 
     if (EmitScalar) {
         try {
-            auto candidate = llvm2smv::lowerScalar(*module, Entry);
+            auto candidate = llvm2smv::lowerScalar(*module, Entry, {MemoryBytes,Generations,StackDepth,DynamicBytes});
             outs() << formatv("{0:2}\n", json::Value(std::move(candidate)));
             return 0;
         } catch (const llvm2smv::ScalarError& error) {
