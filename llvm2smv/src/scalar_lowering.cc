@@ -1,5 +1,6 @@
 #include "llvm2smv/scalar_lowering.hh"
 #include "llvm2smv/model_writer.hh"
+#include "llvm2smv/memory_model.hh"
 #include "llvm2smv/module_analysis.hh"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/IR/DebugInfoMetadata.h"
@@ -57,7 +58,6 @@ Expr choose(Expr c, Expr a, Expr b) { return Expr::select(c,a,b); }
 Expr asSigned(Expr a) { return Expr::cast(ts::Type::word(a.type().width(),true),a); }
 Expr arithmeticRight(Expr a, Expr b)
 { return choose(sign(a),inv(binary(Op::ShiftRight,inv(a),b)),binary(Op::ShiftRight,a,b)); }
-struct ValueExpr { Expr bits, poison; };
 struct Slot { SymbolRef bits, poison; };
 
 void attributes(const Function& f)
@@ -78,13 +78,14 @@ void attributes(const Function& f)
         }
     }
 }
-enum class Hook { None, Assert, Assume, Error, Nondet, Defined };
+enum class Hook { None, Assert, Assume, Error, Nondet, Defined, EndObject };
 Hook hook(const Function& f)
 {
     auto name=f.getName();
     if (name=="__VERIFIER_assert") return Hook::Assert;
     if (name=="__VERIFIER_assume") return Hook::Assume;
     if (name=="__VERIFIER_error") return Hook::Error;
+    if (name=="__llvm2smv_end_object") return Hook::EndObject;
     if (name.starts_with("__llvm2smv_defined_")) return Hook::Defined;
     static const std::map<std::string,unsigned> widths{{"bool",1},{"char",8},{"uchar",8},
         {"short",16},{"ushort",16},{"int",32},{"uint",32},{"long",64},{"ulong",64},
@@ -96,7 +97,8 @@ Hook hook(const Function& f)
     }
     return Hook::None;
 }
-void signature(const Function& f)
+void admittedType(Type* t,bool memory) { if(memory) MemoryModel::widths(t); else width(t); }
+void signature(const Function& f,bool memory=false)
 {
     SmallVector<std::pair<unsigned,MDNode*>,4> metadata;
     f.getAllMetadata(metadata);
@@ -104,27 +106,29 @@ void signature(const Function& f)
     require(!f.isVarArg() && f.getCallingConv()==CallingConv::C && !f.hasPersonalityFn()
         && !f.hasPrefixData() && !f.hasPrologueData() && !f.hasGC() && !f.hasComdat() && !f.hasSection()
         && f.getAddressSpace()==0 && (f.hasExternalLinkage() || f.hasInternalLinkage() || f.hasPrivateLinkage()),
-        "Only ordinary scalar C function signatures/linkage are supported");
-    if (!f.getReturnType()->isVoidTy()) width(f.getReturnType());
-    for (const auto& arg : f.args()) width(arg.getType());
+        "Only ordinary C function signatures/linkage are supported");
+    require(f.getReturnType()->isVoidTy() || f.getReturnType()->isIntegerTy() || (memory && f.getReturnType()->isPointerTy()),"Aggregate function ABI is unsupported");
+    for(auto& arg:f.args()) require(arg.getType()->isIntegerTy() || (memory && arg.getType()->isPointerTy()),"Aggregate function ABI is unsupported");
+    if (!f.getReturnType()->isVoidTy()) admittedType(f.getReturnType(),memory);
+    for (const auto& arg : f.args()) admittedType(arg.getType(),memory);
     attributes(f);
     auto h=hook(f);
     if (h==Hook::None) require(!f.isDeclaration(),"Unknown external function: "+f.getName().str());
     else {
         require(f.isDeclaration(),"Verifier hooks must be declarations, not overridden definitions");
-        bool unary=h==Hook::Assert || h==Hook::Assume || h==Hook::Defined;
+        bool unary=h==Hook::Assert || h==Hook::Assume || h==Hook::Defined || h==Hook::EndObject;
         require(f.arg_size()==(unary ? 1u : 0u) && (h==Hook::Nondet ? f.getReturnType()->isIntegerTy() : f.getReturnType()->isVoidTy()),
             "Incorrect verifier hook signature");
         if (h==Hook::Assert || h==Hook::Assume) require(f.getArg(0)->getType()->isIntegerTy(32),"Verifier predicates take an i32 argument");
     }
 }
-void callContract(const CallInst& call)
+void callContract(const CallInst& call,bool memory)
 {
     auto* callee=call.getCalledFunction();
     require(callee && call.getFunctionType()==callee->getFunctionType() && !call.isMustTailCall()
         && call.getCallingConv()==CallingConv::C && call.getNumOperandBundles()==0,
-        "Only direct, type-matched scalar calls without operand bundles are supported", &call);
-    signature(*callee);
+        "Only direct, type-matched C calls without operand bundles are supported", &call);
+    signature(*callee,memory);
     for (unsigned index : call.getAttributes().indexes()) for (Attribute a : call.getAttributes().getAttributes(index)) {
         bool ok=index==AttributeList::FunctionIndex ? a.hasAttribute(Attribute::NoUnwind) :
             a.hasAttribute(Attribute::NoUndef) || a.hasAttribute(Attribute::SExt) || a.hasAttribute(Attribute::ZExt);
@@ -153,7 +157,7 @@ void checkMemory(const Instruction& i, const DataLayout& dl)
     require(alignment <= objectAlign.valueOrOne() || (!objectAlign && alignment <= dl.getABITypeAlign(type)),
         "Access alignment exceeds the scalar object's guaranteed alignment", &i);
 }
-void inspect(Function& f, bool normalized)
+void inspect(Function& f, bool normalized, bool memory)
 {
     attributes(f);
     const auto& dl = f.getParent()->getDataLayout();
@@ -172,33 +176,63 @@ void inspect(Function& f, bool normalized)
                 debugLoop &= operand.get() == node || isa_and_nonnull<DILocation>(operand.get());
             require(debugLoop, "Unhandled instruction metadata (including progress assumptions)", &i);
         }
-        if (!i.getType()->isVoidTy() && !isa<AllocaInst>(i)) width(i.getType());
+        if (!i.getType()->isVoidTy() && !isa<AllocaInst>(i)) admittedType(i.getType(),memory);
         for (const Use& u : i.operands()) {
             require(!isa<UndefValue>(u.get()) || isa<PoisonValue>(u.get()), "undef is unsupported; initialize scalar locals explicitly", &i);
             if (isa<Constant>(u.get()) && u->getType()->isIntegerTy())
                 require(isa<ConstantInt>(u.get()) || isa<PoisonValue>(u.get()), "Unsupported integer constant expression", &i);
         }
+        if(auto* cmp=dyn_cast<ICmpInst>(&i); cmp && cmp->getOperand(0)->getType()->isPointerTy())
+            require(!cmp->isSigned(),"Signed pointer ordering is unsupported",&i);
         switch (i.getOpcode()) {
         case Instruction::Add: case Instruction::Sub: case Instruction::Mul:
         case Instruction::UDiv: case Instruction::SDiv: case Instruction::URem: case Instruction::SRem:
         case Instruction::Shl: case Instruction::LShr: case Instruction::AShr:
         case Instruction::And: case Instruction::Or: case Instruction::Xor:
         case Instruction::ICmp: case Instruction::Trunc: case Instruction::ZExt: case Instruction::SExt:
-        case Instruction::Select: case Instruction::Freeze: case Instruction::PHI:
+        case Instruction::Freeze:
+            require(i.getType()->isIntegerTy(),"Pointer/aggregate freeze is unsupported",&i); break;
+        case Instruction::GetElementPtr:
+            require(memory,"GEP requires memory lowering",&i); MemoryModel::widths(cast<GetElementPtrInst>(i).getSourceElementType()); break;
+        case Instruction::ExtractValue: case Instruction::InsertValue:
+            require(memory,"Aggregate instructions require memory lowering",&i); break;
+        case Instruction::Select: case Instruction::PHI:
         case Instruction::Br: case Instruction::Switch: case Instruction::Ret: case Instruction::Unreachable:
             break;
-        case Instruction::Load: case Instruction::Store: checkMemory(i,dl); break;
+        case Instruction::Load: case Instruction::Store:
+            if(!memory) checkMemory(i,dl);
+            else if(auto* load=dyn_cast<LoadInst>(&i)) require(!load->isAtomic() && !load->isVolatile(),"Atomic/volatile memory is unsupported",&i);
+            else { auto& store=cast<StoreInst>(i); require(!store.isAtomic() && !store.isVolatile(),"Atomic/volatile memory is unsupported",&i); }
+            break;
         case Instruction::Call: {
-            auto& call=cast<CallInst>(i); callContract(call);
+            auto& call=cast<CallInst>(i);
+            if(memory && (isa<MemIntrinsic>(i) || (isa<IntrinsicInst>(i) && (cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::lifetime_start || cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::lifetime_end)))) {
+                require(!call.isMustTailCall() && call.getNumOperandBundles()==0 && call.getCallingConv()==CallingConv::C,"Unsupported intrinsic call convention/bundles",&i);
+                require(call.getCalledFunction()->getAttributes()==Intrinsic::getAttributes(i.getContext(),cast<IntrinsicInst>(i).getIntrinsicID()),
+                    "Additional memory-intrinsic declaration attributes are unsupported",&i);
+                if(auto* mem=dyn_cast<MemIntrinsic>(&i)) {
+                    require(!mem->isVolatile() && (mem->getIntrinsicID()==Intrinsic::memset || mem->getIntrinsicID()==Intrinsic::memcpy || mem->getIntrinsicID()==Intrinsic::memmove),"Unsupported memory intrinsic",&i);
+                    width(mem->getLength()->getType());
+                } else {
+                    auto* a=dyn_cast<AllocaInst>(call.getArgOperand(1)); auto* length=dyn_cast<ConstantInt>(call.getArgOperand(0));
+                    require(a && length && (length->isMinusOne() || length->getZExtValue()==dl.getTypeAllocSize(a->getAllocatedType()).getFixedValue()*cast<ConstantInt>(a->getArraySize())->getZExtValue()),"Lifetime intrinsics must cover one whole directly named stack object",&i);
+                }
+                for(unsigned index:call.getAttributes().indexes()) for(Attribute attr:call.getAttributes().getAttributes(index))
+                    require(index!=AttributeList::FunctionIndex && attr.hasAttribute(Attribute::Alignment),"Unhandled memory-intrinsic call-site attribute",&i);
+                break;
+            }
+            callContract(call,memory);
             require(!normalized || hook(*call.getCalledFunction())!=Hook::None,"Call was not inlined",&i);
             break;
         }
         case Instruction::Alloca: {
             auto& a = cast<AllocaInst>(i);
-            require(!normalized && &b == &f.getEntryBlock() && a.getAddressSpace() == 0 && a.isStaticAlloca()
-                && cast<ConstantInt>(a.getArraySize())->isOne() && isAllocaPromotable(&a),
-                "Only promotable entry-block scalar allocas are admitted", &i);
-            width(a.getAllocatedType()); break;
+            require((memory || !normalized) && (normalized || &b == &f.getEntryBlock()) && a.getAddressSpace() == 0 && isa<ConstantInt>(a.getArraySize())
+                && !a.isUsedWithInAlloca() && !a.isSwiftError()
+                && !cast<ConstantInt>(a.getArraySize())->isZero() && cast<ConstantInt>(a.getArraySize())->getValue().ule(4096)
+                && (memory || (cast<ConstantInt>(a.getArraySize())->isOne() && isAllocaPromotable(&a))),
+                "Allocas require positive fixed sizes in original entry blocks; scalar mode also requires promotion", &i);
+            admittedType(a.getAllocatedType(),memory); break;
         }
         default: throw ScalarError("Unsupported scalar instruction: " + std::string(i.getOpcodeName()), &i);
         }
@@ -253,7 +287,7 @@ void inlineExact(CallInst& call)
 }
 
 // Validate every syntactically reachable body before normalization changes it.
-void normalizeCalls(Function& entry)
+void normalizeCalls(Function& entry,bool memory)
 {
     std::map<Function*,unsigned> colors;
     std::vector<Function*> closure;
@@ -261,9 +295,9 @@ void normalizeCalls(Function& entry)
         require(depth<256,"Call-graph inspection depth budget exceeded");
         require(colors[&f]!=1,"Recursive call graphs require a later milestone");
         if (colors[&f]==2) return;
-        colors[&f]=1; signature(f); inspect(f,false); closure.push_back(&f);
+        colors[&f]=1; signature(f,memory); inspect(f,false,memory); closure.push_back(&f);
         for (auto& b : f) for (auto& i : b) if (auto* call=dyn_cast<CallInst>(&i)) {
-            if (isa<DbgInfoIntrinsic>(i)) continue;
+            if (isa<IntrinsicInst>(i)) continue;
             auto& callee=*call->getCalledFunction();
             if (hook(callee)==Hook::None) visit(callee,depth+1);
         }
@@ -274,22 +308,33 @@ void normalizeCalls(Function& entry)
     auto defined = [&](Value* value, Instruction* before, DebugLoc loc) {
         auto& m=*entry.getParent();
         auto type=FunctionType::get(Type::getVoidTy(m.getContext()),{value->getType()},false);
-        auto fn=m.getOrInsertFunction("__llvm2smv_defined_"+std::to_string(width(value->getType())),type);
+        auto fn=m.getOrInsertFunction("__llvm2smv_defined_"+(value->getType()->isIntegerTy() ? std::to_string(width(value->getType())) : std::string("ptr")),type);
         IRBuilder<> builder(before); builder.SetCurrentDebugLocation(loc); builder.CreateCall(fn,{value});
     };
     for (auto* f : closure) {
         SmallVector<AllocaInst*,8> allocas;
-        for (auto& i : f->getEntryBlock()) if (auto* a=dyn_cast<AllocaInst>(&i)) allocas.push_back(a);
+        for (auto& i : f->getEntryBlock()) if (auto* a=dyn_cast<AllocaInst>(&i); a && isAllocaPromotable(a)) {
+            bool lifetime=false;
+            for(auto* user:a->users()) if(auto* call=dyn_cast<IntrinsicInst>(user))
+                lifetime |= call->getIntrinsicID()==Intrinsic::lifetime_start || call->getIntrinsicID()==Intrinsic::lifetime_end;
+            if(!lifetime) allocas.push_back(a);
+        }
         DominatorTree dom(*f); PromoteMemToReg(allocas,dom);
-        inspect(*f,false);
+        inspect(*f,false,memory);
         for (auto& arg : f->args()) if (arg.hasAttribute(Attribute::NoUndef))
             defined(&arg,&*f->getEntryBlock().getFirstInsertionPt(),{});
         SmallVector<Instruction*,16> original;
         for (auto& b : *f) for (auto& i : b) original.push_back(&i);
         for (auto* i : original) {
-            if (auto* ret=dyn_cast<ReturnInst>(i); ret && f->hasRetAttribute(Attribute::NoUndef))
-                defined(ret->getReturnValue(),ret,ret->getDebugLoc());
-            if (auto* call=dyn_cast<CallInst>(i); call && !isa<DbgInfoIntrinsic>(i)) {
+            if (auto* ret=dyn_cast<ReturnInst>(i)) {
+                if(f->hasRetAttribute(Attribute::NoUndef)) defined(ret->getReturnValue(),ret,ret->getDebugLoc());
+                if(memory) for(auto& block:*f) for(auto& item:block) if(auto* a=dyn_cast<AllocaInst>(&item)) {
+                    auto type=FunctionType::get(Type::getVoidTy(f->getContext()),{a->getType()},false);
+                    auto fn=f->getParent()->getOrInsertFunction("__llvm2smv_end_object",type);
+                    IRBuilder<> builder(ret); builder.SetCurrentDebugLocation(ret->getDebugLoc()); builder.CreateCall(fn,{a});
+                }
+            }
+            if (auto* call=dyn_cast<CallInst>(i); call && !isa<IntrinsicInst>(i)) {
                 for (unsigned n=0;n<call->arg_size();++n) if (call->paramHasAttr(n,Attribute::NoUndef))
                     defined(call->getArgOperand(n),call,call->getDebugLoc());
                 if (call->hasRetAttr(Attribute::NoUndef)) defined(call,call->getNextNode(),call->getDebugLoc());
@@ -322,11 +367,19 @@ json::Object source(const Instruction& i)
 
 class Lowering {
 public:
-    Lowering(Module& module, Function& function) : module(module), function(function) {}
+    Lowering(Module& module, Function& function, bool addressable, MemoryLimits limits) : module(module), function(function), addressable(addressable), limits(limits) {}
     json::Object run(const std::string& inputHash);
 private:
     Module& module; Function& function; ts::Model model;
     std::map<const Value*,Slot> slots;
+    bool addressable; MemoryLimits limits; std::unique_ptr<MemoryModel> memory;
+    std::map<const Value*,std::vector<Slot>> compound;
+    std::vector<Slot> returnCells;
+    Pieces readCells(const Value*) const;
+    std::vector<Slot> allocateCells(const Value&,const std::string&);
+    std::vector<ts::Write> cellWrites(const Value&,const Pieces&) const;
+    void memoryStep(const Instruction&,MemoryEffect);
+    void cellsResult(const Instruction&,const Pieces&,Expr);
     std::map<const Instruction*,std::string> locations;
     std::map<const Instruction*,SymbolRef> choices;
     std::optional<ts::Type> pcType; SymbolRef pc; std::optional<Slot> returned;
@@ -353,6 +406,46 @@ Slot Lowering::allocate(const Value& value, std::string key, Mode mode, std::opt
         model.variable(poisonKey,ts::Type::boolean(),mode,bit(false))};
     slots.emplace(&value,slot); return slot;
 }
+std::vector<Slot> Lowering::allocateCells(const Value& value,const std::string& key)
+{
+    if(value.getType()->isIntegerTy()) return {allocate(value,key,Mode::State,std::nullopt)};
+    std::vector<Slot> out; unsigned index=0;
+    for(auto w:memory->valueWidths(value.getType())) {
+        auto name=key+".cell."+std::to_string(index++);
+        out.push_back({model.variable(name,ts::Type::word(w),Mode::State,number(w,0)),model.variable(name+".poison",ts::Type::boolean(),Mode::State,bit(false))});
+    }
+    compound[&value]=out; return out;
+}
+Pieces Lowering::readCells(const Value* value) const
+{
+    if(value->getType()->isIntegerTy()) return {read(value)};
+    if(auto* c=dyn_cast<Constant>(value)) return memory->constant(c);
+    Pieces out; for(auto& slot:compound.at(value)) out.push_back({v(slot.bits),v(slot.poison)});
+    return value->getType()->isPointerTy() ? memory->knownAddress(value,std::move(out)) : out;
+}
+std::vector<ts::Write> Lowering::cellWrites(const Value& value,const Pieces& pieces) const
+{
+    auto dest=value.getType()->isIntegerTy() ? std::vector<Slot>{slots.at(&value)} : compound.at(&value);
+    std::vector<ts::Write> writes;
+    require(dest.size()==pieces.size(),"Mismatched compound value representation");
+    for(unsigned j=0;j<dest.size();++j) { writes.push_back({dest[j].bits,pieces[j].bits}); writes.push_back({dest[j].poison,pieces[j].poison}); }
+    return writes;
+}
+void Lowering::cellsResult(const Instruction& i,const Pieces& pieces,Expr ub)
+{
+    auto writes=cellWrites(i,pieces); writes.push_back({pc,label(locations.at(next(i)))});
+    step(i,".execute",bit(true),std::move(writes),ub);
+}
+void Lowering::memoryStep(const Instruction& i,MemoryEffect effect)
+{
+    auto stop=either(effect.error,either(effect.unsupported,effect.bound));
+    if(!i.getType()->isVoidTy()) { auto writes=cellWrites(i,effect.value); effect.writes.insert(effect.writes.end(),writes.begin(),writes.end()); }
+    effect.writes.push_back({pc,label(locations.at(next(i)))});
+    step(i,".memory",bit(true),std::move(effect.writes),stop);
+    if(!isBit(effect.error,false)) model.step(locations.at(&i)+".memory-error",both(at(i),effect.error),{{pc,label("ERROR")}});
+    if(!isBit(effect.unsupported,false)) model.step(locations.at(&i)+".memory-unsupported",both(at(i),both(no(effect.error),effect.unsupported)),{{pc,label("UNSUPPORTED_MEMORY")}});
+    if(!isBit(effect.bound,false)) model.step(locations.at(&i)+".memory-bound",both(at(i),both(no(either(effect.error,effect.unsupported)),effect.bound)),{{pc,label("MEMORY_BOUND")}});
+}
 ValueExpr Lowering::read(const Value* value) const
 {
     if (auto* c = dyn_cast<ConstantInt>(value)) return {constant(c->getValue()),bit(false)};
@@ -375,9 +468,8 @@ std::vector<ts::Write> Lowering::edge(const BasicBlock& from, const BasicBlock& 
 {
     std::vector<ts::Write> writes{{pc,label(locations.at(first(to)))}};
     for (const auto& phi : to.phis()) {
-        auto incoming = read(phi.getIncomingValueForBlock(&from));
-        const auto& slot = slots.at(&phi);
-        writes.push_back({slot.bits,incoming.bits}); writes.push_back({slot.poison,incoming.poison});
+        auto incoming=cellWrites(phi,readCells(phi.getIncomingValueForBlock(&from)));
+        writes.insert(writes.end(),incoming.begin(),incoming.end());
     }
     return writes;
 }
@@ -481,8 +573,54 @@ ValueExpr Lowering::integer(const BinaryOperator& i, Expr& ub) const
 void Lowering::lower(const Instruction& i)
 {
     Expr ub=bit(false);
+    if(memory) {
+        if(auto* a=dyn_cast<AllocaInst>(&i)) { memoryStep(i,memory->allocate(*a)); return; }
+        if(auto* load=dyn_cast<LoadInst>(&i)) { memoryStep(i,memory->load(readCells(load->getPointerOperand()),load->getType(),load->getAlign())); return; }
+        if(auto* store=dyn_cast<StoreInst>(&i)) { memoryStep(i,memory->store(readCells(store->getPointerOperand()),store->getValueOperand()->getType(),readCells(store->getValueOperand()),store->getAlign())); return; }
+        if(auto* g=dyn_cast<GetElementPtrInst>(&i)) {
+            std::vector<ValueExpr> indices;
+            for(auto& index:g->indices()) {
+                auto value=read(index.get());
+                // Retain the stored SSA value/poison, but discard bits that the
+                // defining extension proves redundant for signed GEP indexing.
+                if(auto* c=dyn_cast<CastInst>(index.get())) {
+                    unsigned from=c->getSrcTy()->getIntegerBitWidth();
+                    if(c->getOpcode()==Instruction::ZExt && from<63)
+                        value.bits=Expr::cast(ts::Type::word(from+1),value.bits);
+                    else if(c->getOpcode()==Instruction::SExt)
+                        value.bits=Expr::cast(ts::Type::word(from),value.bits);
+                }
+                indices.push_back(value);
+            }
+            MemoryEffect effect; effect.value=memory->gep(*cast<GEPOperator>(g),readCells(g->getPointerOperand()),indices,&effect.unsupported);
+            memoryStep(i,std::move(effect)); return;
+        }
+        if(auto* e=dyn_cast<ExtractValueInst>(&i)) {
+            auto all=readCells(e->getAggregateOperand()); auto start=MemoryModel::fieldIndex(e->getAggregateOperand()->getType(),e->getIndices());
+            auto count=MemoryModel::widths(e->getType()).size(); cellsResult(i,Pieces(all.begin()+start,all.begin()+start+count),ub); return;
+        }
+        if(auto* e=dyn_cast<InsertValueInst>(&i)) {
+            auto all=readCells(e->getAggregateOperand()), insert=readCells(e->getInsertedValueOperand()); auto start=MemoryModel::fieldIndex(e->getType(),e->getIndices());
+            std::copy(insert.begin(),insert.end(),all.begin()+start); cellsResult(i,all,ub); return;
+        }
+        if(auto* mem=dyn_cast<MemIntrinsic>(&i)) {
+            MemoryEffect effect;
+            if(auto* set=dyn_cast<MemSetInst>(mem)) { auto fill=read(set->getValue()); effect=memory->transfer(readCells(mem->getDest()),{},read(mem->getLength()),true,&fill,mem->getDestAlign().valueOrOne().value()); }
+            else { auto* copy=cast<MemTransferInst>(mem); effect=memory->transfer(readCells(mem->getDest()),readCells(copy->getSource()),read(mem->getLength()),isa<MemMoveInst>(mem),nullptr,mem->getDestAlign().valueOrOne().value(),copy->getSourceAlign().valueOrOne().value()); }
+            memoryStep(i,std::move(effect)); return;
+        }
+        if(auto* intrinsic=dyn_cast<IntrinsicInst>(&i)) {
+            memoryStep(i,memory->lifetime(readCells(intrinsic->getArgOperand(1)),intrinsic->getIntrinsicID()==Intrinsic::lifetime_start)); return;
+        }
+    }
     if (auto* call=dyn_cast<CallInst>(&i)) {
         auto h=hook(*call->getCalledFunction());
+        if(h==Hook::EndObject) { memoryStep(i,memory->lifetime(readCells(call->getArgOperand(0)),false)); return; }
+        if(h==Hook::Defined && !call->getArgOperand(0)->getType()->isIntegerTy()) {
+            for(auto& part:readCells(call->getArgOperand(0))) ub=either(ub,part.poison);
+            step(i,".defined",bit(true),{{pc,label(locations.at(next(i)))}},ub);
+            model.step(locations.at(&i)+".ub",both(at(i),ub),{{pc,label("ERROR")}}); return;
+        }
         if (h==Hook::Nondet) result(i,{v(choices.at(&i)),bit(false)},ub);
         else if (h==Hook::Error) step(i,".assertion",bit(true),{{pc,label("ASSERT."+locations.at(&i))}},ub);
         else {
@@ -494,6 +632,10 @@ void Lowering::lower(const Instruction& i)
     }
     else if (auto* op=dyn_cast<BinaryOperator>(&i)) { auto value=integer(*op,ub); result(i,value,ub); }
     else if (auto* cmp=dyn_cast<ICmpInst>(&i)) {
+        if(cmp->getOperand(0)->getType()->isPointerTy()) {
+            MemoryEffect effect; effect.value={memory->compare(cmp->getPredicate(),readCells(cmp->getOperand(0)),readCells(cmp->getOperand(1)),effect.unsupported)};
+            memoryStep(i,std::move(effect)); return;
+        }
         auto a=read(cmp->getOperand(0)), b=read(cmp->getOperand(1));
         Expr lhs=cmp->isSigned() ? asSigned(a.bits) : a.bits, rhs=cmp->isSigned() ? asSigned(b.bits) : b.bits;
         Op op=Op::Equal;
@@ -512,9 +654,10 @@ void Lowering::lower(const Instruction& i)
         if (c->getOpcode()==Instruction::ZExt && c->hasNonNeg()) a.poison=either(a.poison,sign(a.bits));
         result(i,{Expr::cast(ts::Type::word(width(c->getType())),a.bits),a.poison},ub);
     } else if (auto* s=dyn_cast<SelectInst>(&i)) {
-        auto c=read(s->getCondition()), a=read(s->getTrueValue()), b=read(s->getFalseValue());
-        auto condition=eq(c.bits,number(1,1));
-        result(i,{choose(condition,a.bits,b.bits),either(c.poison,choose(condition,a.poison,b.poison))},ub);
+        auto c=read(s->getCondition()); auto yes=readCells(s->getTrueValue()), noValue=readCells(s->getFalseValue());
+        auto condition=eq(c.bits,number(1,1)); Pieces out;
+        for(unsigned j=0;j<yes.size();++j) out.push_back({choose(condition,yes[j].bits,noValue[j].bits),either(c.poison,choose(condition,yes[j].poison,noValue[j].poison))});
+        cellsResult(i,out,ub);
     } else if (auto* f=dyn_cast<FreezeInst>(&i)) {
         auto a=read(f->getOperand(0));
         result(i,{choose(a.poison,v(choices.at(&i)),a.bits),bit(false)},ub);
@@ -539,9 +682,11 @@ void Lowering::lower(const Instruction& i)
     } else if (auto* ret=dyn_cast<ReturnInst>(&i)) {
         std::vector<ts::Write> writes{{pc,label("DONE")}};
         if (ret->getReturnValue()) {
-            auto a=read(ret->getReturnValue());
-            if (function.hasRetAttribute(Attribute::NoUndef)) ub=a.poison;
-            writes.push_back({returned->bits,a.bits}); writes.push_back({returned->poison,a.poison});
+            auto values=readCells(ret->getReturnValue());
+            for(unsigned j=0;j<values.size();++j) {
+                if(function.hasRetAttribute(Attribute::NoUndef)) ub=either(ub,values[j].poison);
+                writes.push_back({returnCells[j].bits,values[j].bits}); writes.push_back({returnCells[j].poison,values[j].poison});
+            }
         }
         step(i,".return",bit(true),std::move(writes),ub);
     } else if (isa<UnreachableInst>(i)) ub=bit(true);
@@ -550,13 +695,14 @@ void Lowering::lower(const Instruction& i)
 }
 json::Object Lowering::run(const std::string& inputHash)
 {
-    std::vector<std::string> labels{"DONE","ERROR","ASSUMED_OUT"}; unsigned bi=0;
+    if(addressable) memory=std::make_unique<MemoryModel>(model,module,function,limits);
+    std::vector<std::string> labels{"DONE","ERROR","ASSUMED_OUT","UNSUPPORTED_MEMORY","MEMORY_BOUND"}; unsigned bi=0;
     for (const auto& b : function) {
         unsigned ii=0;
         for (const auto& i : b) {
             if (isa<DbgInfoIntrinsic>(i)) continue;
             auto key="b"+std::to_string(bi)+".i"+std::to_string(ii++);
-            if (!i.getType()->isVoidTy()) allocate(i,"ssa."+key,Mode::State,std::nullopt);
+            if (!i.getType()->isVoidTy()) allocateCells(i,"ssa."+key);
             if (isa<PHINode>(i)) continue;
             locations.emplace(&i,key); labels.push_back(key);
             if (auto* call=dyn_cast<CallInst>(&i); call && (hook(*call->getCalledFunction())==Hook::Assert || hook(*call->getCalledFunction())==Hook::Error))
@@ -571,8 +717,9 @@ json::Object Lowering::run(const std::string& inputHash)
         unsigned w=width(function.getReturnType());
         returned=Slot{model.variable("return",ts::Type::word(w),Mode::State,number(w,0)),
             model.variable("return.poison",ts::Type::boolean(),Mode::State,bit(false))};
+        returnCells={*returned};
     }
-    for (const auto& g : module.globals()) allocate(g,"global."+g.getName().str(),g.isConstant() ? Mode::Frozen : Mode::State,
+    if(!memory) for (const auto& g : module.globals()) allocate(g,"global."+g.getName().str(),g.isConstant() ? Mode::Frozen : Mode::State,
         cast<ConstantInt>(g.getInitializer())->getValue());
     for (const auto& b : function) for (const auto& i : b)
         if (!isa<PHINode>(i) && !isa<DbgInfoIntrinsic>(i)) lower(i);
@@ -601,15 +748,17 @@ json::Object Lowering::run(const std::string& inputHash)
         }
         locationsJson[ts::literalName(*pcType,key)]=std::move(record);
     }
+    model.property("memory_supported",no(eq(v(pc),label("UNSUPPORTED_MEMORY"))));
+    model.property("memory_within_bound",no(eq(v(pc),label("MEMORY_BOUND"))));
     model.property("assertion_failed",failed);
     model.property("safe",no(either(failed,eq(v(pc),label("ERROR")))));
     model.property("assumed_out",eq(v(pc),label("ASSUMED_OUT")));
     model.property("progress_goal",either(eq(v(pc),label("DONE")),eq(v(pc),label("ASSUMED_OUT"))));
-    return ts::artifact(model,{{"lowering","scalar-v2"},{"normalization","checked-inline-mem2reg-v2"},
+    return ts::artifact(model,{{"lowering",memory ? "memory-v1" : "scalar-v2"},{"normalization",memory ? "checked-inline-memory-v1" : "checked-inline-mem2reg-v2"},
         {"input_ir_sha256",inputHash},{"normalized_ir_sha256",ts::sha256(moduleText(module))},
         {"entry",function.getName().str()},{"target_triple",module.getTargetTriple()},
         {"data_layout",module.getDataLayoutStr()},{"environment","closed-module; no interposition; verifier-hooks-v1"},
-        {"semantics","LLVM18 scalar bitvectors and poison; error sink at admitted UB; undef rejected"}},"llvm18-scalar-v2",std::move(locationsJson));
+        {"semantics",memory ? "LLVM18 integers; opaque object pointers; strict uninitialized-read diagnostics; memory coverage required" : "LLVM18 scalar bitvectors and poison; error sink at admitted UB; undef rejected"}},memory ? "llvm18-memory-v1" : "llvm18-scalar-v2",std::move(locationsJson),memory ? memory->describe() : json::Object{});
 }
 } // namespace
 ScalarError::ScalarError(std::string message, const Instruction* instruction)
@@ -622,7 +771,7 @@ ScalarError::ScalarError(std::string message, const Instruction* instruction)
             {"file",loc->getFilename().str()},{"line",loc.getLine()},{"column",loc.getCol()}};
     }
 }
-json::Object lowerScalar(Module& module, StringRef entry)
+json::Object lowerScalar(Module& module, StringRef entry, MemoryLimits limits)
 {
     for (auto& f : module) require(!f.getName().starts_with("__llvm2smv_"),"Reserved internal runtime name");
     module.setModuleIdentifier(""); // The IR storage path is not semantic provenance.
@@ -643,19 +792,43 @@ json::Object lowerScalar(Module& module, StringRef entry)
         require(g.getAddressSpace()==0 && !g.isThreadLocal() && !g.isExternallyInitialized() && !g.hasComdat()
             && !g.hasSection() && (g.hasExternalLinkage() || g.hasInternalLinkage() || g.hasPrivateLinkage()),
             "Unsupported scalar global storage/linkage: "+g.getName().str());
-        width(g.getValueType());
-        require(g.hasInitializer() && isa<ConstantInt>(g.getInitializer()),"Scalar globals require concrete integer initializers: "+g.getName().str());
+        MemoryModel::widths(g.getValueType());
+        require(g.hasInitializer(),"Globals require concrete initializers: "+g.getName().str());
     }
     auto* f=module.getFunction(entry);
     require(f && !f->isDeclaration(),"The entry must name a defined function");
     require(f->arg_empty() && !f->isVarArg() && f->getCallingConv()==CallingConv::C && !f->hasPersonalityFn()
         && !f->hasPrefixData() && !f->hasPrologueData(),"Entry requires a zero-argument C calling convention and no exceptional ABI");
     if (!f->getReturnType()->isVoidTy()) width(f->getReturnType());
-    normalizeCalls(*f);
+    bool addressable=false;
+    for(auto& g:module.globals()) addressable |= !g.getValueType()->isIntegerTy() || !isa<ConstantInt>(g.getInitializer());
+    for(auto& fn:module) if(!fn.isDeclaration())
+        for(auto& arg:fn.args()) addressable |= arg.getType()->isPointerTy();
+    for(auto& fn:module) for(auto& block:fn) for(auto& i:block) {
+        if(auto* a=dyn_cast<AllocaInst>(&i)) {
+            auto* count=dyn_cast<ConstantInt>(a->getArraySize());
+            addressable |= !a->getAllocatedType()->isIntegerTy() || !count || !count->isOne() || !isAllocaPromotable(a);
+        }
+        else if(!i.getType()->isVoidTy() && !i.getType()->isIntegerTy()) addressable=true;
+        if(auto* load=dyn_cast<LoadInst>(&i)) addressable |= !isa<GlobalVariable>(load->getPointerOperand()) && !isa<AllocaInst>(load->getPointerOperand());
+        if(auto* store=dyn_cast<StoreInst>(&i)) addressable |= !isa<GlobalVariable>(store->getPointerOperand()) && !isa<AllocaInst>(store->getPointerOperand());
+        if(auto* cmp=dyn_cast<ICmpInst>(&i)) addressable |= cmp->getOperand(0)->getType()->isPointerTy();
+        if(auto* ret=dyn_cast<ReturnInst>(&i); ret && ret->getReturnValue()) addressable |= ret->getReturnValue()->getType()->isPointerTy();
+        auto indirectType=[&](Value* pointer,Type* accessed) {
+            if(auto* g=dyn_cast<GlobalVariable>(pointer)) return g->getValueType()!=accessed;
+            if(auto* a=dyn_cast<AllocaInst>(pointer)) return a->getAllocatedType()!=accessed;
+            return true;
+        };
+        if(auto* load=dyn_cast<LoadInst>(&i)) addressable |= indirectType(load->getPointerOperand(),load->getType());
+        if(auto* store=dyn_cast<StoreInst>(&i)) addressable |= indirectType(store->getPointerOperand(),store->getValueOperand()->getType());
+        if(isa<MemIntrinsic>(i)) addressable=true;
+        if(auto* intr=dyn_cast<IntrinsicInst>(&i)) addressable |= intr->getIntrinsicID()==Intrinsic::lifetime_start || intr->getIntrinsicID()==Intrinsic::lifetime_end;
+    }
+    normalizeCalls(*f,addressable);
     std::string errors; raw_string_ostream stream(errors);
     bool invalid=verifyModule(module,&stream);
     require(!invalid,"Normalization produced invalid LLVM IR: "+errors);
-    inspect(*f,true);
-    return Lowering(module,*f).run(inputHash);
+    inspect(*f,true,addressable);
+    return Lowering(module,*f,addressable,limits).run(inputHash);
 }
 }

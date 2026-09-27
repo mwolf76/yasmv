@@ -1,11 +1,12 @@
 # LLVM to SMV frontend
 
-M3 provides a scalar C safety workflow with direct-call inlining, verifier
+M4 extends the C safety workflow with bounded addressable memory, arrays,
+structures, and opaque pointers. See the [memory contract](MEMORY_MODEL.md).
+The workflow includes direct-call inlining, verifier
 hooks, source locations, and replayed model evidence. Start with the
 [C workflow guide](C_WORKFLOW.md). The [scalar contract](SCALAR_MODEL.md)
 describes integer operations, control flow, scalar memory, and poison semantics;
-the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md) tracks later
-addressable memory and general calls.
+the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md) tracks general calls and heap support.
 
 The historical incorrect writer remains excluded. The M0 inventory interface
 and M1 [typed model foundation](MODEL_FORMAT.md) remain available. Direct raw
@@ -110,7 +111,7 @@ This publishes `model.smv` and four sidecars only after native model validation.
 It reports translation success separately from any verification result. All
 subsequent queries use the existing yasmv interface on the published model.
 The capabilities fields `scalar_candidate_available` and `scalar_features`
-describe M2. The older `translation_available: false` and empty
+describe the admitted features through M4. The older `translation_available: false` and empty
 `supported_features` retain their conservative meaning for legacy direct output.
 
 ## Tests
@@ -128,5 +129,5 @@ compiler errors, deterministic reports, and preservation of output files.
 The counter now has semantic tests: it ends at ten and cannot reach 99 within
 the checked bound. Scalar tests also compare small integer domains with an
 independent interpreter, exercise PHI swaps, nested loops, and nontermination,
-and reject unsupported features before and after promotion. Calls and the C
-assertion workflow remain M3; addressable memory remains M4.
+and reject unsupported features before and after promotion. C workflow tests cover compilation and source evidence. Memory tests cover
+byte aliases, layouts, provenance, copies, lifetimes, and coverage failures.

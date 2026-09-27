@@ -1,9 +1,11 @@
-# Scalar C safety workflow (M3)
+# C safety workflow (M3–M4)
 
 M3 compiles admitted sequential scalar C with matched Clang/LLVM 18, translates
 it into a validated finite model, and invokes the existing checker. It adds
 acyclic direct calls, verifier hooks, basic C locations, and replayed evidence
-to the [scalar execution model](SCALAR_MODEL.md).
+to the [scalar execution model](SCALAR_MODEL.md). M4 adds the bounded
+[memory model](MEMORY_MODEL.md), configured with `--memory-bytes` and
+`--allocation-generations`.
 
 ## Run a check
 
@@ -75,8 +77,9 @@ samples afresh. Values in evidence use the backend's unsigned bit patterns.
 ## Calls, errors, and progress
 
 Inspect every block in the syntactic direct-call closure before normalization,
-including unreachable blocks. Reject recursion, indirect calls, pointer
-arguments/results, exceptional calls, bundles, and unhandled attributes. Promote
+including unreachable blocks. Reject recursion, indirect calls, aggregate ABI,
+exceptional calls, bundles, and unhandled attributes. Integer and pointer
+arguments/results are admitted; the entry returns only void or an integer. Promote
 scalar locals in each function, then inline by copying blocks and wiring incoming
 arguments and return PHIs. No constant folding or dead-code pruning is performed
 by this inliner: even an unused division by zero remains an error site.
@@ -105,6 +108,8 @@ establish vacuity. Safety results leave admission coverage `unknown`.
 | `no_admitted_execution` | Every execution is eventually excluded by an assumption, proven and replayed. | 0 |
 | `unknown` | Time, state, proof, or replay analysis was inconclusive. | 3 |
 | `error` | Build, admission, artifact, or checker failure. | 2 |
+| `unsupported` | Replayed execution needs an unmodeled pointer operation. | 2 |
+| `resource_bound_reached` | Replayed execution exceeds allocation generations. | 3 |
 
 Always inspect `status`; exit zero alone does not mean unbounded safety.
 
@@ -119,9 +124,10 @@ native proof/counterexample format and `validate-progress` replay.
 Model replay validates the generated path, not compiler correctness. The result
 explicitly records `translation_certified: false`. The error scope is admitted
 LLVM UB uses; this does not detect all ISO C undefined behavior or undo frontend
-optimizations. Full executable counterexample replay, addressable memory,
+optimizations. M4 additionally diagnoses uninitialized reads under its strict policy; this is
+stronger than general LLVM undef semantics. Full executable counterexample replay,
 recursive frames, heap bounds, and workbench source views remain later work.
 The regression suite independently executes the defined safe/unsafe C examples
 with a native harness and compares their behavior with the model witness.
 
-Run `make llvm-test` for frontend, writer, scalar semantics, and C-workflow gates.
+Run `make llvm-test` for frontend, writer, scalar, C-workflow, and memory gates.

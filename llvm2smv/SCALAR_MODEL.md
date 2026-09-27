@@ -1,5 +1,8 @@
 # Scalar LLVM execution (M2–M3)
 
+The M4 [memory contract](MEMORY_MODEL.md) extends the scalar-only restrictions
+below when addressable memory is needed.
+
 The scalar frontend translates admitted LLVM 18 entries into the typed model
 introduced in M1. M3 adds acyclic direct calls, verifier hooks, and a controlled
 [C safety workflow](C_WORKFLOW.md). It remains a restricted LLVM execution model

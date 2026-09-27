@@ -1,10 +1,11 @@
 # llvm2smv implementation plan
 
-Status: M0–M3 implemented on 2026-09-27, following code review at
+Status: M0–M4 implemented on 2026-09-27, following code review at
 `84738750`. The current [frontend contract](../llvm2smv/README.md) disables
 legacy SMV generation and provides verified IR inventory and rejection
 diagnostics. M1 adds the internal typed model foundation; M2 adds admitted scalar execution.
-M3 adds the controlled scalar C safety workflow. M4 and later milestones below remain proposed. The review findings
+M3 adds the controlled scalar C safety workflow. M4 adds bounded addressable
+memory with explicit coverage obligations. M5 and later milestones remain proposed. The review findings
 describe the pre-M0 implementation.
 
 The agreed scope is sequential C with integers, arrays, pointers, calls, and
@@ -172,8 +173,56 @@ Validation on LLVM/Clang 18.1.3, GCC 13.3.0, Linux/aarch64:
   groups covering calls, UB boundaries, assumptions, and source evidence.
   Frontend distribution contents, Python syntax, and whitespace checks passed.
 
-The next milestone is M4: addressable memory, object layout, arrays/structs,
-pointers/GEP, byte accesses, and lifetime/definedness checks.
+### M4 bounded addressable memory
+
+Continued after M3 commit `64b6e9bc`. The [memory contract](../llvm2smv/MEMORY_MODEL.md)
+specifies DataLayout-driven arrays/structures, byte aliases, global and stack
+objects, aggregate operations, opaque pointer provenance, and memory intrinsics.
+Acyclic direct calls now accept and return data pointers. Return instrumentation
+expires local objects, and allocation generations prevent stale-pointer reuse.
+
+Byte storage carries initialized and poison bit masks plus ordered pointer
+fragments when needed. Typed accesses, partial writes, relocations, overlapping
+memmove, equal-address memcpy, memset, and whole-object lifetime markers use the
+same storage. Reading uninitialized required bits is an explicitly strict
+diagnostic policy, stronger than general LLVM undef semantics. Claimed access
+alignment must be guaranteed by object alignment and offset.
+
+Static object storage is bounded and oversized candidates are rejected. Runtime
+allocation-generation exhaustion and unmodeled pointer operations enter separate
+coverage sinks. The C driver checks those obligations alongside safety, replays
+witnesses, and distinguishes `resource_bound_reached` and `unsupported`. Memory
+policy, bounds, layouts, and byte-state source projections accompany artifacts.
+
+Initial encodings timed out on small dynamic-pointer and copy fixtures. Disjoint
+byte selection, statically known addresses, provably bounded internal GEP
+arithmetic, and fixed-point propagation of constant model slots reduced that
+cost without narrowing C integers or pruning instruction execution. Larger
+models can still exhaust checker resources; no timeout is a successful check.
+
+Validation on LLVM/Clang 18.1.3 and Linux/aarch64:
+
+* All 19 frontend/configuration contracts, C++ model self-tests, and 15 native
+  writer/publication regressions passed. The writer gate includes changing
+  dependencies and unconstrained state under constant propagation.
+* All 19 memory groups passed across a full suite and final focused runs. They
+  cover partial writes, bit masks, aggregate layout, dynamic indices, pointer
+  selection and call-return PHIs, provenance copies, memset, lifetime errors,
+  generation bounds, offset coverage, full-width GEP wrap, and fail-closed
+  admission. The C alias fixture and its failing variant agree with independent
+  native C execution; model witnesses replay successfully.
+* The memory groups also passed under ASan/UBSan with leak detection, across the
+  initial full suite and focused final regressions. The native checker remained
+  the optimized build. No core source was changed.
+* A clean out-of-tree frontend build passed model self-tests, C alias checks,
+  admission, and pointer-call boundaries. Distribution contents, Python syntax,
+  documentation links, and whitespace checks passed.
+* All 14 existing scalar semantic groups and 11 C-workflow groups passed using
+  a fixed translator binary. An earlier scalar run overlapped a frontend relink
+  and failed to launch the executable; that run was discarded and rerun.
+
+The next milestone is M5: bounded general call frames and recursion. Heap
+allocation and general numeric pointer representations remain later work.
 
 ## 1. Findings in the current codebase
 

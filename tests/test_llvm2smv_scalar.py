@@ -274,7 +274,7 @@ define i1 @main() {
           '@g=global i8 0, align 1\ndefine i8 @main() { %x=load i8, ptr @g, align 8\n ret i8 %x }',
           '@g=constant i8 0\ndefine i8 @main() { store i8 1, ptr @g\n ret i8 0 }',
           '@g=external global i8\ndefine i8 @main() { ret i8 0 }',
-          '@g=global [2 x i8] zeroinitializer\ndefine i8 @main() { ret i8 0 }',
+          '@g=global <2 x i8> zeroinitializer\ndefine i8 @main() { ret i8 0 }',
           'define i8 @main() { %x=add i8 0,1, !range !0\nret i8 %x }\n!0=!{i8 0,i8 2}',
           'define void @main() { br label %loop\nloop: br label %loop, !llvm.loop !0 }\n!0=distinct !{!0,!1}\n!1=!{!"llvm.loop.mustprogress"}',
         ]

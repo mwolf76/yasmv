@@ -21,7 +21,8 @@ later lowering, not to this API.
 
 Expressions cover Boolean/word operators, comparisons, casts, conditionals,
 array literals, and constant array indices. No raw SMV expression injection is
-accepted. Dynamic indexing and memory operations await the memory milestone.
+accepted. The M4 lowering expands dynamic memory accesses into disjoint byte-address
+cases using these expressions.
 Enum literals must refer to a domain declared by a model variable. All symbol
 references, including assignment targets, must belong to the model.
 
@@ -50,6 +51,10 @@ Every assignment reads the current state, including within a simultaneous bundle
 When no guard fires, persistent state stutters. Choice values remain fresh.
 Guards writing a common variable must be disjoint in the native backend's check;
 reachability assumptions do not excuse overlapping guards.
+
+The writer substitutes inductively constant initialized slots after a fixed-point
+check of every assignment. It retains declarations and initialization for trace
+identity, and never substitutes unconstrained or fresh-choice slots.
 
 Invariants constrain the model. Properties are Boolean `DEFINE` expressions and
 sidecar entries, never assumptions or `INVAR` constraints. Checking or proving

@@ -23,14 +23,14 @@ json::Object diagnostic(StringRef code, StringRef message)
 json::Object capabilities()
 {
     return json::Object{
-        {"version", 1}, {"milestone", "M3"}, {"typed_model_foundation", true}, {"llvm_version", LLVM_VERSION_STRING},
+        {"version", 1}, {"milestone", "M4"}, {"typed_model_foundation", true}, {"llvm_version", LLVM_VERSION_STRING},
         {"required_llvm_major", 18}, {"translation_available", false},
         {"supported_features", json::Array{}},
         {"scalar_candidate_available", true},
-        {"scalar_features", json::Array{"integer-1..64", "scalar-globals", "mem2reg", "cfg", "phi", "poison", "freeze", "acyclic-direct-calls", "verifier-hooks", "source-locations"}},
+        {"scalar_features", json::Array{"integer-1..64", "scalar-globals", "mem2reg", "cfg", "phi", "poison", "freeze", "acyclic-direct-calls", "verifier-hooks", "source-locations", "addressable-memory", "aggregate-values", "opaque-pointers", "memory-intrinsics"}},
         {"operations", json::Array{"analyze", "capabilities", "emit-scalar-bundle"}},
         {"input_formats", json::Array{"llvm-ir", "llvm-bitcode"}},
-        {"message", "M3 emits scalar candidates. Publish through tools/llvm2smv_translate.py for mandatory native validation. "
+        {"message", "M4 emits scalar/memory candidates. Publish through tools/llvm2smv_translate.py for mandatory native validation. "
                     "Direct SMV output remains disabled; inventory is not scalar admission."}};
 }
 
