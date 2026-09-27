@@ -1,24 +1,17 @@
-#!/bin/bash
-# Script to compile C files to LLVM IR
-
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <file.c>"
-    exit 1
+#!/usr/bin/env bash
+# Compile with the selected LLVM 18 Clang; do not hide compiler failures.
+set -euo pipefail
+if [[ $# -lt 1 || $# -gt 2 ]]; then
+    echo "Usage: $0 source.c [output.ll]" >&2
+    exit 2
 fi
-
-SOURCE=$1
-BASE=$(basename "$SOURCE" .c)
-
-# Check for clang - required for LLVM IR generation
-if ! command -v clang >/dev/null 2>&1; then
-    echo "Error: clang is required but not found."
-    echo "Please install clang to compile C to LLVM IR:"
-    echo "  sudo apt-get install clang     # Debian/Ubuntu"
-    echo "  sudo yum install clang         # RedHat/CentOS"
-    echo "  brew install llvm              # macOS"
-    exit 1
+compiler=${CLANG:-clang-18}
+compiler_version=$("$compiler" --version)
+if [[ ! "$compiler_version" =~ version\ 18\. ]]; then
+    echo "Error: llvm2smv requires Clang 18; set CLANG to the configured compiler." >&2
+    exit 2
 fi
-
-# Compile to LLVM IR
-clang -S -emit-llvm -O0 "$SOURCE" -o "${BASE}.ll"
-echo "Generated ${BASE}.ll"
+source_file=$1
+output_file=${2:-$(basename -- "$source_file" .c).ll}
+"$compiler" -S -emit-llvm -O0 -g -fno-finite-loops "$source_file" -o "$output_file"
+echo "Generated $output_file"

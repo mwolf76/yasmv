@@ -1,58 +1,39 @@
-# llvm2smv Makefile.am
-
 AUTOMAKE_OPTIONS = subdir-objects
-
-# Include directories
 AM_CPPFLAGS = -I$(top_srcdir)/llvm2smv/include $(LLVM_CPPFLAGS)
-
-# C++20 standard requirement
 AM_CXXFLAGS = -std=c++20 -Wall
-
-# Binary target
 bin_PROGRAMS = llvm2smv
 
-# Sources
-llvm2smv_SOURCES = \
-	src/main.cc \
-	src/llvm2smv_pass.cc \
-	src/expr_translator.cc \
-	src/type_translator.cc \
-	src/smv_writer.cc
-
-# Headers (for distribution)
-noinst_HEADERS = \
-	include/llvm2smv/llvm2smv_pass.hh \
-	include/llvm2smv/expr_translator.hh \
-	include/llvm2smv/type_translator.hh \
-	include/llvm2smv/smv_writer.hh \
-	include/llvm2smv/concepts.hh
-
-# Linking
+# The historical writer is quarantined: it is neither linked nor callable.
+model_sources = src/transition_system.cc src/model_writer.cc
+llvm2smv_SOURCES = src/main.cc src/module_analysis.cc src/scalar_lowering.cc $(model_sources)
+check_PROGRAMS = llvm2smv_model_tests
+llvm2smv_model_tests_SOURCES = tests/model_tests.cc $(model_sources)
+llvm2smv_model_tests_LDFLAGS = $(LLVM_LDFLAGS)
+llvm2smv_model_tests_LDADD = $(LLVM_LIBS)
+noinst_HEADERS = include/llvm2smv/module_analysis.hh include/llvm2smv/scalar_lowering.hh \
+    include/llvm2smv/transition_system.hh include/llvm2smv/model_writer.hh
 llvm2smv_LDFLAGS = $(LLVM_LDFLAGS)
 llvm2smv_LDADD = $(LLVM_LIBS)
 
-# Examples and documentation
-EXTRA_DIST = \
-	examples/simple/counter.c \
-	examples/simple/counter.ll \
-	examples/simple/compile.sh \
-	design.md
+EXTRA_DIST = README.md DESIGN.md MODEL_FORMAT.md SCALAR_MODEL.md build.sh examples/simple/counter.c \
+    examples/simple/conditional.c examples/simple/compile.sh \
+    src/llvm2smv_pass.cc src/expr_translator.cc src/type_translator.cc src/smv_writer.cc \
+    include/llvm2smv/llvm2smv_pass.hh include/llvm2smv/expr_translator.hh \
+    include/llvm2smv/type_translator.hh include/llvm2smv/smv_writer.hh include/llvm2smv/concepts.hh
 
-# Test target
-test-local:
-	@echo "LLVM translation smoke test (does not establish semantic equivalence)..."
-	@if test "x$(CLANG)" != "xno"; then \
-		cd $(srcdir)/examples/simple && ./compile.sh counter.c && \
-		$(abs_builddir)/llvm2smv counter.ll -o counter.smv && \
-		echo "Generated counter.smv successfully!"; \
-	else \
-		echo "Skipping test - clang not available"; \
-	fi
+check-local: llvm2smv llvm2smv_model_tests
+	LLVM2SMV="$(abs_builddir)/llvm2smv" CLANG="$(CLANG)" LLVM_OPT="$(LLVM_OPT)" \
+	LLVM_LINK="$(LLVM_LINK)" python3 "$(top_srcdir)/tests/test_llvm2smv.py"
 
-clean-local:
-	-rm -f examples/simple/*.ll examples/simple/*.smv
+	./llvm2smv_model_tests
+	LLVM2SMV_MODEL_TESTS="$(abs_builddir)/llvm2smv_model_tests" \
+	YASMV="$${YASMV:-$(abs_top_builddir)/yasmv}" YASMV_HOME="$${YASMV_HOME:-$(abs_top_srcdir)}" \
+	python3 "$(top_srcdir)/tests/test_llvm2smv_model.py"
 
-# Make test target available
-test: test-local
+	LLVM2SMV="$(abs_builddir)/llvm2smv" CLANG="$(CLANG)" \
+	YASMV="$${YASMV:-$(abs_top_builddir)/yasmv}" YASMV_HOME="$${YASMV_HOME:-$(abs_top_srcdir)}" \
+	python3 "$(top_srcdir)/tests/test_llvm2smv_scalar.py"
 
-.PHONY: test test-local clean-local
+test: check-local
+
+.PHONY: test check-local
