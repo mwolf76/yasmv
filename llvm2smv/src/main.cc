@@ -10,7 +10,7 @@
 using namespace llvm;
 
 static cl::opt<std::string> InputFilename(cl::Positional, cl::desc("<LLVM IR or bitcode>"), cl::init(""));
-static cl::opt<std::string> OutputFilename("o", cl::desc("SMV destination (never written in M0)"));
+static cl::opt<std::string> OutputFilename("o", cl::desc("SMV destination (not yet enabled)"));
 static cl::opt<std::string> Entry("entry", cl::desc("Defined entry function"), cl::init("main"));
 static cl::opt<bool> Analyze("analyze", cl::desc("Print feature inventory and rejection diagnostics as JSON"));
 static cl::opt<bool> Capabilities("capabilities", cl::desc("Print supported operations as JSON"));
@@ -22,7 +22,7 @@ static cl::opt<DiagnosticFormat> Diagnostics("diagnostics", cl::desc("Diagnostic
 int main(int argc, char** argv)
 {
     InitLLVM init(argc, argv);
-    cl::ParseCommandLineOptions(argc, argv, "LLVM to SMV: M0 analysis and rejection gate\n");
+    cl::ParseCommandLineOptions(argc, argv, "LLVM to SMV: analysis and rejection gate\n");
     auto fail = [](StringRef code, StringRef message) {
         json::Array diagnostics;
         diagnostics.push_back(llvm2smv::diagnostic(code, message));

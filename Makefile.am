@@ -11,7 +11,7 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
-EXTRA_DIST = tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
+EXTRA_DIST = tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
     tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \
     docs/formats/progress-counterexample-v1.schema.json docs/formats/progress-proof-v1.schema.json \
@@ -67,7 +67,7 @@ unit-test: yasmv yasmv_tests
 functional-test: yasmv yasmv_tests
 	@tools/run-functional-tests.sh
 if ENABLE_LLVM2SMV
-llvm-test:
+llvm-test: yasmv
 	@$(MAKE) -C llvm2smv test
 else
 llvm-test:

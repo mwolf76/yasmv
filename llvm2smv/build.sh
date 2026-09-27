@@ -5,5 +5,5 @@ repo_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$repo_dir"
 autoreconf -vif
 ./configure --enable-llvm2smv "$@"
-make -C llvm2smv
-make -C llvm2smv test
+make
+make llvm-test

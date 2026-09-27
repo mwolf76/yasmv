@@ -1,10 +1,12 @@
 # LLVM to SMV frontend
 
-M0 establishes the LLVM toolchain, verified IR inventory, and rejection boundary
+The frontend establishes the LLVM toolchain, verified IR inventory, and rejection
+boundary
 for the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md).
-**SMV generation is disabled.** The previous writer produced incorrect execution
-models and is no longer linked into the executable. There is no legacy-output
-switch. M1/M2 will introduce validated state and instruction lowering.
+**LLVM-to-SMV translation is disabled.** The previous writer produced incorrect
+execution models and is no longer linked into the executable. There is no legacy-output
+switch. M1 supplies the internal [typed model foundation](MODEL_FORMAT.md);
+LLVM instruction lowering begins in M2.
 
 ## Build
 
@@ -18,7 +20,7 @@ From the repository root:
 ```sh
 autoreconf -vif
 ./configure --enable-llvm2smv --with-llvm-config=/usr/bin/llvm-config-18
-make -C llvm2smv
+make
 make llvm-test
 ```
 
@@ -46,7 +48,7 @@ compiles with `-O0 -g`, and propagates compiler failures. It only generates IR;
 these flags do not establish a source-level verification guarantee.
 
 `--analyze` prints a version-1 JSON report to stdout and returns **2** because
-M0 has no supported execution lowering. It accepts textual IR and bitcode,
+LLVM execution lowering is not implemented. It accepts textual IR and bitcode,
 verifies the module, selects a defined `main` by default, and traverses every
 block in its direct call-graph closure, including statically infeasible branches.
 Use `--entry=name` to select another defined function. Missing entries never
@@ -59,8 +61,8 @@ types, opcode counts, target triple, and DataLayout. Unresolved/indirect calls
 remain unsupported. Module globals are conservatively inventoried even if not
 referenced by the selected entry. An inventory is not a supported-feature claim;
 `translation_available` and every instruction's `supported` field are false.
-M0 accepts no target ABI for translation and never infers missing target layout
-from the host.
+The frontend accepts no target ABI for translation and never infers missing
+target layout from the host.
 
 ## Diagnostics and output preservation
 
@@ -84,7 +86,7 @@ LLVM debug locations and can be zero when unavailable.
 
 | Exit status | Meaning |
 | --- | --- |
-| 0 | Capability/help/version output completed; never a translation success in M0. |
+| 0 | Capability/help/version output completed; never a translation success yet. |
 | 1 | LLVM command-line syntax error (LLVM's text diagnostic). |
 | 2 | Invalid input/options or unsupported translation. |
 
@@ -98,7 +100,11 @@ result or proof.
 ## Tests
 
 `make llvm-test` and `make -C llvm2smv test` run the process contracts and toolchain
-checks. The full local `make test` includes this gate when LLVM is enabled.
+checks, typed-model self-tests, and native writer/publication integration tests.
+The integration tests require a built yasmv and extracted microcode (see the core
+build guide); `make llvm-test` also builds yasmv. Direct subdirectory tests may
+use `YASMV=/path/to/yasmv YASMV_HOME=/path/to/installation`.
+The full local `make test` includes this gate when LLVM is enabled.
 Fixtures cover direct and indirect calls, recursion, infeasible blocks, unknown
 features, arithmetic flags, source locations, malformed and invalid SSA, bitcode,
 compiler errors, deterministic reports, and preservation of output files.
