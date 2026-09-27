@@ -313,8 +313,8 @@ define i8 @main() {
         a=self.candidate(source); b=self.candidate(source)
         self.assertEqual(a,b)
         provenance=read_json(a['files']['provenance.json'])
-        self.assertEqual(provenance['scope'],'llvm18-scalar-v1')
-        self.assertEqual(provenance['origin']['normalization'],'checked-scalar-mem2reg-v1')
+        self.assertEqual(provenance['scope'],'llvm18-scalar-v2')
+        self.assertEqual(provenance['origin']['normalization'],'checked-inline-mem2reg-v2')
         path=self.path/'driver.ll'; path.write_text(HEADER+source)
         destination=self.path/'driver-bundle'
         command=[sys.executable,str(ROOT/'tools/llvm2smv_translate.py'),str(path),'-o',str(destination),

@@ -15,7 +15,7 @@ static cl::opt<std::string> OutputFilename("o", cl::desc("SMV destination (not y
 static cl::opt<std::string> Entry("entry", cl::desc("Defined entry function"), cl::init("main"));
 static cl::opt<bool> Analyze("analyze", cl::desc("Print feature inventory and rejection diagnostics as JSON"));
 static cl::opt<bool> Capabilities("capabilities", cl::desc("Print supported operations as JSON"));
-static cl::opt<bool> EmitScalar("emit-scalar-bundle", cl::desc("Emit an M2 scalar candidate bundle for native validation by the publisher"));
+static cl::opt<bool> EmitScalar("emit-scalar-bundle", cl::desc("Emit an M3 scalar candidate bundle for native validation by the publisher"));
 enum DiagnosticFormat { Text, JSON };
 static cl::opt<DiagnosticFormat> Diagnostics("diagnostics", cl::desc("Diagnostic format"),
     cl::values(clEnumValN(Text, "text", "Human-readable diagnostics"),

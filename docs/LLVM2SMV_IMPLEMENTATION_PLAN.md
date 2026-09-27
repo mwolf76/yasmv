@@ -1,10 +1,10 @@
 # llvm2smv implementation plan
 
-Status: M0, M1, and M2 implemented on 2026-09-27, following code review at
+Status: M0–M3 implemented on 2026-09-27, following code review at
 `84738750`. The current [frontend contract](../llvm2smv/README.md) disables
 legacy SMV generation and provides verified IR inventory and rejection
 diagnostics. M1 adds the internal typed model foundation; M2 adds admitted scalar execution.
-M3 and later milestones below remain proposed. The review findings
+M3 adds the controlled scalar C safety workflow. M4 and later milestones below remain proposed. The review findings
 describe the pre-M0 implementation.
 
 The agreed scope is sequential C with integers, arrays, pointers, calls, and
@@ -121,8 +121,59 @@ Validation on LLVM 18.1.3 / Linux/aarch64:
   checks; its final binary passed counter, debug-intrinsic, and global-name
   regressions. Distribution contents and whitespace checks passed.
 
-The next milestone is M3: direct-call inlining, verifier hooks, a C compilation
-driver, source mapping, and a usable scalar safety workflow.
+### M3 scalar C safety workflow
+
+Implemented on `feat/llvm2smv-m3`, based on merged master `c5977c80`.
+The [C workflow guide](../llvm2smv/C_WORKFLOW.md) documents the supported entry,
+hooks, compilation policy, source evidence, and result scopes.
+
+The frontend checks the full syntactic acyclic call closure, promotes scalar
+locals, and inlines by cloning blocks and joining returns with PHIs. It preserves
+instruction execution, including unused immediate-UB sites, and explicitly
+instruments noundef call boundaries. This deliberately avoids LLVM's ordinary
+clone-and-prune inlining: a regression demonstrated that it folded away an
+unused division by zero. Source locations retain nested inline call chains.
+
+Checked verifier declarations implement assertions, error, assumptions, and
+fresh scalar nondeterminism. Assertions enter persistent per-site failure
+locations and export properties, never invariants. False assumptions enter
+ASSUMED_OUT; progress discharges that exclusion without treating it as normal
+termination. A separate replayed universal-exclusion proof distinguishes
+no-admitted-execution from ordinary success.
+
+`tools/verify-c.py` compiles one or more C units with matched LLVM 18 tools and
+controlled assertion headers, links bitcode, validates and atomically publishes
+the model, checks initialization, and runs bounded safety, optional induction,
+or universal progress. The compiled preprocessed snapshots, expanded-header
+content hashes, flags, tool identities, and hook policy are retained in bundle
+provenance. Checks use a private copy of the digest-validated model.
+
+Safety violations require native trace replay and include basic C instruction
+locations, inline chains, global bits/poison, and chosen nondeterministic values.
+Progress evidence is independently replayed through validate-progress. Missing
+local-variable reconstruction is explicit. No result claims independently
+certified translation or complete ISO C undefined-behavior detection. Depth,
+state, and time limits never become an unbounded proof.
+
+Validation on LLVM/Clang 18.1.3, GCC 13.3.0, Linux/aarch64:
+
+* All 19 frontend/configuration contracts, typed-model C++ self-tests, 14 native
+  writer/publication tests, and 14 scalar semantic regressions passed across
+  batches. No core source was changed.
+* All 11 new C workflow tests passed normally and with the translator built
+  under ASan/UBSan and leak detection. Coverage includes nested calls, looped
+  calls, multiple returns, unused immediate UB, noundef, fresh choices,
+  assertion sites, multi-unit source chains, assumption exclusion, induction,
+  time/state limits, output preservation, and tampered evidence.
+* Native C harness execution independently reproduced the safe/unsafe examples
+  with the model witness input. Native model traces and progress evidence were
+  replayed before accepting their conclusions.
+* A fresh out-of-tree frontend build passed C++ self-tests and four workflow
+  groups covering calls, UB boundaries, assumptions, and source evidence.
+  Frontend distribution contents, Python syntax, and whitespace checks passed.
+
+The next milestone is M4: addressable memory, object layout, arrays/structs,
+pointers/GEP, byte accesses, and lifetime/definedness checks.
 
 ## 1. Findings in the current codebase
 
