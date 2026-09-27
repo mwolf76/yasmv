@@ -78,14 +78,15 @@ void attributes(const Function& f)
         }
     }
 }
-enum class Hook { None, Assert, Assume, Error, Nondet, Defined, EndObject };
+enum class Hook { None, Assert, Assume, Error, Nondet, Defined, EndFrame, StackBound };
 Hook hook(const Function& f)
 {
     auto name=f.getName();
     if (name=="__VERIFIER_assert") return Hook::Assert;
     if (name=="__VERIFIER_assume") return Hook::Assume;
     if (name=="__VERIFIER_error") return Hook::Error;
-    if (name=="__llvm2smv_end_object") return Hook::EndObject;
+    if (name=="__llvm2smv_end_frame") return Hook::EndFrame;
+    if (name=="__llvm2smv_stack_bound") return Hook::StackBound;
     if (name.starts_with("__llvm2smv_defined_")) return Hook::Defined;
     static const std::map<std::string,unsigned> widths{{"bool",1},{"char",8},{"uchar",8},
         {"short",16},{"ushort",16},{"int",32},{"uint",32},{"long",64},{"ulong",64},
@@ -107,8 +108,6 @@ void signature(const Function& f,bool memory=false)
         && !f.hasPrefixData() && !f.hasPrologueData() && !f.hasGC() && !f.hasComdat() && !f.hasSection()
         && f.getAddressSpace()==0 && (f.hasExternalLinkage() || f.hasInternalLinkage() || f.hasPrivateLinkage()),
         "Only ordinary C function signatures/linkage are supported");
-    require(f.getReturnType()->isVoidTy() || f.getReturnType()->isIntegerTy() || (memory && f.getReturnType()->isPointerTy()),"Aggregate function ABI is unsupported");
-    for(auto& arg:f.args()) require(arg.getType()->isIntegerTy() || (memory && arg.getType()->isPointerTy()),"Aggregate function ABI is unsupported");
     if (!f.getReturnType()->isVoidTy()) admittedType(f.getReturnType(),memory);
     for (const auto& arg : f.args()) admittedType(arg.getType(),memory);
     attributes(f);
@@ -116,7 +115,7 @@ void signature(const Function& f,bool memory=false)
     if (h==Hook::None) require(!f.isDeclaration(),"Unknown external function: "+f.getName().str());
     else {
         require(f.isDeclaration(),"Verifier hooks must be declarations, not overridden definitions");
-        bool unary=h==Hook::Assert || h==Hook::Assume || h==Hook::Defined || h==Hook::EndObject;
+        bool unary=h==Hook::Assert || h==Hook::Assume || h==Hook::Defined;
         require(f.arg_size()==(unary ? 1u : 0u) && (h==Hook::Nondet ? f.getReturnType()->isIntegerTy() : f.getReturnType()->isVoidTy()),
             "Incorrect verifier hook signature");
         if (h==Hook::Assert || h==Hook::Assume) require(f.getArg(0)->getType()->isIntegerTy(32),"Verifier predicates take an i32 argument");
@@ -206,17 +205,22 @@ void inspect(Function& f, bool normalized, bool memory)
             break;
         case Instruction::Call: {
             auto& call=cast<CallInst>(i);
-            if(memory && (isa<MemIntrinsic>(i) || (isa<IntrinsicInst>(i) && (cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::lifetime_start || cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::lifetime_end)))) {
+            if(memory && (isa<MemIntrinsic>(i) || (isa<IntrinsicInst>(i) && (cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::lifetime_start || cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::lifetime_end || cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::stacksave || cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::stackrestore)))) {
                 require(!call.isMustTailCall() && call.getNumOperandBundles()==0 && call.getCallingConv()==CallingConv::C,"Unsupported intrinsic call convention/bundles",&i);
                 require(call.getCalledFunction()->getAttributes()==Intrinsic::getAttributes(i.getContext(),cast<IntrinsicInst>(i).getIntrinsicID()),
                     "Additional memory-intrinsic declaration attributes are unsupported",&i);
                 if(auto* mem=dyn_cast<MemIntrinsic>(&i)) {
                     require(!mem->isVolatile() && (mem->getIntrinsicID()==Intrinsic::memset || mem->getIntrinsicID()==Intrinsic::memcpy || mem->getIntrinsicID()==Intrinsic::memmove),"Unsupported memory intrinsic",&i);
                     width(mem->getLength()->getType());
-                } else {
+                } else if(cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::lifetime_start || cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::lifetime_end) {
                     auto* a=dyn_cast<AllocaInst>(call.getArgOperand(1)); auto* length=dyn_cast<ConstantInt>(call.getArgOperand(0));
-                    require(a && length && (length->isMinusOne() || length->getZExtValue()==dl.getTypeAllocSize(a->getAllocatedType()).getFixedValue()*cast<ConstantInt>(a->getArraySize())->getZExtValue()),"Lifetime intrinsics must cover one whole directly named stack object",&i);
+                    require(a && length && isa<ConstantInt>(a->getArraySize()) && (length->isMinusOne() || length->getZExtValue()==dl.getTypeAllocSize(a->getAllocatedType()).getFixedValue()*cast<ConstantInt>(a->getArraySize())->getZExtValue()),"Lifetime intrinsics must cover one whole directly named stack object",&i);
                 }
+                if(normalized && cast<IntrinsicInst>(i).getIntrinsicID()==Intrinsic::stacksave)
+                    for(auto* user:i.users()) {
+                        auto* restore=dyn_cast<IntrinsicInst>(user);
+                        require(restore && restore->getIntrinsicID()==Intrinsic::stackrestore && restore->getArgOperand(0)==&i,"Stacksaves may only feed direct stackrestore calls",&i);
+                    }
                 for(unsigned index:call.getAttributes().indexes()) for(Attribute attr:call.getAttributes().getAttributes(index))
                     require(index!=AttributeList::FunctionIndex && attr.hasAttribute(Attribute::Alignment),"Unhandled memory-intrinsic call-site attribute",&i);
                 break;
@@ -227,11 +231,12 @@ void inspect(Function& f, bool normalized, bool memory)
         }
         case Instruction::Alloca: {
             auto& a = cast<AllocaInst>(i);
-            require((memory || !normalized) && (normalized || &b == &f.getEntryBlock()) && a.getAddressSpace() == 0 && isa<ConstantInt>(a.getArraySize())
-                && !a.isUsedWithInAlloca() && !a.isSwiftError()
-                && !cast<ConstantInt>(a.getArraySize())->isZero() && cast<ConstantInt>(a.getArraySize())->getValue().ule(4096)
-                && (memory || (cast<ConstantInt>(a.getArraySize())->isOne() && isAllocaPromotable(&a))),
-                "Allocas require positive fixed sizes in original entry blocks; scalar mode also requires promotion", &i);
+            auto* count=dyn_cast<ConstantInt>(a.getArraySize());
+            require(a.getAddressSpace()==0 && !a.isUsedWithInAlloca() && !a.isSwiftError()
+                && (memory || (!normalized && &b==&f.getEntryBlock() && count && count->isOne() && isAllocaPromotable(&a))),
+                "Unsupported stack allocation form",&i);
+            width(a.getArraySize()->getType());
+            require(!count || (!count->isZero() && count->getValue().ule(4096)),"Fixed allocation count must be 1..4096",&i);
             admittedType(a.getAllocatedType(),memory); break;
         }
         default: throw ScalarError("Unsupported scalar instruction: " + std::string(i.getOpcodeName()), &i);
@@ -240,9 +245,14 @@ void inspect(Function& f, bool normalized, bool memory)
 }
 
 // Unlike InlineFunction's clone-and-prune path, preserve even unused UB sites.
-void inlineExact(CallInst& call)
+struct FrameInfo { unsigned id, parent, depth; std::string function; };
+struct CallFrames {
+    std::map<const Instruction*,unsigned> owners;
+    std::vector<FrameInfo> frames;
+};
+void inlineExact(CallInst& call,Function& callee,CallFrames& frames,unsigned frame)
 {
-    auto& callee=*call.getCalledFunction();
+    unsigned callerFrame=frames.owners.at(&call);
     auto& caller=*call.getFunction();
     ValueToValueMapTy map;
     for (auto& arg : callee.args()) map[&arg]=call.getArgOperand(arg.getArgNo());
@@ -263,6 +273,7 @@ void inlineExact(CallInst& call)
     SmallVector<ReturnInst*,4> returns;
     for (auto* b : blocks) for (auto& i : *b) {
         RemapInstruction(&i,map,RF_NoModuleLevelChanges);
+        frames.owners[&i]=frame;
         if (auto loc=i.getDebugLoc(); loc && call.getDebugLoc())
             i.setDebugLoc(append(loc.get()));
         if (auto* ret=dyn_cast<ReturnInst>(&i)) returns.push_back(ret);
@@ -270,31 +281,30 @@ void inlineExact(CallInst& call)
     auto* before=call.getParent();
     auto* after=before->splitBasicBlock(call.getNextNode(),"call.continue");
     before->getTerminator()->eraseFromParent();
-    auto* jump=BranchInst::Create(blocks.front(),before); jump->setDebugLoc(call.getDebugLoc());
+    auto* jump=BranchInst::Create(blocks.front(),before); jump->setDebugLoc(call.getDebugLoc()); frames.owners[jump]=callerFrame;
     if (!call.getType()->isVoidTy()) {
         if (returns.empty()) call.replaceAllUsesWith(PoisonValue::get(call.getType()));
         else {
             auto* phi=PHINode::Create(call.getType(),returns.size(),"call.result",&after->front());
-            phi->setDebugLoc(call.getDebugLoc());
+            phi->setDebugLoc(call.getDebugLoc()); frames.owners[phi]=callerFrame;
             for (auto* ret : returns) phi->addIncoming(ret->getReturnValue(),ret->getParent());
             call.replaceAllUsesWith(phi);
         }
     }
     for (auto* ret : returns) {
-        auto* branch=BranchInst::Create(after,ret); branch->setDebugLoc(ret->getDebugLoc()); ret->eraseFromParent();
+        auto* branch=BranchInst::Create(after,ret); branch->setDebugLoc(ret->getDebugLoc()); frames.owners[branch]=frame; frames.owners.erase(ret); ret->eraseFromParent();
     }
-    call.eraseFromParent();
+    frames.owners.erase(&call); call.eraseFromParent();
 }
 
 // Validate every syntactically reachable body before normalization changes it.
-void normalizeCalls(Function& entry,bool memory)
+CallFrames normalizeCalls(Function& entry,bool memory,unsigned stackDepth)
 {
     std::map<Function*,unsigned> colors;
     std::vector<Function*> closure;
     std::function<void(Function&,unsigned)> visit = [&](Function& f,unsigned depth) {
         require(depth<256,"Call-graph inspection depth budget exceeded");
-        require(colors[&f]!=1,"Recursive call graphs require a later milestone");
-        if (colors[&f]==2) return;
+        if (colors[&f]) return;
         colors[&f]=1; signature(f,memory); inspect(f,false,memory); closure.push_back(&f);
         for (auto& b : f) for (auto& i : b) if (auto* call=dyn_cast<CallInst>(&i)) {
             if (isa<IntrinsicInst>(i)) continue;
@@ -308,12 +318,14 @@ void normalizeCalls(Function& entry,bool memory)
     auto defined = [&](Value* value, Instruction* before, DebugLoc loc) {
         auto& m=*entry.getParent();
         auto type=FunctionType::get(Type::getVoidTy(m.getContext()),{value->getType()},false);
-        auto fn=m.getOrInsertFunction("__llvm2smv_defined_"+(value->getType()->isIntegerTy() ? std::to_string(width(value->getType())) : std::string("ptr")),type);
+        std::string typeText; raw_string_ostream typeStream(typeText); value->getType()->print(typeStream);
+        auto key=value->getType()->isIntegerTy() ? std::to_string(width(value->getType())) : ts::hexKey(typeText);
+        auto fn=m.getOrInsertFunction("__llvm2smv_defined_"+key,type);
         IRBuilder<> builder(before); builder.SetCurrentDebugLocation(loc); builder.CreateCall(fn,{value});
     };
     for (auto* f : closure) {
         SmallVector<AllocaInst*,8> allocas;
-        for (auto& i : f->getEntryBlock()) if (auto* a=dyn_cast<AllocaInst>(&i); a && isAllocaPromotable(a)) {
+        for (auto& i : f->getEntryBlock()) if (auto* a=dyn_cast<AllocaInst>(&i); a && a->isStaticAlloca() && isAllocaPromotable(a)) {
             bool lifetime=false;
             for(auto* user:a->users()) if(auto* call=dyn_cast<IntrinsicInst>(user))
                 lifetime |= call->getIntrinsicID()==Intrinsic::lifetime_start || call->getIntrinsicID()==Intrinsic::lifetime_end;
@@ -328,10 +340,9 @@ void normalizeCalls(Function& entry,bool memory)
         for (auto* i : original) {
             if (auto* ret=dyn_cast<ReturnInst>(i)) {
                 if(f->hasRetAttribute(Attribute::NoUndef)) defined(ret->getReturnValue(),ret,ret->getDebugLoc());
-                if(memory) for(auto& block:*f) for(auto& item:block) if(auto* a=dyn_cast<AllocaInst>(&item)) {
-                    auto type=FunctionType::get(Type::getVoidTy(f->getContext()),{a->getType()},false);
-                    auto fn=f->getParent()->getOrInsertFunction("__llvm2smv_end_object",type);
-                    IRBuilder<> builder(ret); builder.SetCurrentDebugLocation(ret->getDebugLoc()); builder.CreateCall(fn,{a});
+                if(memory) {
+                    auto fn=f->getParent()->getOrInsertFunction("__llvm2smv_end_frame",FunctionType::get(Type::getVoidTy(f->getContext()),false));
+                    IRBuilder<> builder(ret); builder.SetCurrentDebugLocation(ret->getDebugLoc()); builder.CreateCall(fn);
                 }
             }
             if (auto* call=dyn_cast<CallInst>(i); call && !isa<IntrinsicInst>(i)) {
@@ -341,17 +352,40 @@ void normalizeCalls(Function& entry,bool memory)
             }
         }
     }
+    // Immutable templates prevent recursive calls to the entry from copying an
+    // already-expanded body. Each call path gets distinct bounded frame slots.
+    std::map<Function*,Function*> templates;
+    for(auto* f:closure) { ValueToValueMapTy map; auto* copy=CloneFunction(f,map); copy->setName("__llvm2smv_template_"+f->getName()); templates[f]=copy; }
+    for(auto [original,copy]:templates) for(auto& block:*copy) for(auto& i:block)
+        if(auto* call=dyn_cast<CallInst>(&i)) for(auto [callee,body]:templates)
+            if(call->getCalledFunction()==body) call->setCalledFunction(callee);
+    CallFrames frames; frames.frames.push_back({0,0,1,entry.getName().str()});
+    for(auto& block:entry) for(auto& i:block) frames.owners[&i]=0;
     unsigned expansions=0;
     while (true) {
         CallInst* target=nullptr; size_t count=0;
         for (auto& b : entry) for (auto& i : b) {
             ++count;
-            if (auto* call=dyn_cast<CallInst>(&i); call && !isa<DbgInfoIntrinsic>(i) && !call->getCalledFunction()->isDeclaration()) target=call;
+            if (auto* call=dyn_cast<CallInst>(&i); call && !isa<IntrinsicInst>(i) && !call->getCalledFunction()->isDeclaration()) target=call;
         }
-        require(count<=100000 && expansions<=10000,"Inlining translation budget exceeded");
+        require(count<=100000 && expansions<=10000,"Frame specialization translation budget exceeded");
         if (!target) break;
-        inlineExact(*target); ++expansions;
+        unsigned parent=frames.owners.at(target),depth=frames.frames[parent].depth;
+        if(depth==stackDepth) {
+            auto fn=entry.getParent()->getOrInsertFunction("__llvm2smv_stack_bound",FunctionType::get(Type::getVoidTy(entry.getContext()),false));
+            IRBuilder<> builder(target); builder.SetCurrentDebugLocation(target->getDebugLoc());
+            auto* stop=builder.CreateCall(fn); frames.owners[stop]=parent;
+            if(!target->getType()->isVoidTy()) target->replaceAllUsesWith(PoisonValue::get(target->getType()));
+            frames.owners.erase(target); target->eraseFromParent();
+        } else {
+            auto* callee=target->getCalledFunction(); unsigned id=frames.frames.size();
+            frames.frames.push_back({id,parent,depth+1,callee->getName().str()});
+            inlineExact(*target,*templates.at(callee),frames,id);
+        }
+        ++expansions;
     }
+    for(auto [original,copy]:templates) { (void)original; copy->eraseFromParent(); }
+    return frames;
 }
 json::Object source(const Instruction& i)
 {
@@ -367,7 +401,7 @@ json::Object source(const Instruction& i)
 
 class Lowering {
 public:
-    Lowering(Module& module, Function& function, bool addressable, MemoryLimits limits) : module(module), function(function), addressable(addressable), limits(limits) {}
+    Lowering(Module& module, Function& function, bool addressable, MemoryLimits limits, CallFrames frames) : module(module), function(function), addressable(addressable), limits(limits), frames(std::move(frames)) {}
     json::Object run(const std::string& inputHash);
 private:
     Module& module; Function& function; ts::Model model;
@@ -375,6 +409,7 @@ private:
     bool addressable; MemoryLimits limits; std::unique_ptr<MemoryModel> memory;
     std::map<const Value*,std::vector<Slot>> compound;
     std::vector<Slot> returnCells;
+    CallFrames frames; SymbolRef stackDepthSlot;
     Pieces readCells(const Value*) const;
     std::vector<Slot> allocateCells(const Value&,const std::string&);
     std::vector<ts::Write> cellWrites(const Value&,const Pieces&) const;
@@ -438,12 +473,13 @@ void Lowering::cellsResult(const Instruction& i,const Pieces& pieces,Expr ub)
 }
 void Lowering::memoryStep(const Instruction& i,MemoryEffect effect)
 {
-    auto stop=either(effect.error,either(effect.unsupported,effect.bound));
+    auto stop=either(effect.error,either(effect.unsupported,either(effect.bound,effect.capacity)));
     if(!i.getType()->isVoidTy()) { auto writes=cellWrites(i,effect.value); effect.writes.insert(effect.writes.end(),writes.begin(),writes.end()); }
     effect.writes.push_back({pc,label(locations.at(next(i)))});
     step(i,".memory",bit(true),std::move(effect.writes),stop);
     if(!isBit(effect.error,false)) model.step(locations.at(&i)+".memory-error",both(at(i),effect.error),{{pc,label("ERROR")}});
     if(!isBit(effect.unsupported,false)) model.step(locations.at(&i)+".memory-unsupported",both(at(i),both(no(effect.error),effect.unsupported)),{{pc,label("UNSUPPORTED_MEMORY")}});
+    if(!isBit(effect.capacity,false)) model.step(locations.at(&i)+".stack-allocation-bound",both(at(i),both(no(either(effect.error,either(effect.unsupported,effect.bound))),effect.capacity)),{{pc,label("STACK_ALLOCATION_BOUND")}});
     if(!isBit(effect.bound,false)) model.step(locations.at(&i)+".memory-bound",both(at(i),both(no(either(effect.error,effect.unsupported)),effect.bound)),{{pc,label("MEMORY_BOUND")}});
 }
 ValueExpr Lowering::read(const Value* value) const
@@ -467,6 +503,9 @@ const Instruction* Lowering::next(const Instruction& i) const
 std::vector<ts::Write> Lowering::edge(const BasicBlock& from, const BasicBlock& to) const
 {
     std::vector<ts::Write> writes{{pc,label(locations.at(first(to)))}};
+    auto fromDepth=frames.frames.at(frames.owners.at(from.getTerminator())).depth;
+    auto toDepth=frames.frames.at(frames.owners.at(first(to))).depth;
+    if(fromDepth!=toDepth) writes.push_back({stackDepthSlot,number(8,toDepth)});
     for (const auto& phi : to.phis()) {
         auto incoming=cellWrites(phi,readCells(phi.getIncomingValueForBlock(&from)));
         writes.insert(writes.end(),incoming.begin(),incoming.end());
@@ -574,7 +613,7 @@ void Lowering::lower(const Instruction& i)
 {
     Expr ub=bit(false);
     if(memory) {
-        if(auto* a=dyn_cast<AllocaInst>(&i)) { memoryStep(i,memory->allocate(*a)); return; }
+        if(auto* a=dyn_cast<AllocaInst>(&i)) { memoryStep(i,memory->allocate(*a,read(a->getArraySize()))); return; }
         if(auto* load=dyn_cast<LoadInst>(&i)) { memoryStep(i,memory->load(readCells(load->getPointerOperand()),load->getType(),load->getAlign())); return; }
         if(auto* store=dyn_cast<StoreInst>(&i)) { memoryStep(i,memory->store(readCells(store->getPointerOperand()),store->getValueOperand()->getType(),readCells(store->getValueOperand()),store->getAlign())); return; }
         if(auto* g=dyn_cast<GetElementPtrInst>(&i)) {
@@ -610,12 +649,19 @@ void Lowering::lower(const Instruction& i)
             memoryStep(i,std::move(effect)); return;
         }
         if(auto* intrinsic=dyn_cast<IntrinsicInst>(&i)) {
+            if(intrinsic->getIntrinsicID()==Intrinsic::stacksave) { memoryStep(i,memory->saveStack(*intrinsic)); return; }
+            if(intrinsic->getIntrinsicID()==Intrinsic::stackrestore) {
+                auto* save=dyn_cast<Instruction>(intrinsic->getArgOperand(0));
+                require(save && frames.owners.at(save)==frames.owners.at(&i),"Stack tokens cannot cross call frames",&i);
+                memoryStep(i,memory->restoreStack(*intrinsic)); return;
+            }
             memoryStep(i,memory->lifetime(readCells(intrinsic->getArgOperand(1)),intrinsic->getIntrinsicID()==Intrinsic::lifetime_start)); return;
         }
     }
     if (auto* call=dyn_cast<CallInst>(&i)) {
         auto h=hook(*call->getCalledFunction());
-        if(h==Hook::EndObject) { memoryStep(i,memory->lifetime(readCells(call->getArgOperand(0)),false)); return; }
+        if(h==Hook::StackBound) { step(i,".stack-bound",bit(true),{{pc,label("STACK_BOUND")}},ub); return; }
+        if(h==Hook::EndFrame) { memoryStep(i,memory->endFrame(frames.owners.at(&i))); return; }
         if(h==Hook::Defined && !call->getArgOperand(0)->getType()->isIntegerTy()) {
             for(auto& part:readCells(call->getArgOperand(0))) ub=either(ub,part.poison);
             step(i,".defined",bit(true),{{pc,label(locations.at(next(i)))}},ub);
@@ -680,7 +726,7 @@ void Lowering::lower(const Instruction& i)
         }
         step(i,".default",other,edge(*i.getParent(),*sw->getDefaultDest()),ub);
     } else if (auto* ret=dyn_cast<ReturnInst>(&i)) {
-        std::vector<ts::Write> writes{{pc,label("DONE")}};
+        std::vector<ts::Write> writes{{pc,label("DONE")},{stackDepthSlot,number(8,0)}};
         if (ret->getReturnValue()) {
             auto values=readCells(ret->getReturnValue());
             for(unsigned j=0;j<values.size();++j) {
@@ -695,8 +741,8 @@ void Lowering::lower(const Instruction& i)
 }
 json::Object Lowering::run(const std::string& inputHash)
 {
-    if(addressable) memory=std::make_unique<MemoryModel>(model,module,function,limits);
-    std::vector<std::string> labels{"DONE","ERROR","ASSUMED_OUT","UNSUPPORTED_MEMORY","MEMORY_BOUND"}; unsigned bi=0;
+    if(addressable) memory=std::make_unique<MemoryModel>(model,module,function,limits,frames.owners);
+    std::vector<std::string> labels{"DONE","ERROR","ASSUMED_OUT","UNSUPPORTED_MEMORY","MEMORY_BOUND","STACK_BOUND","STACK_ALLOCATION_BOUND"}; unsigned bi=0;
     for (const auto& b : function) {
         unsigned ii=0;
         for (const auto& i : b) {
@@ -712,6 +758,7 @@ json::Object Lowering::run(const std::string& inputHash)
         ++bi;
     }
     pcType=ts::Type::enumeration("pc",std::move(labels));
+    stackDepthSlot=model.variable("stack.depth",ts::Type::word(8),Mode::State,number(8,1));
     pc=model.variable("pc",*pcType,Mode::State,label(locations.at(first(function.getEntryBlock()))));
     if (!function.getReturnType()->isVoidTy()) {
         unsigned w=width(function.getReturnType());
@@ -734,7 +781,7 @@ json::Object Lowering::run(const std::string& inputHash)
         if (found==locations.end()) continue;
         const auto& key=found->second;
         auto record=source(*instruction);
-        record["key"]=key;
+        record["key"]=key; record["frame"]=frames.owners.at(instruction);
         if (auto* call=dyn_cast<CallInst>(instruction)) {
             auto h=hook(*call->getCalledFunction());
             record["hook"]=call->getCalledFunction()->getName().str();
@@ -748,17 +795,22 @@ json::Object Lowering::run(const std::string& inputHash)
         }
         locationsJson[ts::literalName(*pcType,key)]=std::move(record);
     }
+    model.property("stack_within_bound",no(eq(v(pc),label("STACK_BOUND"))));
+    model.property("stack_allocation_within_bound",no(eq(v(pc),label("STACK_ALLOCATION_BOUND"))));
     model.property("memory_supported",no(eq(v(pc),label("UNSUPPORTED_MEMORY"))));
     model.property("memory_within_bound",no(eq(v(pc),label("MEMORY_BOUND"))));
     model.property("assertion_failed",failed);
     model.property("safe",no(either(failed,eq(v(pc),label("ERROR")))));
     model.property("assumed_out",eq(v(pc),label("ASSUMED_OUT")));
     model.property("progress_goal",either(eq(v(pc),label("DONE")),eq(v(pc),label("ASSUMED_OUT"))));
-    return ts::artifact(model,{{"lowering",memory ? "memory-v1" : "scalar-v2"},{"normalization",memory ? "checked-inline-memory-v1" : "checked-inline-mem2reg-v2"},
+    json::Array frameList;
+    for(auto& f:frames.frames) frameList.push_back(json::Object{{"id",f.id},{"parent",f.parent},{"depth",f.depth},{"function",f.function}});
+    json::Object stack{{"policy","bounded-specialized-frames-v1"},{"depth_limit",limits.stackDepth},{"frames",std::move(frameList)}};
+    return ts::artifact(model,{{"lowering",memory ? "memory-v2" : "scalar-v3"},{"normalization","bounded-frames-v1"},{"stack_depth",std::to_string(limits.stackDepth)},
         {"input_ir_sha256",inputHash},{"normalized_ir_sha256",ts::sha256(moduleText(module))},
         {"entry",function.getName().str()},{"target_triple",module.getTargetTriple()},
         {"data_layout",module.getDataLayoutStr()},{"environment","closed-module; no interposition; verifier-hooks-v1"},
-        {"semantics",memory ? "LLVM18 integers; opaque object pointers; strict uninitialized-read diagnostics; memory coverage required" : "LLVM18 scalar bitvectors and poison; error sink at admitted UB; undef rejected"}},memory ? "llvm18-memory-v1" : "llvm18-scalar-v2",std::move(locationsJson),memory ? memory->describe() : json::Object{});
+        {"semantics",memory ? "LLVM18 integers; opaque object pointers; strict uninitialized-read diagnostics; memory coverage required" : "LLVM18 scalar bitvectors and poison; error sink at admitted UB; undef rejected"}},memory ? "llvm18-memory-v2" : "llvm18-scalar-v3",std::move(locationsJson),memory ? memory->describe() : json::Object{},std::move(stack));
 }
 } // namespace
 ScalarError::ScalarError(std::string message, const Instruction* instruction)
@@ -803,11 +855,11 @@ json::Object lowerScalar(Module& module, StringRef entry, MemoryLimits limits)
     bool addressable=false;
     for(auto& g:module.globals()) addressable |= !g.getValueType()->isIntegerTy() || !isa<ConstantInt>(g.getInitializer());
     for(auto& fn:module) if(!fn.isDeclaration())
-        for(auto& arg:fn.args()) addressable |= arg.getType()->isPointerTy();
+        for(auto& arg:fn.args()) addressable |= !arg.getType()->isIntegerTy();
     for(auto& fn:module) for(auto& block:fn) for(auto& i:block) {
         if(auto* a=dyn_cast<AllocaInst>(&i)) {
             auto* count=dyn_cast<ConstantInt>(a->getArraySize());
-            addressable |= !a->getAllocatedType()->isIntegerTy() || !count || !count->isOne() || !isAllocaPromotable(a);
+            addressable |= &block!=&fn.getEntryBlock() || !a->getAllocatedType()->isIntegerTy() || !count || !count->isOne() || !isAllocaPromotable(a);
         }
         else if(!i.getType()->isVoidTy() && !i.getType()->isIntegerTy()) addressable=true;
         if(auto* load=dyn_cast<LoadInst>(&i)) addressable |= !isa<GlobalVariable>(load->getPointerOperand()) && !isa<AllocaInst>(load->getPointerOperand());
@@ -824,11 +876,12 @@ json::Object lowerScalar(Module& module, StringRef entry, MemoryLimits limits)
         if(isa<MemIntrinsic>(i)) addressable=true;
         if(auto* intr=dyn_cast<IntrinsicInst>(&i)) addressable |= intr->getIntrinsicID()==Intrinsic::lifetime_start || intr->getIntrinsicID()==Intrinsic::lifetime_end;
     }
-    normalizeCalls(*f,addressable);
+    require(limits.stackDepth>0 && limits.stackDepth<=64,"Stack depth must be 1..64");
+    auto frames=normalizeCalls(*f,addressable,limits.stackDepth);
     std::string errors; raw_string_ostream stream(errors);
     bool invalid=verifyModule(module,&stream);
     require(!invalid,"Normalization produced invalid LLVM IR: "+errors);
     inspect(*f,true,addressable);
-    return Lowering(module,*f,addressable,limits).run(inputHash);
+    return Lowering(module,*f,addressable,limits,std::move(frames)).run(inputHash);
 }
 }

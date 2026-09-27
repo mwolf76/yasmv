@@ -1,10 +1,9 @@
-# Bounded addressable memory (M4)
+# Bounded addressable memory (M4–M5)
 
 M4 extends the [scalar contract](SCALAR_MODEL.md) and [C workflow](C_WORKFLOW.md)
 with fixed-size arrays and structures, addressable globals and stack objects,
 integer and pointer loads/stores, GEP, aggregate operations, and memory intrinsics.
-It retains the LLVM 18, little-endian Linux x86_64/aarch64 baseline, exact acyclic
-inlining, and mandatory native model validation. This is an explicitly bounded
+It retains the LLVM 18, little-endian Linux x86_64/aarch64 baseline, [bounded call frames](CALL_STACK.md), and mandatory native model validation. This is an explicitly bounded
 model with strict memory diagnostics, not a complete ISO C verifier.
 
 ```sh
@@ -64,8 +63,8 @@ itself a claim of ISO C undefined behavior. Padding starts uninitialized. An i1
 store initializes only its low bit. Poison bits propagate through loads and
 stores, failing at the admitted uses described in the scalar contract.
 
-Only positive, constant-size entry-block allocas in the original functions are
-admitted. Special ABI allocation flags and GEP `inrange` restrictions are rejected. The inliner preserves their execution and inserts object expiration
+Fixed and bounded dynamic allocas in any block are admitted under the
+[M5 allocation policy](CALL_STACK.md#stack-allocation-and-restoration). Special ABI allocation flags and GEP `inrange` restrictions are rejected. The inliner preserves their execution and inserts object expiration
 at function returns. Reusing an inlined allocation site increments its generation,
 so a pointer escaping an earlier call cannot alias the next allocation. Whole
 object `llvm.lifetime.start/end` is supported for directly named allocas, with
@@ -88,23 +87,25 @@ and zero-sized typed accesses are rejected before publication. Allocation genera
 (maximum 255). A further allocation enters `MEMORY_BOUND` before wraparound.
 Neither limit silently removes an execution.
 
-Safety queries conjoin `safe`, `memory_supported`, and `memory_within_bound`.
+Safety queries conjoin `safe`, `memory_supported`, `memory_within_bound`,
+`stack_within_bound`, and `stack_allocation_within_bound`.
 A replayed coverage counterexample yields `unsupported` (exit 2) or
 `resource_bound_reached` (exit 3), rather than safety or an assertion violation.
 These absorbing states also fail the progress goal. Direct model clients must
-check both coverage properties alongside their requested safety property.
+check all coverage properties alongside their requested safety property.
 Ordinary time/depth/state limits retain their existing result scopes.
 
-Source projections include object liveness, generation, bytes, initialized masks,
+Source projections include frame ownership, allocation status, dynamic extent,
+object liveness, generation, bytes, initialized masks,
 and poison masks. Full pointer fragments remain available in native model traces.
 Models preserve declared trace slots while substituting inductively constant
 values in generated expressions. Dynamic byte reads combine disjoint address
 cases, and statically provable GEP ranges reduce internal arithmetic widths.
 These transformations do not prune instructions or UB sites.
 
-General recursive call frames, dynamic stack sizes, heap allocation, aggregate
-function ABI, arbitrary pointer representations, and library models remain later
-milestones. Large models may still exhaust checker resources; such results are
+Heap allocation, special aggregate ABI attributes, arbitrary pointer
+representations, and library models remain later milestones. Recursive calls and
+dynamic stack sizes follow the M5 contract. Large models may still exhaust checker resources; such results are
 inconclusive. Native replay validates a generated model path, not translation
 correctness or source-level equivalence.
 

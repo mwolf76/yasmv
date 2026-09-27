@@ -46,7 +46,7 @@ class TranslatorTests(unittest.TestCase):
         result = self.run_tool('--capabilities', expected=0)
         report = json.loads(result.stdout)
         self.assertEqual(report['required_llvm_major'], 18)
-        self.assertEqual(report['milestone'], 'M4')
+        self.assertEqual(report['milestone'], 'M5')
         self.assertTrue(report['scalar_candidate_available'])
         self.assertTrue(report['typed_model_foundation'])
         self.assertEqual(report['supported_features'], [])

@@ -1,11 +1,12 @@
 # llvm2smv implementation plan
 
-Status: M0–M4 implemented on 2026-09-27, following code review at
+Status: M0–M5 implemented on 2026-09-27, following code review at
 `84738750`. The current [frontend contract](../llvm2smv/README.md) disables
 legacy SMV generation and provides verified IR inventory and rejection
 diagnostics. M1 adds the internal typed model foundation; M2 adds admitted scalar execution.
 M3 adds the controlled scalar C safety workflow. M4 adds bounded addressable
-memory with explicit coverage obligations. M5 and later milestones remain proposed. The review findings
+memory with explicit coverage obligations. M5 adds bounded recursive frames and
+dynamic stack allocation. M6 and later milestones remain proposed. The review findings
 describe the pre-M0 implementation.
 
 The agreed scope is sequential C with integers, arrays, pointers, calls, and
@@ -221,8 +222,55 @@ Validation on LLVM/Clang 18.1.3 and Linux/aarch64:
   a fixed translator binary. An earlier scalar run overlapped a frontend relink
   and failed to launch the executable; that run was discarded and rerun.
 
-The next milestone is M5: bounded general call frames and recursion. Heap
-allocation and general numeric pointer representations remain later work.
+M5 below extends this foundation to recursive calls and dynamic stack storage.
+Heap allocation and general numeric pointer representations remain later work.
+
+### M5 bounded call frames
+
+The [call-stack contract](../llvm2smv/CALL_STACK.md) extends the existing execution
+model to recursive and mutually recursive direct calls. Frames are specialized
+by bounded static call path: each has distinct registers/objects, explicit CFG
+return continuations, argument wiring, return PHIs, and tracked active depth.
+This refines the proposed runtime-array representation while preserving its
+bounded sequential behavior. It reuses the checked CFG machinery but can expand
+exponentially for branching recursion; translation budgets remain explicit.
+
+Direct LLVM aggregate arguments/results preserve noundef checks. Special ABI
+attributes such as byval/sret remain rejected. Dynamic allocas track actual size
+within a declared per-site capacity; one allocation may remain outstanding per
+site/frame. Repeated unreleased allocas stop at a resource bound. Same-frame
+stacksave/restore releases later allocations, return releases callee objects,
+and allocation generations never wrap. Older dynamic extents are not retained;
+operations requiring those extents stop with unsupported coverage.
+
+`stack_within_bound` and `stack_allocation_within_bound` join the memory/safety
+obligations. Depth/capacity failures are replayed resource results for safety
+and termination queries. Source maps record frame ownership and the static
+frame tree; projected traces expose active call chains and dynamic memory state.
+The driver and IR publisher both forward and record the new limits.
+
+Validation on LLVM/Clang 18.1.3 and Linux/aarch64:
+
+* All 96 process regression groups passed: 19 frontend, 15 writer/publication,
+  14 scalar, 11 C workflow, 19 memory, and 18 stack groups. The stack total
+  includes a full 16-group run followed by two added focused boundary/identity
+  groups. C++ typed-model self-tests also passed.
+* Recursive and mutually recursive fixtures preserve callers; dynamic extents,
+  stale generations, stack restoration, aggregate noundef boundaries, token/ABI
+  rejection, and safety/progress resource classifications have native checks.
+  The recursive C example and both nondeterministic VLA sizes agree with
+  independent native C execution.
+* All 19 frontend groups and 10 focused stack groups passed under ASan/UBSan
+  with leak detection. The checker remained the optimized native build; this
+  is frontend sanitizer coverage, not a core sanitizer run.
+* A clean out-of-tree frontend build passed typed-model self-tests and recursive
+  C/rejection checks. Distribution inclusion, Python syntax, documentation links,
+  and whitespace checks passed. No core source was changed.
+
+Larger recursive-object and VLA configurations hit solver wall limits during
+validation and returned inconclusive results. The final semantic fixtures use
+small explicit capacities; scalability work remains M8. The next milestone is
+M6: bounded heap allocation and closed-world indirect call targets.
 
 ## 1. Findings in the current codebase
 
