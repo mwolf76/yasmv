@@ -9,6 +9,7 @@
 Makefile
 Makefile.in
 *.m4
+!m4/cadical.m4
 autom4te.cache
 config*
 .dirstamp

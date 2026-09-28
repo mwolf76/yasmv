@@ -13,6 +13,8 @@
 #include <jsoncpp/json/json.h>
 #include <fstream>
 #include <sstream>
+#include <limits>
+#include <thread>
 
 #ifdef Minisat_SolverTypes_h
 #error "Engine clients must not include MiniSat headers transitively"
@@ -138,6 +140,90 @@ BOOST_AUTO_TEST_CASE(packed_microcode_loading)
             }
         }
     }
+}
+
+BOOST_AUTO_TEST_CASE(cadical_result_lifetime_and_limits)
+{
+    sat::Engine engine("result-lifetime");
+    const auto x = engine.new_sat_var(true);
+    engine.add_clause({sat::mkLit(x)});
+    BOOST_REQUIRE(engine.solve() == sat::STATUS_SAT);
+    BOOST_CHECK_EQUAL(engine.value(x), 1);
+    const auto y = engine.new_sat_var(true);
+    BOOST_CHECK(engine.status() == sat::STATUS_UNKNOWN);
+    BOOST_CHECK(!engine.assigned(x));
+    BOOST_CHECK_THROW(engine.value(x), std::logic_error);
+    BOOST_REQUIRE(engine.solve() == sat::STATUS_SAT);
+    BOOST_CHECK(engine.assigned(y)); // unused declared bits have complete values.
+    engine.add_clause({sat::mkLit(x, true)});
+    BOOST_CHECK(!engine.assigned(x));
+    BOOST_REQUIRE(engine.solve() == sat::STATUS_UNSAT);
+    engine.add_clause({});
+    BOOST_CHECK(engine.failed_groups().empty());
+
+    sat::Engine limited("limits");
+    limited.configure(0, -1);
+    BOOST_CHECK(limited.solve() == sat::STATUS_UNKNOWN);
+    limited.configure(-1, 0);
+    BOOST_CHECK(limited.solve() == sat::STATUS_UNKNOWN);
+    limited.configure(std::numeric_limits<int64_t>::max(), std::numeric_limits<int64_t>::max());
+    BOOST_CHECK(limited.solve() == sat::STATUS_SAT);
+    limited.configure(-1, -1);
+    BOOST_CHECK(limited.solve() == sat::STATUS_SAT);
+    BOOST_CHECK_THROW(limited.configure(-2, -1), std::invalid_argument);
+    std::thread canceller([&] { limited.interrupt(); });
+    canceller.join();
+    BOOST_CHECK(limited.solve() == sat::STATUS_UNKNOWN);
+    BOOST_CHECK_THROW(limited.value(0), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE(cadical_search_budgets_and_accounting)
+{
+    const auto pigeonhole = [](sat::Engine& engine) {
+        std::vector<std::vector<sat::Var>> variables(9);
+        for (auto& pigeon : variables) {
+            sat::Lits clause;
+            for (unsigned hole = 0; hole < 8; ++hole) {
+                pigeon.push_back(engine.new_sat_var(true));
+                clause.push_back(sat::mkLit(pigeon.back()));
+            }
+            engine.add_clause(clause);
+        }
+        for (unsigned hole = 0; hole < 8; ++hole)
+            for (unsigned p = 0; p < 9; ++p)
+                for (unsigned q = p + 1; q < 9; ++q)
+                    engine.add_clause({sat::mkLit(variables[p][hole], true),
+                                       sat::mkLit(variables[q][hole], true)});
+    };
+    for (bool propagation : {false, true}) {
+        query::QueryLimits limits;
+        if (propagation) limits.propagations = 1;
+        else limits.conflicts = 1;
+        query::QueryContext context(limits);
+        query::ContextScope scope(context);
+        sat::Engine engine("search-budget");
+        pigeonhole(engine);
+        BOOST_CHECK(engine.solve() == sat::STATUS_UNKNOWN);
+        BOOST_CHECK(context.stop == (propagation ? query::StopReason::propagation_budget :
+                                                  query::StopReason::conflict_budget));
+        BOOST_CHECK((propagation ? context.propagations_used : context.conflicts_used) >= 1);
+        BOOST_CHECK(engine.failed_groups().empty());
+    }
+    query::QueryContext context;
+    query::ContextScope scope(context);
+    sat::Engine engine("accounting");
+    pigeonhole(engine);
+    BOOST_REQUIRE(engine.solve() == sat::STATUS_UNSAT);
+    const auto conflicts = context.conflicts_used, propagations = context.propagations_used;
+    BOOST_CHECK(conflicts > 0);
+    BOOST_CHECK(propagations > 0);
+    BOOST_CHECK(engine.solve() == sat::STATUS_UNSAT);
+    BOOST_CHECK(context.conflicts_used >= conflicts);
+    BOOST_CHECK(context.propagations_used >= propagations);
+    // An exhausted cumulative budget stops the next solve before a trivial answer.
+    context.limits.conflicts = context.conflicts_used;
+    BOOST_CHECK(engine.solve() == sat::STATUS_UNKNOWN);
+    BOOST_CHECK(context.stop == query::StopReason::conflict_budget);
 }
 
 BOOST_AUTO_TEST_CASE(algorithm_status_and_enumeration)

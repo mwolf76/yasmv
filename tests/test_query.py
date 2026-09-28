@@ -240,6 +240,25 @@ class QueryTests(unittest.TestCase):
         child = normalize(self.job(query={'operation': 'simulate', 'trace': parent})['trace'])
         self.assertEqual(self.replay(child)['outcome'], 'valid')
 
+    def test_cadical_provenance(self):
+        result = self.reach()
+        identity = result['identity']
+        self.assertIn('/cadical-3.0.1-c607304', identity['engine'])
+        self.assertEqual(identity['solver']['name'], 'cadical')
+        self.assertEqual(identity['solver']['version'], '3.0.1')
+        self.assertEqual(identity['solver']['revision'], 'c60730422e758ef1cebe7aeddf2dda31c996bf04')
+        self.assertEqual(identity['solver']['propagation_counter'], 'search')
+        self.assertEqual(identity['solver']['propagation_limit'], 'cooperative')
+        self.assertEqual(identity['options']['sat_random_seed'], 0)
+        self.assertNotIn('sat_var_decay', identity['options'])
+        self.assertEqual(result['trace']['identity'], identity)
+        info = subprocess.run([str(ROOT / 'yasmv'), '--solver-info'],
+                              capture_output=True, text=True, check=True, timeout=10)
+        linked = json.loads(info.stdout)
+        self.assertEqual(linked['signature'], identity['solver']['signature'])
+        self.assertEqual(linked['revision'], identity['solver']['revision'])
+        self.assertEqual(linked['linkage'], 'static')
+
     def test_runner_hard_deadline_discards_partial_output(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)

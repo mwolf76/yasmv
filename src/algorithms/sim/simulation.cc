@@ -134,8 +134,8 @@ namespace sim {
                     const enc::UCBI& ucbi { bm.find_ucbi(bit) };
                     const auto tcbi { enc::TCBI(ucbi, 0) };
 
-                    const sat::Var minisat_var { engine.tcbi_to_var(tcbi) };
-                    exclusion.push_back(sat::mkLit(minisat_var, engine.value(minisat_var)));
+                    const sat::Var sat_var { engine.existing_var(tcbi) };
+                    exclusion.push_back(sat::mkLit(sat_var, engine.value(sat_var)));
                 }
             }
 
