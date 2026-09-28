@@ -62,7 +62,10 @@ struct Slot { SymbolRef bits, poison; };
 
 void attributes(const Function& f)
 {
-    static const std::set<std::string> strings{"frame-pointer", "no-trapping-math", "stack-protector-buffer-size", "target-cpu", "target-features", "tune-cpu"};
+    // Clang emits min-legal-vector-width even for scalar functions on x86.
+    // It only guides target code generation; vector operations are still
+    // rejected by the type/instruction admission checks below.
+    static const std::set<std::string> strings{"frame-pointer", "min-legal-vector-width", "no-trapping-math", "stack-protector-buffer-size", "target-cpu", "target-features", "tune-cpu"};
     for (unsigned index : f.getAttributes().indexes()) {
         for (Attribute a : f.getAttributes().getAttributes(index)) {
             bool ok = false;

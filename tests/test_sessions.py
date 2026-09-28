@@ -11,6 +11,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -88,12 +89,22 @@ class SessionTests(unittest.TestCase):
         pid = session.process.pid
         os.kill(pid, signal.SIGSTOP)
         cancel = threading.Event()
-        timer = threading.Timer(.5, cancel.set); timer.start()
-        try:
+        started = threading.Event()
+        original_query = session.query
+        def active_query(*args, **kwargs):
+            started.set()
+            return original_query(*args, **kwargs)
+        # Fingerprinting can take longer than a fixed cancellation delay.
+        # Wait until the stopped snapshot is leased by this query so that
+        # cancellation exercises active-session cleanup, not admission.
+        with patch.object(session, 'query', side_effect=active_query), ThreadPoolExecutor(max_workers=1) as executor:
+            pending = executor.submit(self.run_query, cancel=cancel)
+            try:
+                self.assertTrue(started.wait(timeout=10))
+            finally:
+                cancel.set()
             with self.assertRaises(Interrupted):
-                self.run_query(cancel=cancel)
-        finally:
-            timer.join()
+                pending.result(timeout=10)
         self.assertFalse(Path(f'/proc/{pid}').exists())
         self.assertEqual(self.run_query()['outcome'], 'reachable')
         session = next(iter(self.pool.sessions.values()))

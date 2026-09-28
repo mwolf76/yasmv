@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """M2 artifact, isolation, protocol, and independent retry-model acceptance gates."""
 from copy import deepcopy
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 import importlib.util
 import json
 import os
@@ -12,6 +13,7 @@ import tempfile
 import threading
 import time
 import unittest
+from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
@@ -79,6 +81,46 @@ class WorkbenchTests(unittest.TestCase):
         self.assertNotEqual(a['id'], self.revision(source=TOGGLE + '\n')['id'])
         self.assertEqual(self.engine.revision(a['id'])['inputs'], {'i': '0'})
         self.assertEqual(len(self.engine.revisions()), 3)
+
+    def test_completed_job_includes_terminal_event(self):
+        revision = self.revision()
+        request = self.request(revision, dict(operation='validate-model'))
+        result = protocol.failure(request['request_id'], 'test-failure', 'Test worker result')
+        written = threading.Event()
+        publish = threading.Event()
+        reading = threading.Event()
+
+        def paused_atomic(path, value):
+            atomic(path, value)
+            if Path(path).name == 'result.json':
+                written.set()
+                self.assertTrue(publish.wait(timeout=10))
+
+        def read_job(identifier):
+            reading.set()
+            return self.engine.job(identifier)
+
+        with patch('tools.workbench.engine.atomic', side_effect=paused_atomic), \
+                patch.object(self.engine, 'worker', return_value=result), \
+                ThreadPoolExecutor(max_workers=1) as executor:
+            identifier = self.engine.submit(request)
+            try:
+                self.assertTrue(written.wait(timeout=10))
+                pending = executor.submit(read_job, identifier)
+                self.assertTrue(reading.wait(timeout=10))
+                # A poll must not observe completion while its terminal event
+                # and active-job cleanup are still waiting to be published.
+                with self.assertRaises(TimeoutError):
+                    pending.result(timeout=.1)
+            finally:
+                publish.set()
+            completed = pending.result(timeout=10)
+        self.assertFalse(completed['running'])
+        self.assertEqual(completed['result'], result)
+        events = self.engine.events(identifier)
+        self.assertEqual(sum(event['event'] == 'result' for event in events), 1)
+        self.assertEqual(events[-1]['result'], result)
+        self.assertNotIn(identifier, self.engine.active)
 
     def test_malformed_protocol_never_launches_worker(self):
         rev = self.revision()

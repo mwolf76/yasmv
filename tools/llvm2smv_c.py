@@ -14,7 +14,10 @@ from llvm2smv_artifact import ArtifactError, ArtifactUnknown, FILES, check_artif
 
 ROOT = Path(__file__).resolve().parents[1]
 RUNTIME = ROOT / 'llvm2smv/runtime'
-FLAGS = ['-std=c11', '-O0', '-g', '-fno-finite-loops', '-Werror=implicit-function-declaration']
+# Some Clang builds record the command line in debug metadata by default,
+# including our random temporary output path. Keep source debug information,
+# but record the controlled flags in c_build instead of embedding that path.
+FLAGS = ['-std=c11', '-O0', '-g', '-gno-record-command-line', '-fno-finite-loops', '-Werror=implicit-function-declaration']
 
 
 def digest(data):

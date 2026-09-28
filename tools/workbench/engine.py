@@ -179,10 +179,13 @@ class Engine:
             return False
 
     def job(self, identifier):
-        directory = self.path('jobs', identifier)
-        request = read(directory / 'request.json')
-        result = read(directory / 'result.json') if (directory / 'result.json').exists() else None
-        return dict(request=request, result=result, running=result is None)
+        # Completion also publishes the terminal event and releases the active
+        # slot. Readers must observe that entire update under the same lock.
+        with self.guard:
+            directory = self.path('jobs', identifier)
+            request = read(directory / 'request.json')
+            result = read(directory / 'result.json') if (directory / 'result.json').exists() else None
+            return dict(request=request, result=result, running=result is None)
 
     def jobs(self):
         return [self.job(p.name) for p in sorted((self.directory / 'jobs').iterdir(), key=lambda p: p.stat().st_mtime_ns)
