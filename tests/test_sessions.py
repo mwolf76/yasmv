@@ -139,6 +139,27 @@ class SessionTests(unittest.TestCase):
         self.assertFalse(Path(f'/proc/{parent}').exists())
         self.assertEqual(self.run_query()['outcome'], 'reachable')
 
+    def test_solver_budget_does_not_poison_cached_session(self):
+        first = self.run_query()
+        session = next(iter(self.pool.sessions.values()))
+        pid = session.process.pid
+        for budget in ('conflicts', 'propagations'):
+            with self.subTest(budget=budget):
+                result = self.run_query(dict(request_id=f'budget-{budget}', operation='reach', target='x',
+                                             limits={'depth': 2, budget: 0}))
+                self.assertEqual(result['status'], 'unknown')
+                self.assertEqual(result['stop_reason'], 'conflict_budget' if budget == 'conflicts' else 'propagation_budget')
+                self.assertIsNone(result['outcome'])
+                self.assertIsNone(result['trace'])
+                recovered = self.run_query()
+                self.assertEqual(recovered['outcome'], 'reachable')
+                self.assertEqual(recovered['identity'], first['identity'])
+                self.assertTrue(recovered['statistics']['session_cache_hit'])
+                self.assertEqual(next(iter(self.pool.sessions.values())).process.pid, pid)
+                replay = self.run_query(dict(request_id=f'replay-{budget}', operation='validate-trace',
+                                             trace=recovered['trace']))
+                self.assertEqual(replay['outcome'], 'valid')
+
     def test_input_root_and_content_keys(self):
         # Fingerprint checks actual content, including same-size, restored-mtime edits.
         with tempfile.TemporaryDirectory() as directory:

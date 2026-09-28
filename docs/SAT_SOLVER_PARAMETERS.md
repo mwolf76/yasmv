@@ -7,7 +7,17 @@ machine-readable responses remain clean.
 
 `--sat-random-seed=SEED` accepts integers from 0 through 2000000000.
 The default is 0. Fractional, non-finite, negative, and out-of-range values are
-rejected. Other CaDiCaL options use upstream defaults.
+rejected.
+
+The adapter explicitly disables CaDiCaL's `inprobing` simplification schedule.
+The bounded LLVM regression could spend excessive time in that schedule;
+other native optimizations remain enabled. This fixed policy is recorded in
+`--solver-info` and query/trace identities as `settings.inprobing: false`.
+See the [migration validation](CADICAL_MIGRATION_VALIDATION.md) for measurements.
+Other options retain their upstream initialization. CaDiCaL also reads native
+`CADICAL_*` environment overrides; these are not supported yasmv tuning options
+and must be unset for reproducible validation. The adapter's explicit quiet,
+seed, and inprobing settings take precedence over those environment values.
 
 ```sh
 ./yasmv --sat-random-seed=7 model.smv

@@ -15,10 +15,15 @@
 #include <sstream>
 #include <limits>
 #include <thread>
+#include <random>
+#include <set>
+#include <type_traits>
 
 #ifdef Minisat_SolverTypes_h
 #error "Engine clients must not include MiniSat headers transitively"
 #endif
+
+static_assert(std::is_same_v<decltype(std::declval<sat::Engine&>().groups()), const sat::Groups&>);
 
 namespace {
 class TestCommand : public cmd::Command {
@@ -32,6 +37,24 @@ void clause(sat::Engine& engine, std::initializer_list<sat::Lit> literals)
     sat::Lits values;
     for (auto literal : literals) values.push_back(literal);
     engine.add_clause(values);
+}
+
+void pigeonhole(sat::Engine& engine, unsigned holes = 8)
+{
+    std::vector<std::vector<sat::Var>> variables(holes + 1);
+    for (auto& pigeon : variables) {
+        sat::Lits clause;
+        for (unsigned hole = 0; hole < holes; ++hole) {
+            pigeon.push_back(engine.new_sat_var(true));
+            clause.push_back(sat::mkLit(pigeon.back()));
+        }
+        engine.add_clause(clause);
+    }
+    for (unsigned hole = 0; hole < holes; ++hole)
+        for (unsigned p = 0; p <= holes; ++p)
+            for (unsigned q = p + 1; q <= holes; ++q)
+                engine.add_clause({sat::mkLit(variables[p][hole], true),
+                                   sat::mkLit(variables[q][hole], true)});
 }
 }
 
@@ -179,22 +202,6 @@ BOOST_AUTO_TEST_CASE(cadical_result_lifetime_and_limits)
 
 BOOST_AUTO_TEST_CASE(cadical_search_budgets_and_accounting)
 {
-    const auto pigeonhole = [](sat::Engine& engine) {
-        std::vector<std::vector<sat::Var>> variables(9);
-        for (auto& pigeon : variables) {
-            sat::Lits clause;
-            for (unsigned hole = 0; hole < 8; ++hole) {
-                pigeon.push_back(engine.new_sat_var(true));
-                clause.push_back(sat::mkLit(pigeon.back()));
-            }
-            engine.add_clause(clause);
-        }
-        for (unsigned hole = 0; hole < 8; ++hole)
-            for (unsigned p = 0; p < 9; ++p)
-                for (unsigned q = p + 1; q < 9; ++q)
-                    engine.add_clause({sat::mkLit(variables[p][hole], true),
-                                       sat::mkLit(variables[q][hole], true)});
-    };
     for (bool propagation : {false, true}) {
         query::QueryLimits limits;
         if (propagation) limits.propagations = 1;
@@ -224,6 +231,191 @@ BOOST_AUTO_TEST_CASE(cadical_search_budgets_and_accounting)
     context.limits.conflicts = context.conflicts_used;
     BOOST_CHECK(engine.solve() == sat::STATUS_UNKNOWN);
     BOOST_CHECK(context.stop == query::StopReason::conflict_budget);
+}
+
+BOOST_AUTO_TEST_CASE(cadical_group_updates_are_transactional)
+{
+    sat::Engine engine("group-lifetime");
+    const auto group = engine.new_group();
+    engine.add_clause({sat::mkLit(group)});
+    BOOST_REQUIRE(engine.solve() == sat::STATUS_SAT);
+    auto groups = engine.groups();
+    // Merely inspecting or editing a copy must not invalidate the model.
+    groups.back() = -group;
+    BOOST_CHECK(engine.assigned(group));
+    BOOST_CHECK_THROW(engine.set_groups({0, -group, std::numeric_limits<int>::min()}), std::out_of_range);
+    BOOST_CHECK_THROW(engine.set_groups({0, -group, group + 1}), std::out_of_range);
+    BOOST_CHECK(engine.assigned(group));
+    BOOST_CHECK_EQUAL(engine.groups().back(), group);
+    engine.set_groups(groups);
+    BOOST_CHECK(!engine.assigned(group));
+    BOOST_REQUIRE(engine.solve() == sat::STATUS_UNSAT);
+    BOOST_CHECK(!engine.failed_groups().empty());
+    engine.set_groups({0, group});
+    BOOST_CHECK(engine.failed_groups().empty());
+    BOOST_CHECK(engine.status() == sat::STATUS_UNKNOWN);
+    BOOST_REQUIRE(engine.solve() == sat::STATUS_SAT);
+    BOOST_CHECK_EQUAL(engine.value(group), 1);
+}
+
+BOOST_AUTO_TEST_CASE(cadical_small_formula_oracle)
+{
+    // Independent exhaustive truth tables, not another SAT solver or its choices.
+    const auto satisfies = [](unsigned model, const sat::LitsVector& clauses, const sat::Groups& groups) {
+        for (auto group : groups)
+            if (bool(model & (1u << std::abs(group))) != (group >= 0)) return false;
+        for (const auto& clause : clauses) {
+            bool holds = false;
+            for (auto literal : clause)
+                holds |= bool(model & (1u << sat::var(literal))) != sat::sign(literal);
+            if (!holds) return false;
+        }
+        return true;
+    };
+    const auto possible = [&](const sat::LitsVector& clauses, const sat::Groups& groups) {
+        for (unsigned model = 0; model < 256; ++model)
+            if (satisfies(model, clauses, groups)) return true;
+        return false;
+    };
+    std::mt19937 random(0xCA01CA1);
+    unsigned sat_results = 0, unsat_results = 0;
+    for (unsigned trial = 0; trial < 16; ++trial) {
+        sat::Engine engine("truth-table");
+        for (unsigned bit = 0; bit < 4; ++bit) engine.new_sat_var(true);
+        for (unsigned selector = 0; selector < 3; ++selector) engine.new_group();
+        const auto all_groups = engine.groups();
+        sat::LitsVector clauses;
+        // Incremental batches retain learned clauses across every polarity tuple.
+        for (unsigned batch = 0; batch < 3; ++batch) {
+            for (unsigned i = 0; i < 6; ++i) {
+                sat::Lits clause {sat::mkLit(5 + random() % 3, true)};
+                for (unsigned j = 0, width = 1 + random() % 3; j < width; ++j)
+                    clause.push_back(sat::mkLit(1 + random() % 4, random() % 2));
+                clauses.push_back(clause);
+                engine.add_clause(clause);
+            }
+            for (unsigned mask = 0; mask < 8; ++mask) {
+                auto groups = all_groups;
+                for (unsigned i = 1; i < groups.size(); ++i)
+                    if (!(mask & (1u << (i - 1)))) groups[i] = -groups[i];
+                engine.set_groups(groups);
+                const bool expected = possible(clauses, groups);
+                const auto status = engine.solve();
+                BOOST_REQUIRE(status == (expected ? sat::STATUS_SAT : sat::STATUS_UNSAT));
+                if (expected) {
+                    ++sat_results;
+                    unsigned model = 0;
+                    for (unsigned bit = 0; bit < 8; ++bit) {
+                        BOOST_REQUIRE(engine.assigned(bit));
+                        model |= unsigned(engine.value(bit)) << bit;
+                    }
+                    BOOST_CHECK(satisfies(model, clauses, groups));
+                    BOOST_CHECK(engine.failed_groups().empty());
+                } else {
+                    ++unsat_results;
+                    const auto core = engine.failed_groups();
+                    for (auto group : core)
+                        BOOST_CHECK(std::find(groups.begin(), groups.end(), group) != groups.end());
+                    BOOST_CHECK(!possible(clauses, core));
+                    engine.set_groups(core);
+                    BOOST_CHECK(engine.failed_groups().empty());
+                    BOOST_CHECK(engine.solve() == sat::STATUS_UNSAT);
+                }
+            }
+        }
+    }
+    BOOST_CHECK(sat_results > 0);
+    BOOST_CHECK(unsat_results > 0);
+    BOOST_CHECK_EQUAL(sat_results + unsat_results, 384);
+}
+
+BOOST_AUTO_TEST_CASE(cadical_unconstrained_enumeration)
+{
+    sat::Engine engine("unused-bits");
+    std::vector<sat::Var> bits;
+    for (unsigned i = 0; i < 4; ++i) bits.push_back(engine.new_sat_var(true));
+    std::set<unsigned> seen;
+    for (unsigned i = 0; i < 16; ++i) {
+        BOOST_REQUIRE(engine.solve() == sat::STATUS_SAT);
+        unsigned value = 0;
+        sat::Lits block;
+        for (unsigned bit = 0; bit < bits.size(); ++bit) {
+            BOOST_REQUIRE(engine.assigned(bits[bit]));
+            const auto assigned = engine.value(bits[bit]);
+            value |= unsigned(assigned) << bit;
+            block.push_back(sat::mkLit(bits[bit], assigned));
+        }
+        BOOST_CHECK(seen.insert(value).second);
+        engine.add_clause(block);
+        BOOST_CHECK_THROW(engine.value(bits.front()), std::logic_error);
+    }
+    BOOST_CHECK_EQUAL(seen.size(), 16);
+    BOOST_CHECK(engine.solve() == sat::STATUS_UNSAT);
+}
+
+BOOST_AUTO_TEST_CASE(cadical_multi_engine_accounting_and_reconfiguration)
+{
+    query::QueryContext context;
+    query::ContextScope scope(context);
+    sat::Engine first("first-account"), second("second-account");
+    pigeonhole(first);
+    pigeonhole(second);
+    BOOST_REQUIRE(first.solve() == sat::STATUS_UNSAT);
+    const auto conflicts = context.conflicts_used, propagations = context.propagations_used;
+    BOOST_REQUIRE(conflicts > 0);
+    BOOST_REQUIRE(propagations > 0);
+    BOOST_REQUIRE(second.solve() == sat::STATUS_UNSAT);
+    BOOST_CHECK(context.conflicts_used > conflicts);
+    BOOST_CHECK(context.propagations_used > propagations);
+    // Stop reason precedence is first-wins, including cancellation afterwards.
+    context.cancel(query::StopReason::conflict_budget);
+    context.cancel(query::StopReason::cancelled);
+    BOOST_CHECK(context.stop == query::StopReason::conflict_budget);
+}
+
+BOOST_AUTO_TEST_CASE(cadical_relative_budgets_and_active_cancellation)
+{
+    sat::Engine limited("relative-allowance");
+    pigeonhole(limited);
+    limited.configure(1, -1);
+    BOOST_CHECK(limited.solve() == sat::STATUS_UNKNOWN);
+    BOOST_CHECK(limited.solve() == sat::STATUS_UNKNOWN);
+    limited.configure(-1, -1);
+    BOOST_CHECK(limited.solve() == sat::STATUS_UNSAT);
+    {
+        query::QueryContext context;
+        query::ContextScope scope(context);
+        sat::Engine engine("active-cancellation");
+        // Commit before starting the canceller so there is no encoding checkpoint
+        // between the solving hook and the native call.
+        engine.enable_cnf_optimization(false);
+        pigeonhole(engine, 13);
+        std::atomic<bool> solving {false};
+        context.checkpoint_hook = [&](query::Phase phase) {
+            if (phase == query::Phase::solving) solving.store(true);
+        };
+        std::jthread canceller([&] {
+            while (!solving.load()) std::this_thread::yield();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            context.cancel();
+        });
+        auto status = sat::STATUS_UNKNOWN;
+        try { status = engine.solve(); }
+        catch (const query::Cancelled&) {
+            // A descheduled solving thread can receive cancellation at the
+            // last checkpoint before native entry. This is inconclusive too.
+        }
+        canceller.join();
+        BOOST_CHECK(status == sat::STATUS_UNKNOWN);
+        BOOST_CHECK(context.stop == query::StopReason::cancelled);
+        BOOST_CHECK(engine.failed_groups().empty());
+        BOOST_CHECK(!engine.assigned(0));
+    }
+    query::QueryContext fresh;
+    query::ContextScope scope(fresh);
+    sat::Engine recovered("after-cancellation");
+    BOOST_CHECK(recovered.solve() == sat::STATUS_SAT);
+    BOOST_CHECK(fresh.stop == query::StopReason::none);
 }
 
 BOOST_AUTO_TEST_CASE(algorithm_status_and_enumeration)

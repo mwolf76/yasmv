@@ -77,6 +77,8 @@ jobs:
         YASMV_HOME: ${{ github.workspace }}
       run: |
         make sat-types-test yasmv_reliability_tests
-        ./yasmv_reliability_tests --log_level=error
+        for settings in 000 001 010 011 100 101 110 111; do
+          YASMV_TEST_CNF="$settings" ./yasmv_reliability_tests --log_level=error
+        done
         python3 tests/test_query.py QueryTests.test_cli_and_machine_agree
         python3 tests/test_cli.py CLITests.test_protocol_recovery_and_discovery

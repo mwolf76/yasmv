@@ -224,6 +224,7 @@ namespace opts {
             info["signature"] = sat::Engine::solver_signature();
             info["revision"] = CADICAL_BUILD_REVISION;
             info["linkage"] = "static";
+            info["settings"]["inprobing"] = sat::Engine::solver_inprobing();
             Json::StreamWriterBuilder writer;
             writer["indentation"] = "";
             std::cout << Json::writeString(writer, info) << std::endl;

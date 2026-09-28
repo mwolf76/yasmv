@@ -3,7 +3,9 @@
 The production engine uses CaDiCaL 3.0.1 at revision
 `c60730422e758ef1cebe7aeddf2dda31c996bf04`. MiniSat is no longer linked.
 This implements milestone 4 of the [integration plan](../cadical_integration.md).
-The broader migration audit and performance comparison remain later milestones.
+The [milestone 5 audit](CADICAL_MIGRATION_VALIDATION.md) adds validation and an
+incremental-workload tuning policy. Broader performance comparison remains a
+later milestone.
 
 ## Build the external dependency
 
@@ -88,9 +90,10 @@ The supported yasmv CNF options are unchanged. See
 [SAT parameters](SAT_SOLVER_PARAMETERS.md).
 
 `./yasmv --solver-info` prints linked solver version, signature, verified full
-revision, and static linkage as JSON. The provenance script records it. Query
+revision, fixed solver settings, and static linkage as JSON. The provenance script records it. Query
 and trace identities include the same solver identity and the new counter/budget
-semantics; their engine identity no longer names MiniSat.
+semantics; their engine identity no longer names MiniSat. The fixed `inprobing=0`
+setting disables CaDiCaL's inprobe schedule, leaving other optimizations enabled.
 
 ## Verification
 
