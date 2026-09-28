@@ -66,7 +66,7 @@ namespace query {
         void activate(sat::Engine& engine, const std::set<int>& enabled)
         {
             auto& groups = engine.groups();
-            for (int i = 1; i < groups.size(); ++i) {
+            for (size_t i = 1; i < groups.size(); ++i) {
                 const auto id = std::abs(groups[i]);
                 groups[i] = enabled.count(id) ? id : -id;
             }

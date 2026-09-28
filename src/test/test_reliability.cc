@@ -7,7 +7,16 @@
 #include <cmd/commands/commands.hh>
 #include <model/module.hh>
 #include <sat/engine.hh>
+#include <sat/logging.hh>
+#include <sat/inlining.hh>
 #include <parse.hh>
+#include <jsoncpp/json/json.h>
+#include <fstream>
+#include <sstream>
+
+#ifdef Minisat_SolverTypes_h
+#error "Engine clients must not include MiniSat headers transitively"
+#endif
 
 namespace {
 class TestCommand : public cmd::Command {
@@ -16,10 +25,10 @@ public:
     utils::Variant operator()() override { return utils::Variant(cmd::okMessage); }
 };
 
-void clause(sat::Engine& engine, std::initializer_list<Minisat::Lit> literals)
+void clause(sat::Engine& engine, std::initializer_list<sat::Lit> literals)
 {
-    Minisat::vec<Minisat::Lit> values;
-    for (auto literal : literals) values.push(literal);
+    sat::Lits values;
+    for (auto literal : literals) values.push_back(literal);
     engine.add_clause(values);
 }
 }
@@ -40,19 +49,34 @@ BOOST_AUTO_TEST_CASE(incremental_solver)
     for (const auto& arg : args) argv.push_back(arg.c_str());
     opts::OptsMgr::INSTANCE().parse_command_line(argv.size(), argv.data());
 
+    // Main group zero is a real positive literal, not a clause terminator.
+    sat::Engine main_group("main-group-test");
+    BOOST_REQUIRE_EQUAL(main_group.groups().size(), 1);
+    BOOST_CHECK_EQUAL(main_group.groups().front(), sat::MAINGROUP);
+    const sat::Lits main_clause {sat::mkLit(0, true)};
+    main_group.add_clause(main_clause);
+    BOOST_CHECK(main_clause == sat::Lits({sat::mkLit(0, true)}));
+    BOOST_CHECK(main_group.solve() == sat::STATUS_UNSAT);
+    const auto main_core = main_group.failed_groups();
+    BOOST_CHECK(std::find(main_core.begin(), main_core.end(), 0) != main_core.end());
+
     sat::Engine engine("incremental-test");
     const auto x = engine.new_sat_var(true);
     const auto y = engine.new_sat_var(true);
     const auto group = engine.new_group();
+    const sat::Lits unsorted {sat::mkLit(x), sat::mkLit(group, true), sat::mkLit(x)};
+    const auto original = unsorted;
+    engine.add_clause(unsorted);
+    BOOST_CHECK(unsorted == original);
     // group -> x, including duplicates, tautologies, and an unsorted superset.
-    clause(engine, { Minisat::mkLit(group, true), Minisat::mkLit(x) });
-    clause(engine, { Minisat::mkLit(x), Minisat::mkLit(group, true) });
-    clause(engine, { Minisat::mkLit(y), Minisat::mkLit(x), Minisat::mkLit(group, true) });
-    clause(engine, { Minisat::mkLit(y), Minisat::mkLit(y, true) });
+    clause(engine, { sat::mkLit(group, true), sat::mkLit(x) });
+    clause(engine, { sat::mkLit(x), sat::mkLit(group, true) });
+    clause(engine, { sat::mkLit(y), sat::mkLit(x), sat::mkLit(group, true) });
+    clause(engine, { sat::mkLit(y), sat::mkLit(y, true) });
     BOOST_REQUIRE(engine.solve() == sat::STATUS_SAT);
     BOOST_CHECK_EQUAL(engine.value(x), 1);
     engine.invert_last_group();
-    clause(engine, { Minisat::mkLit(x, true) });
+    clause(engine, { sat::mkLit(x, true) });
     BOOST_REQUIRE(engine.solve() == sat::STATUS_SAT);
     BOOST_CHECK_EQUAL(engine.value(x), 0);
     engine.invert_last_group();
@@ -67,10 +91,53 @@ BOOST_AUTO_TEST_CASE(incremental_solver)
 
     sat::Engine interrupted("interrupted-test");
     const auto z = interrupted.new_sat_var(true);
-    clause(interrupted, { Minisat::mkLit(z), Minisat::mkLit(z, true) });
+    clause(interrupted, { sat::mkLit(z), sat::mkLit(z, true) });
     interrupted.interrupt();
     BOOST_CHECK(interrupted.solve() == sat::STATUS_UNKNOWN);
     BOOST_CHECK(interrupted.failed_groups().empty());
+
+    sat::Engine negative_group("negative-group-test");
+    const auto disabled = negative_group.new_group();
+    clause(negative_group, {sat::mkLit(disabled)});
+    negative_group.invert_last_group();
+    BOOST_REQUIRE(negative_group.solve() == sat::STATUS_UNSAT);
+    const auto negative_core = negative_group.failed_groups();
+    BOOST_CHECK(std::find(negative_core.begin(), negative_core.end(), -disabled) != negative_core.end());
+    negative_group.invert_last_group();
+    BOOST_CHECK(negative_group.solve() == sat::STATUS_SAT);
+
+    // Logging must handle empty vectors without unsigned size underflow.
+    std::ostringstream logged;
+    sat::operator<<(logged, sat::Lits{});
+    BOOST_CHECK(logged.str().empty());
+    sat::operator<<(logged, sat::Lits{sat::mkLit(0), sat::mkLit(0, true), sat::mkLit(3)});
+    BOOST_CHECK_EQUAL(logged.str(), "0 -0 3");
+}
+
+BOOST_AUTO_TEST_CASE(packed_microcode_loading)
+{
+    const auto home = std::getenv("YASMV_HOME");
+    BOOST_REQUIRE(home);
+    for (const auto name : {"u-add-8.json", "s-add-8.json", "u-mul-4.json", "s-lt-8.json"}) {
+        const auto path = boost::filesystem::path(home) / "microcode" / name;
+        std::ifstream input(path.string());
+        BOOST_REQUIRE(input.good());
+        Json::Value document;
+        input >> document;
+        const auto& packed = document["cnf"];
+        sat::InlinedOperatorLoader loader(path);
+        const auto& clauses = loader.clauses();
+        BOOST_REQUIRE_EQUAL(clauses.size(), packed.size());
+        for (Json::ArrayIndex i = 0; i < packed.size(); ++i) {
+            BOOST_REQUIRE_EQUAL(clauses[i].size(), packed[i].size());
+            for (Json::ArrayIndex j = 0; j < packed[i].size(); ++j) {
+                const int encoded = packed[i][j].asInt();
+                BOOST_CHECK_EQUAL(sat::toInt(clauses[i][j]), encoded);
+                BOOST_CHECK_EQUAL(sat::var(clauses[i][j]), encoded / 2);
+                BOOST_CHECK_EQUAL(sat::sign(clauses[i][j]), bool(encoded % 2));
+            }
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE(algorithm_status_and_enumeration)

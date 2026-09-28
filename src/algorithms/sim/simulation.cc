@@ -93,7 +93,7 @@ namespace sim {
            model and negate it in the exclusion clause. */
         enc::EncodingMgr& bm { enc::EncodingMgr::INSTANCE() };
 
-        vec<Lit> exclusion;
+        sat::Lits exclusion;
         symb::SymbIter symbols { model() };
 
         while (symbols.has_next()) {
@@ -134,8 +134,8 @@ namespace sim {
                     const enc::UCBI& ucbi { bm.find_ucbi(bit) };
                     const auto tcbi { enc::TCBI(ucbi, 0) };
 
-                    const Var minisat_var { engine.tcbi_to_var(tcbi) };
-                    exclusion.push(mkLit(minisat_var, engine.value(minisat_var)));
+                    const sat::Var minisat_var { engine.tcbi_to_var(tcbi) };
+                    exclusion.push_back(sat::mkLit(minisat_var, engine.value(minisat_var)));
                 }
             }
 

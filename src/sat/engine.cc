@@ -26,8 +26,35 @@
 #include <set>
 #include <sat.hh>
 #include <opts/opts_mgr.hh>
+#include <minisat/simp/SimpSolver.h>
 
 namespace sat {
+
+    class Engine::Backend : public Minisat::SimpSolver {};
+
+    std::ostream& operator<<(std::ostream& os, const Engine& engine)
+    {
+        const auto& solver = *engine.f_solver;
+        return os << "Solver: `" << engine.f_instance_name
+                  << "`, solves: " << solver.solves
+                  << ", starts: " << solver.starts
+                  << ", decs: " << solver.decisions
+                  << ", rnd decs: " << solver.rnd_decisions
+                  << ", props: " << solver.propagations
+                  << ", conflicts: " << solver.conflicts
+                  << ", dec vars: " << solver.dec_vars
+                  << ", clause lits: " << solver.clauses_literals
+                  << ", learnt lits: " << solver.learnts_literals
+                  << ", max lits: " << solver.max_literals
+                  << ", tot lits: " << solver.tot_literals;
+    }
+
+    namespace {
+        Minisat::Lit native_literal(Lit literal)
+        {
+            return Minisat::mkLit(var(literal), sign(literal));
+        }
+    }
 
     /**
  * @brief SAT instance ctor
@@ -35,6 +62,7 @@ namespace sat {
     Engine::Engine(const char* instance_name)
         : f_instance_name(instance_name)
         , f_enc_mgr(enc::EncodingMgr::INSTANCE())
+        , f_solver(std::make_unique<Backend>())
         , f_cnf_optimization_enabled(false)  // Disabled by default (performance reasons)
         , f_optimization_in_progress(false)
     {
@@ -42,24 +70,24 @@ namespace sat {
 
         /* Default configuration */
         opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
-        f_solver.random_var_freq = opts_mgr.sat_random_var_freq();
-        f_solver.ccmin_mode = opts_mgr.sat_ccmin_mode();
-        f_solver.phase_saving = opts_mgr.sat_phase_saving();
-        f_solver.rnd_init_act = opts_mgr.sat_random_init_act();
-        f_solver.garbage_frac = opts_mgr.sat_garbage_frac();
-        f_solver.var_decay = opts_mgr.sat_var_decay();
-        f_solver.clause_decay = opts_mgr.sat_clause_decay();
-        f_solver.random_seed = opts_mgr.sat_random_seed();
-        f_solver.luby_restart = opts_mgr.sat_luby_restart();
-        f_solver.restart_first = opts_mgr.sat_restart_first();
-        f_solver.restart_inc = opts_mgr.sat_restart_inc();
-        f_solver.use_elim = opts_mgr.sat_elim();
-        f_solver.use_rcheck = opts_mgr.sat_rcheck();
-        f_solver.use_asymm = opts_mgr.sat_asymm();
-        f_solver.grow = opts_mgr.sat_grow();
-        f_solver.clause_lim = opts_mgr.sat_clause_lim();
-        f_solver.subsumption_lim = opts_mgr.sat_subsumption_lim();
-        f_solver.simp_garbage_frac = opts_mgr.sat_simp_garbage_frac();
+        f_solver->random_var_freq = opts_mgr.sat_random_var_freq();
+        f_solver->ccmin_mode = opts_mgr.sat_ccmin_mode();
+        f_solver->phase_saving = opts_mgr.sat_phase_saving();
+        f_solver->rnd_init_act = opts_mgr.sat_random_init_act();
+        f_solver->garbage_frac = opts_mgr.sat_garbage_frac();
+        f_solver->var_decay = opts_mgr.sat_var_decay();
+        f_solver->clause_decay = opts_mgr.sat_clause_decay();
+        f_solver->random_seed = opts_mgr.sat_random_seed();
+        f_solver->luby_restart = opts_mgr.sat_luby_restart();
+        f_solver->restart_first = opts_mgr.sat_restart_first();
+        f_solver->restart_inc = opts_mgr.sat_restart_inc();
+        f_solver->use_elim = opts_mgr.sat_elim();
+        f_solver->use_rcheck = opts_mgr.sat_rcheck();
+        f_solver->use_asymm = opts_mgr.sat_asymm();
+        f_solver->grow = opts_mgr.sat_grow();
+        f_solver->clause_lim = opts_mgr.sat_clause_lim();
+        f_solver->subsumption_lim = opts_mgr.sat_subsumption_lim();
+        f_solver->simp_garbage_frac = opts_mgr.sat_simp_garbage_frac();
         
         /* Enable CNF optimization if any individual optimization is enabled */
         if (opts_mgr.cnf_tautology_removal() || 
@@ -72,7 +100,7 @@ namespace sat {
         }
 
         /* MAINGROUP (=0) is already there. */
-        f_groups.push(new_sat_var());
+        f_groups.push_back(new_sat_var());
         if (auto context = query::current()) context->attach(this);
 
         EngineMgr::INSTANCE()
@@ -91,13 +119,58 @@ namespace sat {
             .unregister_instance(this);
     }
 
+    void Engine::interrupt() { f_solver->interrupt(); }
+
+    void Engine::configure(int64_t conf_budget, int64_t prop_budget)
+    {
+        f_solver->setConfBudget(conf_budget);
+        f_solver->setPropBudget(prop_budget);
+    }
+
+    bool Engine::assigned(Var variable)
+    {
+        return Minisat::toInt(f_solver->modelValue(variable)) != 2;
+    }
+
+    int Engine::value(Var variable)
+    {
+        assert(STATUS_SAT == f_status);
+        return Minisat::toInt(f_solver->modelValue(variable)) == 0;
+    }
+
+    Var Engine::new_sat_var(bool frozen)
+    {
+        query::checkpoint(query::Phase::encoding);
+        if (f_solver->nVars() > MAX_VAR)
+            throw std::out_of_range("SAT variable exceeds packed literal range");
+        const Var variable = f_solver->newVar();
+        f_solver->setFrozen(variable, frozen);
+        return variable;
+    }
+
+    void Engine::commit_clause(const Lits& literals)
+    {
+        Minisat::vec<Minisat::Lit> native;
+        for (auto literal : literals) native.push(native_literal(literal));
+        f_solver->addClause_(native);
+    }
+
+    void Engine::add_clause(const Lits& literals)
+    {
+        query::checkpoint(query::Phase::encoding);
+        if (f_cnf_optimization_enabled && !f_optimization_in_progress)
+            f_pending_clauses.push_back(literals);
+        else
+            commit_clause(literals);
+    }
+
     std::vector<group_t> Engine::failed_groups() const
     {
         std::vector<group_t> result;
         if (f_status != STATUS_UNSAT) return result;
-        for (int i = 0; i < f_solver.conflict.size(); ++i) {
-            const auto assumption = ~f_solver.conflict[i];
-            result.push_back(Minisat::sign(assumption) ? -Minisat::var(assumption) : Minisat::var(assumption));
+        for (int i = 0; i < f_solver->conflict.size(); ++i) {
+            const auto assumption = ~toLit(Minisat::toInt(f_solver->conflict[i]));
+            result.push_back(sign(assumption) ? -var(assumption) : var(assumption));
         }
         return result;
     }
@@ -106,44 +179,43 @@ namespace sat {
     {
         query::PhaseTimer timer(query::Phase::solving);
         auto context = query::current();
-        const auto initial_conflicts = f_solver.conflicts;
-        const auto initial_propagations = f_solver.propagations;
+        const auto initial_conflicts = f_solver->conflicts;
+        const auto initial_propagations = f_solver->propagations;
         if (context) {
             const auto& l = context->limits;
             if (l.conflicts >= 0) {
                 if (context->conflicts_used >= static_cast<uint64_t>(l.conflicts)) { context->cancel(query::StopReason::conflict_budget); return f_status = STATUS_UNKNOWN; }
-                f_solver.setConfBudget(l.conflicts - context->conflicts_used);
+                f_solver->setConfBudget(l.conflicts - context->conflicts_used);
             }
             if (l.propagations >= 0) {
                 if (context->propagations_used >= static_cast<uint64_t>(l.propagations)) { context->cancel(query::StopReason::propagation_budget); return f_status = STATUS_UNKNOWN; }
-                f_solver.setPropBudget(l.propagations - context->propagations_used);
+                f_solver->setPropBudget(l.propagations - context->propagations_used);
             }
         }
         // Optimize pending clauses before solving
         optimize_and_commit();
         
-        vec<Lit> assumptions;
+        Minisat::vec<Minisat::Lit> assumptions;
 
         const clock_t t0 { clock() };
-        for (int i = 0; i < groups.size(); ++i) {
-            const Var grp { groups[i] };
+        for (const auto grp : groups) {
 
             /* Assumptions work like "a -> phi". Here we use both
              * polarities of the implication, that is a positive group
              * var asserts the formulas in the group whereas a
              * negative group var disables those formulas. */
-            assumptions.push(mkLit(abs(grp), grp < 0));
+            assumptions.push(native_literal(mkLit(abs(grp), grp < 0)));
         }
 
         TRACE
             << "Solving ..."
             << std::endl;
 
-        if (const lbool status { f_solver.solveLimited(assumptions) }; status == l_True) {
+        if (const int status = Minisat::toInt(f_solver->solveLimited(assumptions)); status == 0) {
             f_status = STATUS_SAT;
-        } else if (status == l_False) {
+        } else if (status == 1) {
             f_status = STATUS_UNSAT;
-        } else if (status == l_Undef) {
+        } else if (status == 2) {
             f_status = STATUS_UNKNOWN;
         } else {
             assert(false); /* unreachable */
@@ -160,10 +232,10 @@ namespace sat {
             << std::endl;
 
         if (context) {
-            context->conflicts_used += f_solver.conflicts - initial_conflicts;
-            context->propagations_used += f_solver.propagations - initial_propagations;
-            context->variables = std::max(context->variables, static_cast<uint64_t>(f_solver.nVars()));
-            context->clauses = std::max(context->clauses, static_cast<uint64_t>(f_solver.nClauses()));
+            context->conflicts_used += f_solver->conflicts - initial_conflicts;
+            context->propagations_used += f_solver->propagations - initial_propagations;
+            context->variables = std::max(context->variables, static_cast<uint64_t>(f_solver->nVars()));
+            context->clauses = std::max(context->clauses, static_cast<uint64_t>(f_solver->nClauses()));
             if (f_status == STATUS_UNKNOWN && context->stop == query::StopReason::none) {
                 context->cancel(context->limits.conflicts >= 0 && context->conflicts_used >= static_cast<uint64_t>(context->limits.conflicts) ? query::StopReason::conflict_budget : context->limits.propagations >= 0 && context->propagations_used >= static_cast<uint64_t>(context->limits.propagations) ? query::StopReason::propagation_budget : query::StopReason::solver_unknown);
             }
@@ -436,11 +508,7 @@ namespace sat {
         // Always commit clauses to solver
         clock_t commit_start = clock();
         for (auto& clause : f_pending_clauses) {
-            vec<Lit> ps;
-            for (auto lit : clause) {
-                ps.push(lit);
-            }
-            f_solver.addClause_(ps);
+            commit_clause(clause);
         }
         clock_t commit_time = clock() - commit_start;
         double commit_secs = (double)commit_time / CLOCKS_PER_SEC;
@@ -657,8 +725,8 @@ namespace sat {
         
         for (size_t i = 0; i < f_pending_clauses.size(); ++i) {
             for (auto lit : f_pending_clauses[i]) {
-                Var var = Minisat::var(lit);
-                if (Minisat::sign(lit)) {
+                Var var = sat::var(lit);
+                if (sign(lit)) {
                     negative_occurrences[var].push_back(i);
                 } else {
                     positive_occurrences[var].push_back(i);
@@ -695,14 +763,14 @@ namespace sat {
                     
                     // Add literals from positive clause (except var)
                     for (auto lit : f_pending_clauses[pos_idx]) {
-                        if (Minisat::var(lit) != var) {
+                        if (sat::var(lit) != var) {
                             resolvent.push_back(lit);
                         }
                     }
                     
                     // Add literals from negative clause (except ~var)
                     for (auto lit : f_pending_clauses[neg_idx]) {
-                        if (Minisat::var(lit) != var) {
+                        if (sat::var(lit) != var) {
                             // Check if literal already exists (would create tautology)
                             bool found = false;
                             for (auto existing : resolvent) {
