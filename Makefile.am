@@ -11,7 +11,7 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
-EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md docs/CADICAL_OWNED_TYPES.md docs/CADICAL_BACKEND.md docs/SAT_SOLVER_PARAMETERS.md
+EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md docs/CADICAL_OWNED_TYPES.md docs/CADICAL_BACKEND.md docs/CADICAL_MIGRATION_VALIDATION.md docs/SAT_SOLVER_PARAMETERS.md
 EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/verify-c.py tools/llvm2smv_c.py tests/test_llvm2smv_c.py tools/llvm2smv_translate.py tests/test_llvm2smv_scalar.py tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
     tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \

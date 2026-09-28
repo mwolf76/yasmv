@@ -216,6 +216,9 @@ choices.
   option.
 - Cooperative propagation budgets with documented counter semantics and
   possible overshoot.
+- Bring forward narrowly scoped solver-performance tuning into milestone 5
+  to resolve the full-suite deadline failures; retain the broader performance
+  comparison and dependency cleanup in milestone 6.
 
 ## Milestone progress
 
@@ -225,5 +228,5 @@ choices.
 | 2. Pinned CaDiCaL API validation | Complete | [Standalone API contracts, sanitizer checks, full regression gate, and integration findings](docs/CADICAL_API_VALIDATION.md) |
 | 3. Owned SAT types | Complete | [Owned representation, backend boundary, compatibility checks, and full regression gate](docs/CADICAL_OWNED_TYPES.md) |
 | 4. CaDiCaL integration | Complete | [Backend, build, budgets, configuration, provenance, and full regression gate](docs/CADICAL_BACKEND.md) |
-| 5. Migration validation | Pending | |
+| 5. Migration validation | Complete | [Adapter audit, incremental tuning, full regression gate, and focused sanitizers](docs/CADICAL_MIGRATION_VALIDATION.md) |
 | 6. Performance comparison and dependency cleanup | Pending | |

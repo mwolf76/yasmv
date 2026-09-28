@@ -50,6 +50,9 @@ namespace sat {
                 std::string(CaDiCaL::Solver::signature()) != "cadical-3.0.1-c607304")
                 throw std::runtime_error("Expected the pinned CaDiCaL 3.0.1 build");
             if (!solver.set("quiet", 1) ||
+                // Repeated incremental solves spend excessive time in the
+                // inprobe simplification schedule on bounded LLVM models.
+                !solver.set("inprobing", Engine::solver_inprobing()) ||
                 !solver.set("seed", opts::OptsMgr::INSTANCE().sat_random_seed()))
                 throw std::runtime_error("Invalid CaDiCaL configuration");
             solver.connect_terminator(this);
@@ -84,6 +87,7 @@ namespace sat {
 
     const char* Engine::solver_version() { return CaDiCaL::Solver::version(); }
     const char* Engine::solver_signature() { return CaDiCaL::Solver::signature(); }
+    bool Engine::solver_inprobing() { return false; }
 
     std::ostream& operator<<(std::ostream& os, const Engine& engine)
     {
@@ -158,6 +162,18 @@ namespace sat {
     {
         f_status = STATUS_UNKNOWN;
         f_failed_groups.clear();
+    }
+
+    void Engine::set_groups(Groups groups)
+    {
+        // Reject the entire update before touching either assumptions or results.
+        for (const auto group : groups) {
+            if (group == std::numeric_limits<group_t>::min() ||
+                size_t(std::abs(group)) >= f_solver->variables.size())
+                throw std::out_of_range("Invalid SAT group");
+        }
+        invalidate_result();
+        f_groups = std::move(groups);
     }
 
     bool Engine::assigned(Var variable)

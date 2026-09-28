@@ -83,12 +83,9 @@ namespace sat {
 	 * A positive value of the i-th element of this array enables the
 	 * i-th group, whereas a negative value disables it.
 	 */
-        inline Groups& groups()
-        {
-            invalidate_result();
-            return f_groups;
-        }
         const Groups& groups() const { return f_groups; }
+        // Copy-in mutation prevents retained references from bypassing invalidation.
+        void set_groups(Groups groups);
 
         /**
 	 * @brief add a formula to the SAT problem instance.
@@ -131,6 +128,7 @@ namespace sat {
         Var existing_var(const enc::TCBI& tcbi) const;
         static const char* solver_version();
         static const char* solver_signature();
+        static bool solver_inprobing();
 
         /**
 	 * @brief TCBI -> SAT variable mapping
