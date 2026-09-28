@@ -6,6 +6,11 @@ Implementation update (2026-09-26): the first correctness milestone addresses
 several findings below. See [current behavior and migration notes](docs/CORRECTNESS_BASELINE.md).
 The review findings below retain their original baseline context.
 
+SAT migration update (2026-09-28): the current engine uses pinned CaDiCaL 3.0.1,
+not MiniSat. See [the backend guide](docs/CADICAL_BACKEND.md) and
+[migration plan](cadical_integration.md). MiniSat references below describe the
+historical review baseline, not current build requirements.
+
 The accepted development direction is broken down into work packages and completion gates in the [implementation plan](docs/IMPLEMENTATION_PLAN.md).
 
 This document describes the implementation in this checkout, distinguishes working capabilities from incomplete ones, and proposes an incremental development direction. Findings marked **observed** were exercised with the existing binaries; findings marked **inspection** come from source review. Proposed interfaces and features are designs, not existing commands.

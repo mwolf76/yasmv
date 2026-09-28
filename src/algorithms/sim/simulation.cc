@@ -89,7 +89,7 @@ namespace sim {
     void Simulation::exclude_state(sat::Engine& engine)
     {
         /* In ALLSAT mode, for each bit int the encoding, fetch UCBI,
-           time it into TCBI at time 0, fetch its value in MiniSAT
+           time it into TCBI at time 0, fetch its value from the SAT engine
            model and negate it in the exclusion clause. */
         enc::EncodingMgr& bm { enc::EncodingMgr::INSTANCE() };
 
@@ -122,7 +122,7 @@ namespace sim {
                 }
 
                 /* for each bit in this encoding, fetch UCBI, time it
-                   into TCBI at time 0, fetch its value in MiniSAT
+                   into TCBI at time 0, fetch its value from the SAT engine
                    model and append its negation to exclusion
                    clause. */
                 dd::DDVector::const_iterator di;

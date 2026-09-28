@@ -39,8 +39,9 @@ functional targets remain available.
 
 ## CI and local pre-commit gates
 
-CI runs one optimized core build with LLVM disabled, followed by two smoke
-checks: native CLI trace generation/replay and agent protocol recovery/discovery.
+CI validates the pinned CaDiCaL API and runs an optimized core build with LLVM
+disabled. It checks SAT literal contracts, all eight adapter CNF configurations,
+native CLI trace generation/replay, and agent protocol recovery/discovery.
 It does not run the full regression suite, sanitizer builds, LLVM translation,
 Chromium acceptance, or provenance collection.
 

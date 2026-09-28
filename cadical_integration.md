@@ -1,6 +1,6 @@
 # CaDiCaL integration plan
 
-Status: approved for milestone-by-milestone implementation on 2026-09-28.
+Status: all six migration milestones completed on 2026-09-28.
 
 Each milestone must pass the full test suite before its relevant changes are
 staged and committed. Commit messages describe only the staged changes, with no
@@ -229,4 +229,4 @@ choices.
 | 3. Owned SAT types | Complete | [Owned representation, backend boundary, compatibility checks, and full regression gate](docs/CADICAL_OWNED_TYPES.md) |
 | 4. CaDiCaL integration | Complete | [Backend, build, budgets, configuration, provenance, and full regression gate](docs/CADICAL_BACKEND.md) |
 | 5. Migration validation | Complete | [Adapter audit, incremental tuning, full regression gate, and focused sanitizers](docs/CADICAL_MIGRATION_VALIDATION.md) |
-| 6. Performance comparison and dependency cleanup | Pending | |
+| 6. Performance comparison and dependency cleanup | Complete | [Matched benchmark samples, dependency audit, clean rebuild, and full regression gate](docs/benchmarks/cadical-m6.md) |
