@@ -4,8 +4,8 @@ The production engine uses CaDiCaL 3.0.1 at revision
 `c60730422e758ef1cebe7aeddf2dda31c996bf04`. MiniSat is no longer linked.
 This implements milestone 4 of the [integration plan](../cadical_integration.md).
 The [milestone 5 audit](CADICAL_MIGRATION_VALIDATION.md) adds validation and an
-incremental-workload tuning policy. Broader performance comparison remains a
-later milestone.
+incremental-workload tuning policy. The [milestone 6 report](benchmarks/cadical-m6.md)
+records the matched performance comparison and remaining dependency cleanup.
 
 ## Build the external dependency
 

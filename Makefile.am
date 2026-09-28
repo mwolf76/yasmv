@@ -12,6 +12,9 @@ VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
 EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md docs/CADICAL_OWNED_TYPES.md docs/CADICAL_BACKEND.md docs/CADICAL_MIGRATION_VALIDATION.md docs/SAT_SOLVER_PARAMETERS.md
+EXTRA_DIST_CADICAL += cadical_integration.md docs/benchmarks/cadical-m1-minisat.md \
+    docs/benchmarks/cadical-m1-minisat-reachable.json docs/benchmarks/cadical-m1-minisat-unreachable.json \
+    docs/benchmarks/cadical-m6.md docs/benchmarks/cadical-m6-reachable.json docs/benchmarks/cadical-m6-unreachable.json
 EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/verify-c.py tools/llvm2smv_c.py tests/test_llvm2smv_c.py tools/llvm2smv_translate.py tests/test_llvm2smv_scalar.py tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
     tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \
@@ -44,8 +47,7 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 -I$(top_srcdir)/src/cmd -I$(top_srcdir)/src/utils                   \
 -I$(top_srcdir)/src/witness -I$(top_srcdir)/src/3rdparty/ezlogger   \
 -I$(top_srcdir)/src/parser/grammars -I$(top_srcdir)/src/algorithms  \
--I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat/core  \
--I$(top_srcdir)/src/sat -I$(top_srcdir)/src/sat/mtl                 \
+-I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat       \
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd                              \
 -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr                               \
 -I$(top_srcdir)/src/dd/cudd-2.5.0/st                                \

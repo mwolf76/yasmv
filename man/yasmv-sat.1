@@ -3,7 +3,10 @@
 yasmv-sat \- SAT solver configuration for yasmv
 .SH DESCRIPTION
 yasmv uses a pinned, statically linked CaDiCaL 3.0.1 solver.
-Native solver output is suppressed. Other than the seed, CaDiCaL uses its defaults.
+Native solver output is suppressed. The inprobing simplification schedule is
+disabled for incremental workloads. Other options retain upstream initialization.
+Native CADICAL_* environment overrides are unsupported; unset them for
+reproducible runs. Explicit quiet, seed, and inprobing settings take precedence.
 .SH OPTIONS
 .TP
 .BI --sat-random-seed= SEED
@@ -11,7 +14,7 @@ Integer in the range 0 through 2000000000. Default: 0.
 Fractional, non-finite, negative, and out-of-range values are rejected.
 .TP
 .B --solver-info
-Print linked solver version, signature, verified build revision, and linkage
+Print linked solver version, signature, verified build revision, fixed settings, and linkage
 as JSON, then exit.
 .SH MIGRATION FROM MINISAT
 All other MiniSat tuning flags are removed. Explicit use produces an error

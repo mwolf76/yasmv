@@ -93,7 +93,7 @@ namespace reach {
                     memset(inputs, 0, sizeof(inputs));
 
                     /* 1. for each bit int the encoding, fetch UCBI,
-                     * time it into TCBI, fetch its value in MiniSAT
+                     * time it into TCBI, fetch its value from the SAT engine
                      * model and set the corresponding entry in
                      * input. */
                     dd::DDVector::const_iterator di;
