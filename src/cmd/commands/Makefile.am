@@ -17,7 +17,7 @@ AM_CXXFLAGS = @AM_CXXFLAGS@
 
 PKG_HH = check_init.hh check_trans.hh clear.hh commands.hh	\
 diameter.hh do.hh dump_model.hh dump_trace.hh dup_trace.hh echo.hh	\
-get.hh help.hh last.hh list_traces.hh load_model.hh on.hh		    \
+get.hh help.hh last.hh list_traces.hh on.hh				    \
 pick_state.hh quit.hh reach.hh read_model.hh select_trace.hh		\
 read_trace.hh set.hh simulate.hh time.hh
 
