@@ -41,8 +41,10 @@ The driver preprocesses each unit using `-std=c11 -O0 -g -fno-finite-loops`,
 rejects source pragmas, and compiles the exact expanded snapshot. This snapshot
 includes header expansions and line directives and is stored, with its digest,
 in bundle provenance. Include paths, defines, runtime header hashes, tool
-versions/banners, and frontend policy are also recorded. Link the resulting
-bitcode without a general optimization pipeline. Filenames in source mappings
+versions/banners, and frontend policy are also recorded. Debug command-line
+recording is disabled (`-gno-record-command-line`) so temporary output paths do
+not change artifact identities. Link the resulting bitcode without a general
+optimization pipeline. Filenames in source mappings
 refer to compilation inputs; the captured snapshot is authoritative if a file
 subsequently changes.
 

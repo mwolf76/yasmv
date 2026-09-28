@@ -281,6 +281,14 @@ define i1 @main() {
         for source in cases:
             with self.subTest(source=source): self.candidate(source,ok=False)
 
+    def test_codegen_attribute_admission(self):
+        # Exercise the x86 Clang attribute even when tests run on another host.
+        for width in (0, 128):
+            with self.subTest(width=width):
+                self.candidate(f'define i8 @main() "min-legal-vector-width"="{width}" {{ ret i8 7 }}')
+        self.candidate('define i8 @main() "unknown-semantic-attribute"="0" { ret i8 7 }',ok=False)
+        self.candidate('define <2 x i8> @main() "min-legal-vector-width"="128" { ret <2 x i8> zeroinitializer }',ok=False)
+
     def test_debug_intrinsic_admission(self):
         source=self.path/'debug.c'; source.write_text('int main(void) { int x=3; return x; }')
         path=self.path/'debug.ll'

@@ -78,8 +78,10 @@ Unhandled semantic attributes and metadata are rejected, including
 Debug metadata and debug-only loop locations are retained as non-executable
 information. Supported entry attributes are `noinline`, `optnone`, `nounwind`,
 `uwtable`, argument/return `noundef`, integer ABI `signext`/`zeroext`, and the enumerated Clang target/frame/code-generation
-string attributes in the admission code. Module flags and compiler/debug
-identification are recorded through the IR hashes, not applied as link passes.
+string attributes in the admission code, including `min-legal-vector-width`.
+These code-generation hints do not admit vector types or operations. Module flags
+and compiler/debug identification are recorded through the IR hashes, not applied
+as link passes.
 
 The compile helper now uses `-O0 -g -fno-finite-loops` with matched Clang 18.
 This avoids introducing progress assumptions that would undermine checking an

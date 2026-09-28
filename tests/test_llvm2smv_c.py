@@ -156,6 +156,8 @@ exit: ret i8 0 }''')
         source=self.path/'input.c'; source.write_text('#include <assert.h>\nint main(void) { assert(1); return 0; }')
         a,bundle,command=self.driver(source,status='holds_through_depth',*['--depth','10'])
         b,other,_=self.driver(source,status='holds_through_depth',*['--depth','10'])
+        for path in bundle.iterdir():
+            self.assertEqual(path.read_bytes(), (other / path.name).read_bytes(), path.name)
         self.assertEqual(a['artifact_id'],b['artifact_id'])
         provenance=json.loads((bundle/'provenance.json').read_text())
         self.assertIn('preprocessed_sha256',provenance['c_build']['units'][0])
