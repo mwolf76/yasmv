@@ -1,0 +1,82 @@
+{
+  "machine": "Linux-6.12.107+deb13-amd64-x86_64-with-glibc2.41",
+  "processor": "x86_64",
+  "python": "3.13.5",
+  "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+  "cxxflags": "-D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -DPIC -fPIC -std=c++20 -O2 -Wall -Wno-deprecated-declarations -Werror",
+  "binary_sha256": "f92816ea950047eae7fd5efc0c0d1b57f86c61790eec9c71ad6069459725b639",
+  "source_sha256": "2c82c26c3347fddc86481216d3a221981c3cfa3d901d55912823358c66b27d9b",
+  "query": {
+    "request_id": "benchmark",
+    "operation": "shortest-reach",
+    "target": "DUPLICATE",
+    "limits": {
+      "depth": 12
+    }
+  },
+  "samples_ms": {
+    "fresh": [
+      1525.2955720061436,
+      1540.15913400508,
+      1523.8658570015104,
+      1542.4308560031932,
+      1531.3350630021887
+    ],
+    "warm_snapshot": [
+      619.1890829941258,
+      620.9386340051424,
+      609.3097609991673,
+      612.6294410059927,
+      600.4015010112198
+    ]
+  },
+  "snapshot_initial_ms": 2722.753936002846,
+  "session_key": "86ba371bbab6f3fdb63ea14aa7f185cf96a2b15bfe1c71d39f85e1e4e60e20ec",
+  "result": {
+    "status": "completed",
+    "outcome": "unreachable",
+    "identity": {
+      "engine": "yasmv-0.0.10/minisat",
+      "environment_constraints": [
+        [],
+        [],
+        []
+      ],
+      "inputs": {},
+      "microcode_revision": "sha1:8d6c15340a294e399fc2107a84e85cae1fa77c50",
+      "model_revision": "sha1:b2d584d1bf3bacde61c4fcf0bb5eef0578fabb55",
+      "options": {
+        "cnf_duplicate_removal": true,
+        "cnf_self_subsumption": false,
+        "cnf_subsumption": false,
+        "cnf_tautology_removal": true,
+        "sat_asymm": false,
+        "sat_ccmin_mode": 2,
+        "sat_clause_decay": 0.999,
+        "sat_clause_lim": 20,
+        "sat_elim": true,
+        "sat_garbage_frac": 0.3,
+        "sat_grow": 0,
+        "sat_luby_restart": false,
+        "sat_phase_saving": 2,
+        "sat_random_init_act": true,
+        "sat_random_seed": 91648253,
+        "sat_random_var_freq": 0.02,
+        "sat_rcheck": false,
+        "sat_restart_first": 100,
+        "sat_restart_inc": 2,
+        "sat_simp_garbage_frac": 0.5,
+        "sat_subsumption_lim": 1000,
+        "sat_var_decay": 0.95,
+        "word_width": 4
+      },
+      "root": "main",
+      "source_revision": "sha1:e381cebf7661d7680603b351017af30e8ea86e16"
+    },
+    "optimality": null
+  },
+  "median_ms": {
+    "fresh": 1531.3350630021887,
+    "warm_snapshot": 612.6294410059927
+  }
+}

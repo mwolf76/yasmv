@@ -47,7 +47,7 @@ clause emitted for that unit. An enabled use emits its complete definitions,
 including definitions shared with disabled uses. Disabling a selector removes
 the requirement; it does not assert the constraint's negation.
 
-The MiniSat adapter returns the failed signed group assumptions after UNSAT.
+The CaDiCaL adapter snapshots the failed signed group assumptions after UNSAT.
 The explanation service extracts the enabled subset and **solves again with
 only that subset enabled before publishing it**. A SAT or interrupted query
 never yields an impossibility explanation.

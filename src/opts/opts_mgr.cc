@@ -25,10 +25,23 @@
 #include <iomanip>
 
 #include <opts_mgr.hh>
+#include <sat/engine.hh>
+#include <jsoncpp/json/json.h>
 
 #include <utils/logging.hh>
 
 namespace opts {
+
+    namespace {
+        constexpr const char* retired_sat_options[] = {
+            "sat-random-var-freq", "sat-random-init-act", "sat-ccmin-mode",
+            "sat-phase-saving", "sat-garbage-frac", "sat-var-decay",
+            "sat-clause-decay", "sat-luby-restart", "sat-restart-first",
+            "sat-restart-inc", "sat-elim", "sat-rcheck", "sat-asymm",
+            "sat-grow", "sat-clause-lim", "sat-subsumption-lim",
+            "sat-simp-garbage-frac"
+        };
+    }
 
     // static initialization
     OptsMgr_ptr OptsMgr::f_instance = nullptr;
@@ -50,6 +63,7 @@ namespace opts {
         general_opts.add_options()
             ("session-file", boost::program_options::value<std::string>(), "load an immutable model snapshot and serve isolated JSON Lines queries")
             ("query-file", boost::program_options::value<std::string>(), "execute a typed query request and emit one JSON result")
+            ("solver-info", "print linked SAT solver provenance as JSON and exit")
             (
                 "help",
                 "produce help message"
@@ -163,100 +177,14 @@ namespace opts {
             )
             ;
 
-        // SAT solver options
-        boost::program_options::options_description sat_opts("SAT solver options");
+        boost::program_options::options_description sat_opts("CaDiCaL solver options");
         sat_opts.add_options()
-            (
-                "sat-ccmin-mode",
-                boost::program_options::value<int>(),
-                "conflict clause minimization mode (0=none, 1=basic, 2=deep, default: 2)"
-            )
-            (
-                "sat-garbage-frac",
-                boost::program_options::value<double>(),
-                "garbage collection fraction (0.0-1.0, default: 0.30)"
-            )
-            (
-                "sat-phase-saving",
-                boost::program_options::value<int>(),
-                "phase saving mode (0=none, 1=limited, 2=full, default: 2)"
-            )
-            (
-                "sat-random-init-act",
-                boost::program_options::value<std::string>(),
-                "enable random initial activity (yes/no, default: yes)"
-            )
-            (
-                "sat-random-var-freq",
-                boost::program_options::value<double>(),
-                "random variable frequency (0.0 = deterministic, higher = more random, default: 0.02)"
-            )
-            (
-                "sat-var-decay",
-                boost::program_options::value<double>(),
-                "variable activity decay factor (0.0-1.0, default: 0.95)"
-            )
-            (
-                "sat-clause-decay",
-                boost::program_options::value<double>(),
-                "clause activity decay factor (0.0-1.0, default: 0.999)"
-            )
-            (
-                "sat-random-seed",
-                boost::program_options::value<double>(),
-                "random seed for SAT solver (default: 91648253)"
-            )
-            (
-                "sat-luby-restart",
-                boost::program_options::value<std::string>(),
-                "use Luby restart sequence (yes/no, default: no)"
-            )
-            (
-                "sat-restart-first",
-                boost::program_options::value<int>(),
-                "base restart interval in conflicts (default: 100)"
-            )
-            (
-                "sat-restart-inc",
-                boost::program_options::value<double>(),
-                "restart interval multiplier for geometric restarts (default: 2.0)"
-            )
-            (
-                "sat-elim",
-                boost::program_options::value<std::string>(),
-                "enable variable elimination preprocessing (yes/no, default: yes)"
-            )
-            (
-                "sat-rcheck",
-                boost::program_options::value<std::string>(),
-                "check if clauses are already implied (yes/no, default: no)"
-            )
-            (
-                "sat-asymm",
-                boost::program_options::value<std::string>(),
-                "shrink clauses by asymmetric branching (yes/no, default: no)"
-            )
-            (
-                "sat-grow",
-                boost::program_options::value<int>(),
-                "allow formula growth during elimination (default: 0)"
-            )
-            (
-                "sat-clause-lim",
-                boost::program_options::value<int>(),
-                "skip elimination producing long clauses (default: 20)"
-            )
-            (
-                "sat-subsumption-lim",
-                boost::program_options::value<int>(),
-                "skip subsumption check for large clauses (default: 1000)"
-            )
-            (
-                "sat-simp-garbage-frac",
-                boost::program_options::value<double>(),
-                "garbage collection fraction during simplification (default: 0.5)"
-            )
-            ;
+            ("sat-random-seed", boost::program_options::value<int>(),
+             "CaDiCaL random seed (integer 0..2000000000, default: 0)");
+        for (const auto option : retired_sat_options)
+            sat_opts.add_options()(option,
+                boost::program_options::value<std::string>()->implicit_value(""),
+                "removed MiniSat option; omit when using CaDiCaL");
 
         // Combine all option groups
         f_desc
@@ -283,6 +211,25 @@ namespace opts {
             f_vm);
 
         boost::program_options::notify(f_vm);
+        for (const auto option : retired_sat_options)
+            if (f_vm.count(option))
+                throw std::invalid_argument(std::string("Removed MiniSat option --") + option +
+                    ": yasmv now uses CaDiCaL; omit this option. Only --sat-random-seed is retained.");
+        if (sat_random_seed() < 0 || sat_random_seed() > 2000000000)
+            throw std::invalid_argument("--sat-random-seed must be an integer in 0..2000000000");
+        if (f_vm.count("solver-info")) {
+            Json::Value info;
+            info["name"] = "cadical";
+            info["version"] = sat::Engine::solver_version();
+            info["signature"] = sat::Engine::solver_signature();
+            info["revision"] = CADICAL_BUILD_REVISION;
+            info["linkage"] = "static";
+            info["settings"]["inprobing"] = sat::Engine::solver_inprobing();
+            Json::StreamWriterBuilder writer;
+            writer["indentation"] = "";
+            std::cout << Json::writeString(writer, info) << std::endl;
+            std::exit(0);
+        }
         for (const char* option : {"cnf-blocked-clause", "cnf-variable-elimination",
                                    "cnf-self-subsumption", "cnf-subsumption",
                                    "cnf-tautology-removal", "cnf-duplicate-removal",
@@ -438,153 +385,9 @@ namespace opts {
         return DEFAULT_REACH_BACKWARD_STRATEGY;
     }
 
-    double OptsMgr::sat_random_var_freq() const
+    int OptsMgr::sat_random_seed() const
     {
-        if (0 < f_vm.count("sat-random-var-freq")) {
-            return f_vm["sat-random-var-freq"].as<double>();
-        }
-        return DEFAULT_SAT_RANDOM_VAR_FREQ;
-    }
-
-    bool OptsMgr::sat_random_init_act() const
-    {
-        if (0 < f_vm.count("sat-random-init-act")) {
-            const auto value = f_vm["sat-random-init-act"].as<std::string>();
-            return is_true(value);
-        }
-        return DEFAULT_SAT_RANDOM_INIT_ACT;
-    }
-    
-    int OptsMgr::sat_ccmin_mode() const
-    {
-        if (0 < f_vm.count("sat-ccmin-mode")) {
-            return f_vm["sat-ccmin-mode"].as<int>();
-        }
-        return DEFAULT_SAT_CCMIN_MODE;
-    }
-    
-    int OptsMgr::sat_phase_saving() const
-    {
-        if (0 < f_vm.count("sat-phase-saving")) {
-            return f_vm["sat-phase-saving"].as<int>();
-        }
-        return DEFAULT_SAT_PHASE_SAVING;
-    }
-    
-    double OptsMgr::sat_garbage_frac() const
-    {
-        if (0 < f_vm.count("sat-garbage-frac")) {
-            return f_vm["sat-garbage-frac"].as<double>();
-        }
-        return DEFAULT_SAT_GARBAGE_FRAC;
-    }
-    
-    double OptsMgr::sat_var_decay() const
-    {
-        if (0 < f_vm.count("sat-var-decay")) {
-            return f_vm["sat-var-decay"].as<double>();
-        }
-        return DEFAULT_SAT_VAR_DECAY;
-    }
-    
-    double OptsMgr::sat_clause_decay() const
-    {
-        if (0 < f_vm.count("sat-clause-decay")) {
-            return f_vm["sat-clause-decay"].as<double>();
-        }
-        return DEFAULT_SAT_CLAUSE_DECAY;
-    }
-    
-    double OptsMgr::sat_random_seed() const
-    {
-        if (0 < f_vm.count("sat-random-seed")) {
-            return f_vm["sat-random-seed"].as<double>();
-        }
-        return DEFAULT_SAT_RANDOM_SEED;
-    }
-    
-    bool OptsMgr::sat_luby_restart() const
-    {
-        if (0 < f_vm.count("sat-luby-restart")) {
-            const auto value = f_vm["sat-luby-restart"].as<std::string>();
-            return is_true(value);
-        }
-        return DEFAULT_SAT_LUBY_RESTART;
-    }
-    
-    int OptsMgr::sat_restart_first() const
-    {
-        if (0 < f_vm.count("sat-restart-first")) {
-            return f_vm["sat-restart-first"].as<int>();
-        }
-        return DEFAULT_SAT_RESTART_FIRST;
-    }
-    
-    double OptsMgr::sat_restart_inc() const
-    {
-        if (0 < f_vm.count("sat-restart-inc")) {
-            return f_vm["sat-restart-inc"].as<double>();
-        }
-        return DEFAULT_SAT_RESTART_INC;
-    }
-    
-    bool OptsMgr::sat_elim() const
-    {
-        if (0 < f_vm.count("sat-elim")) {
-            const auto value = f_vm["sat-elim"].as<std::string>();
-            return is_true(value);
-        }
-        return DEFAULT_SAT_ELIM;
-    }
-    
-    bool OptsMgr::sat_rcheck() const
-    {
-        if (0 < f_vm.count("sat-rcheck")) {
-            const auto value = f_vm["sat-rcheck"].as<std::string>();
-            return is_true(value);
-        }
-        return DEFAULT_SAT_RCHECK;
-    }
-    
-    bool OptsMgr::sat_asymm() const
-    {
-        if (0 < f_vm.count("sat-asymm")) {
-            const auto value = f_vm["sat-asymm"].as<std::string>();
-            return is_true(value);
-        }
-        return DEFAULT_SAT_ASYMM;
-    }
-    
-    int OptsMgr::sat_grow() const
-    {
-        if (0 < f_vm.count("sat-grow")) {
-            return f_vm["sat-grow"].as<int>();
-        }
-        return DEFAULT_SAT_GROW;
-    }
-    
-    int OptsMgr::sat_clause_lim() const
-    {
-        if (0 < f_vm.count("sat-clause-lim")) {
-            return f_vm["sat-clause-lim"].as<int>();
-        }
-        return DEFAULT_SAT_CLAUSE_LIM;
-    }
-    
-    int OptsMgr::sat_subsumption_lim() const
-    {
-        if (0 < f_vm.count("sat-subsumption-lim")) {
-            return f_vm["sat-subsumption-lim"].as<int>();
-        }
-        return DEFAULT_SAT_SUBSUMPTION_LIM;
-    }
-    
-    double OptsMgr::sat_simp_garbage_frac() const
-    {
-        if (0 < f_vm.count("sat-simp-garbage-frac")) {
-            return f_vm["sat-simp-garbage-frac"].as<double>();
-        }
-        return DEFAULT_SAT_SIMP_GARBAGE_FRAC;
+        return f_vm.count("sat-random-seed") ? f_vm["sat-random-seed"].as<int>() : DEFAULT_SAT_RANDOM_SEED;
     }
     
     

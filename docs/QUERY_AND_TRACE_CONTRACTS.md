@@ -109,6 +109,10 @@ engine version, and a digest of the actual arithmetic fragment files. Model
 revision is derived from these fields. Paths and elapsed times are excluded.
 Digests identify local artifacts; they are not authentication signatures.
 
+The solver identity records CaDiCaL's version, signature, verified build revision,
+and search-propagation/cooperative-limit semantics. `--solver-info` reports the
+linked solver identity without loading a model.
+
 Statistics report compilation/encoding/solving/decoding elapsed milliseconds,
 solver work, and maximum observed solver variables/clauses. These are measured
 phase totals, not disjoint CPU accounting. Replay additionally reports the
@@ -123,8 +127,13 @@ All limits default to `-1` (unlimited):
 | `depth` | Maximum reach depth; transition-check depth; number of continuation steps; maximum diameter search depth |
 | `states` | Positive enumeration/count limit for `pick-state` |
 | `wall_ms` | Cooperative wall deadline, including loading in machine mode |
-| `conflicts` | Total MiniSat conflict budget across the job's solves |
-| `propagations` | Total MiniSat propagation budget across the job's solves |
+| `conflicts` | Total CaDiCaL conflict budget across the job's solves |
+| `propagations` | Cooperative CaDiCaL search-propagation threshold across the job's solves |
+
+Search-propagation counters exclude preprocessing work. Propagation thresholds
+and conflict budgets above `INT_MAX` are checked cooperatively and can overshoot
+between callbacks; they are not strict work caps. Exhausted budgets suppress
+conclusive results and evidence even if the solver has just finished.
 
 Zero solver-work or wall budgets return unknown. State limits must be positive;
 reaching one produces an incomplete count. Reach depth zero checks the initial

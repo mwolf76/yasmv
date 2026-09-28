@@ -9,6 +9,27 @@ on:
     branches: [ "master" ]
 
 jobs:
+  cadical-api:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: checkout pinned CaDiCaL
+      uses: actions/checkout@v4
+      with:
+        repository: arminbiere/cadical
+        ref: c60730422e758ef1cebe7aeddf2dda31c996bf04
+        path: .deps/cadical
+    - name: build assertion-enabled static library
+      working-directory: .deps/cadical
+      run: |
+        ./configure -c -fPIC
+        make -C build -j2 libcadical.a
+    - name: validate incremental API contracts
+      run: |
+        python3 tests/test_cadical_runner.py
+        python3 tools/test-cadical-api.py --source .deps/cadical
+
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -22,13 +43,29 @@ jobs:
         sudo apt-get install -y build-essential python3 autoconf automake libtool \
           libboost-filesystem-dev libboost-program-options-dev libboost-test-dev \
           libboost-thread-dev libboost-system-dev libboost-chrono-dev \
-          libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev minisat
+          libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev
+
+    - name: checkout pinned CaDiCaL
+      uses: actions/checkout@v4
+      with:
+        repository: arminbiere/cadical
+        ref: c60730422e758ef1cebe7aeddf2dda31c996bf04
+        path: .deps/cadical
+
+    - name: build pinned static SAT dependency
+      run: |
+        cd .deps/cadical
+        ./configure -c -fPIC
+        make -C build -j2 libcadical.a
+        mkdir -p ../cadical-prefix/include ../cadical-prefix/lib
+        install -m 644 src/cadical.hpp ../cadical-prefix/include/
+        install -m 644 build/libcadical.a ../cadical-prefix/lib/
 
     - name: configure core build
       run: |
         autoreconf -vif
         tar xfj microcode.tar.bz2
-        ./configure --disable-llvm2smv CXXFLAGS="-std=c++20 -O2 -Wall -Wno-deprecated-declarations -Werror"
+        ./configure --disable-llvm2smv --with-cadical-prefix="$PWD/.deps/cadical-prefix" CXXFLAGS="-std=c++20 -O2 -Wall -Wno-deprecated-declarations -Werror"
 
     - name: compile
       run: make -j2
@@ -39,5 +76,9 @@ jobs:
       env:
         YASMV_HOME: ${{ github.workspace }}
       run: |
+        make sat-types-test yasmv_reliability_tests
+        for settings in 000 001 010 011 100 101 110 111; do
+          YASMV_TEST_CNF="$settings" ./yasmv_reliability_tests --log_level=error
+        done
         python3 tests/test_query.py QueryTests.test_cli_and_machine_agree
         python3 tests/test_cli.py CLITests.test_protocol_recovery_and_discovery
