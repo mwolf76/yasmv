@@ -1,0 +1,94 @@
+{
+  "machine": "Linux-6.12.107+deb13-amd64-x86_64-with-glibc2.41",
+  "processor": "x86_64",
+  "python": "3.13.5",
+  "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+  "cxxflags": "-D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -DPIC -fPIC -std=c++20 -O2 -Wall -Wno-deprecated-declarations -Werror",
+  "binary_sha256": "f92816ea950047eae7fd5efc0c0d1b57f86c61790eec9c71ad6069459725b639",
+  "source_sha256": "075bb962e7426d69a4e348b81ecb54f68d1b6d4c25d0a882743c0ca5dc21d5ca",
+  "query": {
+    "request_id": "benchmark",
+    "operation": "shortest-reach",
+    "target": "DUPLICATE",
+    "limits": {
+      "depth": 12
+    }
+  },
+  "samples_ms": {
+    "fresh": [
+      1525.1420270069502,
+      1516.4757550082868,
+      1522.523640000145,
+      1522.4412010138622,
+      1524.2154959996697
+    ],
+    "warm_snapshot": [
+      605.715316007263,
+      625.6346430018311,
+      612.9527620068984,
+      599.368625000352,
+      607.3852429981343
+    ]
+  },
+  "snapshot_initial_ms": 2698.92409699969,
+  "session_key": "9a7f9e0ac5f44a3c42175da208a86e96cc16d484be14ef2a60b65a3522fcaa69",
+  "result": {
+    "status": "completed",
+    "outcome": "reachable",
+    "identity": {
+      "engine": "yasmv-0.0.10/minisat",
+      "environment_constraints": [
+        [],
+        [],
+        []
+      ],
+      "inputs": {},
+      "microcode_revision": "sha1:8d6c15340a294e399fc2107a84e85cae1fa77c50",
+      "model_revision": "sha1:866739db98d815fd10c156ed9a903b6e6b77bc3c",
+      "options": {
+        "cnf_duplicate_removal": true,
+        "cnf_self_subsumption": false,
+        "cnf_subsumption": false,
+        "cnf_tautology_removal": true,
+        "sat_asymm": false,
+        "sat_ccmin_mode": 2,
+        "sat_clause_decay": 0.999,
+        "sat_clause_lim": 20,
+        "sat_elim": true,
+        "sat_garbage_frac": 0.3,
+        "sat_grow": 0,
+        "sat_luby_restart": false,
+        "sat_phase_saving": 2,
+        "sat_random_init_act": true,
+        "sat_random_seed": 91648253,
+        "sat_random_var_freq": 0.02,
+        "sat_rcheck": false,
+        "sat_restart_first": 100,
+        "sat_restart_inc": 2,
+        "sat_simp_garbage_frac": 0.5,
+        "sat_subsumption_lim": 1000,
+        "sat_var_decay": 0.95,
+        "word_width": 4
+      },
+      "root": "main",
+      "source_revision": "sha1:3d531687e527ba0d614fbf294231f87de092ff49"
+    },
+    "optimality": {
+      "certified": true,
+      "criterion": "transitions",
+      "depth": 5,
+      "method": "increasing-depth-exhaustion",
+      "unsat_depths": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "median_ms": {
+    "fresh": 1522.523640000145,
+    "warm_snapshot": 607.3852429981343
+  }
+}
