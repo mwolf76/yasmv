@@ -14,6 +14,10 @@ API usage, migration notes, and acceptance evidence are documented in
 
 Prepared 2026-09-26 against commit `2077efeb`. The accepted direction and evidence are in [ARCHITECTURE.md](../ARCHITECTURE.md). The findings below describe the original planning baseline; the correctness baseline document records the implemented repairs and their verification.
 
+The later [CaDiCaL migration](../cadical_integration.md) supersedes this plan's
+MiniSat-specific integration choices. Current builds require the pinned static
+CaDiCaL dependency described in [the backend guide](CADICAL_BACKEND.md).
+
 CI now runs a single core build and two smoke checks. Full regression, LLVM,
 sanitizer, and browser gates run locally before committing; see
 [the testing guide](CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).

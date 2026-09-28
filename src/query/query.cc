@@ -86,7 +86,7 @@ namespace query {
         auto& mm = model::ModelMgr::INSTANCE();
         auto& om = opts::OptsMgr::INSTANCE();
         v["root"] = source::print(mm.model().main_module().name());
-        v["engine"] = "yasmv-0.0.10/minisat";
+        v["engine"] = std::string("yasmv-") + PACKAGE_VERSION + "/" + sat::Engine::solver_signature();
         v["inputs"] = Json::objectValue;
         auto& env = env::Environment::INSTANCE();
         for (auto id : env.identifiers())
@@ -96,24 +96,14 @@ namespace query {
         v["options"]["cnf_duplicate_removal"] = om.cnf_duplicate_removal();
         v["options"]["cnf_subsumption"] = om.cnf_subsumption();
         v["options"]["cnf_self_subsumption"] = om.cnf_self_subsumption();
-        v["options"]["sat_random_var_freq"] = om.sat_random_var_freq();
-        v["options"]["sat_random_init_act"] = om.sat_random_init_act();
-        v["options"]["sat_ccmin_mode"] = om.sat_ccmin_mode();
-        v["options"]["sat_phase_saving"] = om.sat_phase_saving();
-        v["options"]["sat_garbage_frac"] = om.sat_garbage_frac();
-        v["options"]["sat_var_decay"] = om.sat_var_decay();
-        v["options"]["sat_clause_decay"] = om.sat_clause_decay();
         v["options"]["sat_random_seed"] = om.sat_random_seed();
-        v["options"]["sat_luby_restart"] = om.sat_luby_restart();
-        v["options"]["sat_restart_first"] = om.sat_restart_first();
-        v["options"]["sat_restart_inc"] = om.sat_restart_inc();
-        v["options"]["sat_elim"] = om.sat_elim();
-        v["options"]["sat_rcheck"] = om.sat_rcheck();
-        v["options"]["sat_asymm"] = om.sat_asymm();
-        v["options"]["sat_grow"] = om.sat_grow();
-        v["options"]["sat_clause_lim"] = om.sat_clause_lim();
-        v["options"]["sat_subsumption_lim"] = om.sat_subsumption_lim();
-        v["options"]["sat_simp_garbage_frac"] = om.sat_simp_garbage_frac();
+        v["solver"]["name"] = "cadical";
+        v["solver"]["version"] = sat::Engine::solver_version();
+        v["solver"]["signature"] = sat::Engine::solver_signature();
+        v["solver"]["revision"] = CADICAL_BUILD_REVISION;
+        v["solver"]["settings"]["inprobing"] = sat::Engine::solver_inprobing();
+        v["solver"]["propagation_counter"] = "search";
+        v["solver"]["propagation_limit"] = "cooperative";
         // JSON clients may rewrite 2.0 as 2. Normalize integral options before
         // fingerprinting so saving a trace in JavaScript preserves its identity.
         for (auto& option : v["options"]) {

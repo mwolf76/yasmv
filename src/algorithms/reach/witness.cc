@@ -93,7 +93,7 @@ namespace reach {
                     memset(inputs, 0, sizeof(inputs));
 
                     /* 1. for each bit int the encoding, fetch UCBI,
-                     * time it into TCBI, fetch its value in MiniSAT
+                     * time it into TCBI, fetch its value from the SAT engine
                      * model and set the corresponding entry in
                      * input. */
                     dd::DDVector::const_iterator di;
@@ -107,7 +107,7 @@ namespace reach {
                             enc::TCBI(ucbi, reversed ? UINT_MAX - step : step)
                         };
 
-                        Var var { engine.tcbi_to_var(tcbi) };
+                        sat::Var var { engine.existing_var(tcbi) };
                         int value { engine.value(var) }; /* XXX: don't cares assigned to 0 */
 
                         inputs[bit] = value;

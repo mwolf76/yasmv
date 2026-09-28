@@ -133,7 +133,7 @@ namespace sat {
                 newClause.clear();
                 for (const auto& literal : clause) {
                     assert(literal.type() == Json::intValue);
-                    newClause.push_back(Minisat::toLit(literal.asInt()));
+                    newClause.push_back(sat::toLit(literal.asInt()));
                 }
 
                 f_clauses.push_back(newClause);
@@ -263,9 +263,9 @@ namespace sat {
         f_sat.clear_cnf_map();
 
         for (const auto& clause : clauses) {
-            vec<Lit> ps;
+            Lits ps;
             if (MAINGROUP != f_group) {
-                ps.push(mkLit(f_group, true));
+                ps.push_back(mkLit(f_group, true));
             }
 
             /* for each literal in clause, determine whether
@@ -277,8 +277,8 @@ namespace sat {
             for (const auto lit : clause) {
                 constexpr Var alpha { 0 }; // true
 
-                const Var lit_var { Minisat::var(lit) };
-                const int lit_sign { Minisat::sign(lit) };
+                const Var lit_var { sat::var(lit) };
+                const int lit_sign { sat::sign(lit) };
 
                 Var tgt_var;
 
@@ -297,12 +297,12 @@ namespace sat {
 
                     if (!Cudd_IsConstant(node)) {
                         tgt_var = f_sat.find_dd_var(node, f_time);
-                        ps.push(mkLit(tgt_var, lit_sign));
+                        ps.push_back(mkLit(tgt_var, lit_sign));
                     } else {
                         value_t value { cuddV(node) };
 
                         assert(value < 2); // 0 or 1
-                        ps.push(mkLit(alpha, value ? lit_sign : !lit_sign));
+                        ps.push_back(mkLit(alpha, value ? lit_sign : !lit_sign));
                     }
                 }
 
@@ -313,12 +313,12 @@ namespace sat {
 
                     if (const DdNode * node { x[width - ndx - 1].getNode() }; !Cudd_IsConstant(node)) {
                         tgt_var = f_sat.find_dd_var(node, f_time);
-                        ps.push(mkLit(tgt_var, lit_sign));
+                        ps.push_back(mkLit(tgt_var, lit_sign));
                     } else {
                         value_t value { cuddV(node) };
 
                         assert(value < 2); // 0 or 1
-                        ps.push(mkLit(alpha, value ? lit_sign : !lit_sign));
+                        ps.push_back(mkLit(alpha, value ? lit_sign : !lit_sign));
                     }
                 }
 
@@ -329,12 +329,12 @@ namespace sat {
 
                     if (const DdNode * node { y[width - ndx - 1].getNode() }; !Cudd_IsConstant(node)) {
                         tgt_var = f_sat.find_dd_var(node, f_time);
-                        ps.push(mkLit(tgt_var, lit_sign));
+                        ps.push_back(mkLit(tgt_var, lit_sign));
                     } else {
                         value_t value { cuddV(node) };
 
                         assert(value < 2); // 0 or 1
-                        ps.push(mkLit(alpha, value ? lit_sign : !lit_sign));
+                        ps.push_back(mkLit(alpha, value ? lit_sign : !lit_sign));
                     }
                 }
 
@@ -344,7 +344,7 @@ namespace sat {
                     assert(0 <= ndx /* && ndx < width */);
 
                     tgt_var = f_sat.rewrite_cnf_var(ndx, f_time);
-                    ps.push(mkLit(tgt_var, lit_sign));
+                    ps.push_back(mkLit(tgt_var, lit_sign));
                 }
 
             } /* for (j = clause...) */
@@ -371,17 +371,17 @@ namespace sat {
         /* ! a, Zi <-> Xi for all i */
         for (unsigned pol = 0; pol < 2; ++pol) {
             for (unsigned i = 0; i < md.width(); ++i) {
-                Minisat::vec<Lit> ps;
+                Lits ps;
 
                 if (MAINGROUP != f_group) {
-                    ps.push(mkLit(f_group, true));
+                    ps.push_back(mkLit(f_group, true));
                 }
 
-                ps.push(mkLit(act, true));
-                ps.push(mkLit(f_sat.find_dd_var(z[i].getNode(), f_time), !pol));
+                ps.push_back(mkLit(act, true));
+                ps.push_back(mkLit(f_sat.find_dd_var(z[i].getNode(), f_time), !pol));
                 DdNode* xnode { x[i].getNode() };
 
-                ps.push(
+                ps.push_back(
                     Cudd_IsConstant(xnode)
                         ? mkLit(alpha, Cudd_V(xnode) ? pol : !pol)
                         : mkLit(f_sat.find_dd_var(x[i].getNode(), f_time), pol));
@@ -393,17 +393,17 @@ namespace sat {
         /* a, Zi <-> Yi for all i */
         for (unsigned pol = 0; pol < 2; ++pol) {
             for (unsigned i = 0; i < md.width(); ++i) {
-                Minisat::vec<Lit> ps;
+                Lits ps;
 
                 if (MAINGROUP != f_group) {
-                    ps.push(mkLit(f_group, true));
+                    ps.push_back(mkLit(f_group, true));
                 }
 
-                ps.push(mkLit(act, false));
-                ps.push(mkLit(f_sat.find_dd_var(z[i].getNode(), f_time), !pol));
+                ps.push_back(mkLit(act, false));
+                ps.push_back(mkLit(f_sat.find_dd_var(z[i].getNode(), f_time), !pol));
                 DdNode* ynode { y[i].getNode() };
 
-                ps.push(
+                ps.push_back(
                     Cudd_IsConstant(ynode)
                         ? mkLit(alpha, Cudd_V(ynode) ? pol : !pol)
                         : mkLit(f_sat.find_dd_var(y[i].getNode(), f_time), pol));
@@ -433,15 +433,15 @@ namespace sat {
                 for (unsigned i = 0; i < md.elem_width(); ++i) {
                     unsigned ndx { i + j * md.elem_width() };
 
-                    Minisat::vec<Lit> ps;
+                    Lits ps;
 
                     if (MAINGROUP != f_group) {
-                        ps.push(mkLit(f_group, true));
+                        ps.push_back(mkLit(f_group, true));
                     }
 
-                    ps.push(mkLit(act, true));
-                    ps.push(mkLit(f_sat.find_dd_var(z[i].getNode(), f_time), !pol));
-                    ps.push(mkLit(f_sat.find_dd_var(x[ndx].getNode(), f_time), pol));
+                    ps.push_back(mkLit(act, true));
+                    ps.push_back(mkLit(f_sat.find_dd_var(z[i].getNode(), f_time), !pol));
+                    ps.push_back(mkLit(f_sat.find_dd_var(x[ndx].getNode(), f_time), pol));
                     f_sat.add_clause(ps);
                 }
             }

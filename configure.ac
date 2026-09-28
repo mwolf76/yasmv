@@ -105,8 +105,8 @@ AC_LIBJSONCPP
 # ANTLR3 checks
 AC_ANTLR3
 
-# minisat checks
-AC_MINISAT
+# Pinned external SAT solver (static linkage).
+AC_CADICAL
 
 # LLVM checks (for llvm2smv)
 AC_LLVM

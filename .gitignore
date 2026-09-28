@@ -9,6 +9,7 @@
 Makefile
 Makefile.in
 *.m4
+!m4/cadical.m4
 autom4te.cache
 config*
 .dirstamp
@@ -26,6 +27,7 @@ llvm2smv/llvm2smv
 llvm2smv/llvm2smv_model_tests
 yasmv.pc
 yasmv_tests
+sat_literal_tests
 yasmv_reliability_tests
 __pycache__/
 playground/
@@ -44,3 +46,5 @@ yasmv_query_tests
 
 !docs/benchmarks/m4-sessions.json
 !docs/benchmarks/m6-progress.json
+!docs/benchmarks/cadical-m1-minisat-reachable.json
+!docs/benchmarks/cadical-m1-minisat-unreachable.json

@@ -25,30 +25,33 @@ to solve planning problems.
   For the current core-only build, correctness regression tests, and migration
   notes, see [the correctness baseline](docs/CORRECTNESS_BASELINE.md).
 
-  Here is the complete list of build dependencies. These package names are from
-  Ubuntu 14.04 (Trusty), used in Travis CI.
+  The core requires a C++20 compiler, Python 3.10+, Autotools/libtool, ANTLR3
+  and its C runtime, Boost, JsonCpp, readline, zlib, and pinned CaDiCaL 3.0.1.
+  CUDD is vendored. The Ubuntu 24.04 core CI job installs these system packages:
 
-  - antlr3
-  - autoconf
-  - build-essential
-  - gcc
-  - g++
-  - libantlr3c-dev
-  - libboost-all-dev
-  - libjsoncpp-dev
-  - libtool
-  - libyaml-cpp-dev
-  - openjdk-7-jdk
-  - make
-  - minisat
-  - zlib1g-dev
-
-  when all the required packages are installed, launching the build should boil
-  down to this:
+  ```sh
+  sudo apt-get install build-essential python3 autoconf automake libtool \
+    libboost-filesystem-dev libboost-program-options-dev libboost-test-dev \
+    libboost-thread-dev libboost-system-dev libboost-chrono-dev \
+    libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev
   ```
-  $ ./setup.sh
+
+  The old Trusty dependency installer has been retired. After installing the
+  system dependencies and building CaDiCaL as described below:
+
+  ```sh
+  $ ./setup.sh --disable-llvm2smv --with-cadical-prefix=/path/to/cadical-prefix
   $ make
   ```
+
+  To include the LLVM frontend, install LLVM/Clang 18 and use
+  `--enable-llvm2smv` instead; see [the frontend guide](llvm2smv/README.md).
+
+  Build the pinned CaDiCaL dependency using the reproducible instructions in
+  [the SAT backend guide](docs/CADICAL_BACKEND.md). It must provide
+  `include/cadical.hpp` and `lib/libcadical.a`; configure validates its API,
+  runtime version, and full build revision. Neither setup nor configure
+  downloads dependencies. The default prefix is `/usr/local`.
 
   The build may take quite a while. If your machine has multiple cores using -j
   <number-of-parallel-tasks> option when running `make` should help in reducing
@@ -61,8 +64,7 @@ to solve planning problems.
   Another option is to use `distcc`. The setup.sh script contains a working
   example. Refer to `distcc` documentation for more details.
 
-  On my current development platform - Debian 9.4 ("Stretch") - the whole thing
-  builds with no warnings. The parser is written with ANTLR3[*] so you will need
+  The parser is written with ANTLR3[*] so you will need
   some JRE installed at build time to generate the parser and lexer code.
   Generated parser and lexer code itself is C++, so as long as you don't change
   the grammar source files you will no longer need the JRE to make the build. No
@@ -110,15 +112,16 @@ to solve planning problems.
   $ make test
   ```
 
-  CI runs one core build and two smoke checks. Full regression, LLVM,
+  CI validates the pinned CaDiCaL API, builds the core, and runs the SAT literal
+  and adapter matrix plus CLI/agent smoke checks. Full regression, LLVM,
   sanitizer, and browser acceptance remain local pre-commit gates; see
   [the testing guide](docs/CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).
 
   Remark: The default build for C++ code now uses -O2 optimization for optimal
   performance. If you need a debugger-friendly build, set USE_DEBUGGER=1 in the
-  setup.sh script to use -O0 instead. Core services `CUDD` (used in the expression
-  compiler) and `Minisat` (which powers the solving engine) are compiled/installed
-  separately and already use a higher level of optimization.
+  setup.sh script to use -O0 instead. Vendored `CUDD` (used in the expression
+  compiler) has its own build settings. `CaDiCaL` (which powers the solving
+  engine) is built separately using the pinned dependency instructions.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
 

@@ -324,11 +324,11 @@ namespace algorithms {
                     const enc::TCBI jtcbi { enc::TCBI(ucbi, j) };
                     const enc::TCBI ktcbi { enc::TCBI(ucbi, k) };
 
-                    Var jkne { engine.new_sat_var() };
+                    sat::Var jkne { engine.new_sat_var() };
                     uniqueness_vars.push_back(jkne);
 
-                    const Var jvar { engine.tcbi_to_var(jtcbi) };
-                    const Var kvar { engine.tcbi_to_var(ktcbi) };
+                    const sat::Var jvar { engine.tcbi_to_var(jtcbi) };
+                    const sat::Var kvar { engine.tcbi_to_var(ktcbi) };
 
                     /* for each pair (j, k) we assert two clauses, both
                        activated by jkne. The first clause is satisfied if
@@ -341,19 +341,19 @@ namespace algorithms {
                        jkne -> j xor k */
 
                     {
-                        vec<Lit> ps;
-                        ps.push(mkLit(jkne, true));
-                        ps.push(mkLit(jvar, true));
-                        ps.push(mkLit(kvar, true));
+                        sat::Lits ps;
+                        ps.push_back(sat::mkLit(jkne, true));
+                        ps.push_back(sat::mkLit(jvar, true));
+                        ps.push_back(sat::mkLit(kvar, true));
 
                         engine.add_clause(ps);
                     }
 
                     {
-                        vec<Lit> ps;
-                        ps.push(mkLit(jkne, true));
-                        ps.push(mkLit(jvar, false));
-                        ps.push(mkLit(kvar, false));
+                        sat::Lits ps;
+                        ps.push_back(sat::mkLit(jkne, true));
+                        ps.push_back(sat::mkLit(jvar, false));
+                        ps.push_back(sat::mkLit(kvar, false));
 
                         engine.add_clause(ps);
                     }
@@ -364,11 +364,11 @@ namespace algorithms {
         /* ...  finally, we assert that at least one of the activation
            variables is true */
         {
-            vec<Lit> ps;
-            ps.push(mkLit(group, true));
+            sat::Lits ps;
+            ps.push_back(sat::mkLit(group, true));
 
             for (int uniqueness_var : uniqueness_vars) {
-                ps.push(mkLit(uniqueness_var, false));
+                ps.push_back(sat::mkLit(uniqueness_var, false));
             }
 
             engine.add_clause(ps);

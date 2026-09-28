@@ -12,6 +12,11 @@ The project now includes **llvm2smv**, a C-to-SMV translator that enables formal
 
 ### Building the Project
 
+Build the pinned static CaDiCaL dependency first using
+[the backend guide](docs/CADICAL_BACKEND.md). Pass
+`--with-cadical-prefix=/path/to/cadical-prefix` to setup/configure when it is not
+installed in `/usr/local`; no MiniSat package is required.
+
 ```bash
 # Recommended: Use the setup script
 ./setup.sh
@@ -69,7 +74,7 @@ make -C llvm2smv test
 2. **Model** (`src/model/`) - Model representation with modules, variables, and constraints
 3. **Compiler** (`src/compiler/`) - Compiles models to internal representation
 4. **Encoding** (`src/enc/`) - Manages encoding schemes (algebraic, monolithic, TCBI/UCBI)
-5. **SAT Engine** (`src/sat/`) - MiniSat-based SAT solving with CNF encoding
+5. **SAT Engine** (`src/sat/`) - CaDiCaL-based SAT solving behind an owned-type engine interface with CNF encoding
 6. **Algorithms** (`src/algorithms/`) - Core verification algorithms:
    - `check/` - Consistency checking for INITial states, TRANSition relations, and constraints.
    - `reach/` - Forward/backward reachability

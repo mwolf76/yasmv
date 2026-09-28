@@ -2,6 +2,7 @@
 """M1 process contracts and trace replay, using independently known tiny models."""
 import copy
 import hashlib
+import itertools
 import json
 import os
 from pathlib import Path
@@ -239,6 +240,51 @@ class QueryTests(unittest.TestCase):
         self.assertEqual(self.replay(parent)['outcome'], 'valid')
         child = normalize(self.job(query={'operation': 'simulate', 'trace': parent})['trace'])
         self.assertEqual(self.replay(child)['outcome'], 'valid')
+
+    def test_unconstrained_states_and_replay_all_cnf_modes(self):
+        model = ('MODULE main\nVAR free:boolean; bits:boolean[2]; mode:{A,B,C};\n'
+                 '#inertial\nVAR tick:boolean;\nINIT !tick;\nTRANS tick:=!tick;\n')
+        for settings in itertools.product(('no', 'yes'), repeat=3):
+            with self.subTest(settings=settings):
+                options = tuple(item for pair in zip(
+                    ('--cnf-tautology-removal', '--cnf-duplicate-removal', '--cnf-subsumption'), settings)
+                    for item in pair)
+                count = self.job(model, {'operation': 'pick-state', 'count': True}, options=options)
+                self.assertEqual(count['value'], '24')  # 2 * 4 * 3, with tick fixed.
+                self.assertTrue(count['complete'])
+                result = self.job(model, {'operation': 'reach', 'target': 'tick', 'limits': {'depth': 1}},
+                                  options=options)
+                trace = result['trace']
+                self.assertEqual([step['values']['tick'] for step in trace['steps']], [False, True])
+                for step in trace['steps']:
+                    values = step['values']
+                    self.assertIsInstance(values['free'], bool)
+                    self.assertEqual(len(values['bits']), 2)
+                    self.assertTrue(all(isinstance(bit, bool) for bit in values['bits']))
+                    self.assertIn(values['mode'], ('A', 'B', 'C'))
+                replay = self.job(model, {'operation': 'validate-trace', 'trace': trace}, options=options)
+                self.assertEqual(replay['outcome'], 'valid')
+
+    def test_cadical_provenance(self):
+        result = self.reach()
+        identity = result['identity']
+        self.assertIn('/cadical-3.0.1-c607304', identity['engine'])
+        self.assertEqual(identity['solver']['name'], 'cadical')
+        self.assertEqual(identity['solver']['version'], '3.0.1')
+        self.assertEqual(identity['solver']['revision'], 'c60730422e758ef1cebe7aeddf2dda31c996bf04')
+        self.assertEqual(identity['solver']['propagation_counter'], 'search')
+        self.assertEqual(identity['solver']['propagation_limit'], 'cooperative')
+        self.assertEqual(identity['solver']['settings'], {'inprobing': False})
+        self.assertEqual(identity['options']['sat_random_seed'], 0)
+        self.assertNotIn('sat_var_decay', identity['options'])
+        self.assertEqual(result['trace']['identity'], identity)
+        info = subprocess.run([str(ROOT / 'yasmv'), '--solver-info'],
+                              capture_output=True, text=True, check=True, timeout=10)
+        linked = json.loads(info.stdout)
+        self.assertEqual(linked['signature'], identity['solver']['signature'])
+        self.assertEqual(linked['revision'], identity['solver']['revision'])
+        self.assertEqual(linked['linkage'], 'static')
+        self.assertEqual(linked['settings'], identity['solver']['settings'])
 
     def test_runner_hard_deadline_discards_partial_output(self):
         with tempfile.TemporaryDirectory() as directory:

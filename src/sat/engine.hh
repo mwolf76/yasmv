@@ -40,6 +40,7 @@
 #include <unordered_set>
 #include <vector>
 #include <functional>
+#include <memory>
 #include <query/runtime.hh>
 
 namespace sat {
@@ -55,9 +56,9 @@ namespace sat {
 	 */
         inline group_t new_group()
         {
-            group_t res(new_sat_var());
+            group_t res(new_sat_var(true));
 
-            f_groups.push(res);
+            f_groups.push_back(res);
 
             DEBUG
                 << "Created new group var "
@@ -72,7 +73,8 @@ namespace sat {
 	 */
         inline void invert_last_group()
         {
-            f_groups.last() *= -1;
+            invalidate_result();
+            f_groups.back() *= -1;
         }
 
         /**
@@ -81,10 +83,9 @@ namespace sat {
 	 * A positive value of the i-th element of this array enables the
 	 * i-th group, whereas a negative value disables it.
 	 */
-        inline Groups& groups()
-        {
-            return f_groups;
-        }
+        const Groups& groups() const { return f_groups; }
+        // Copy-in mutation prevents retained references from bypassing invalidation.
+        void set_groups(Groups groups);
 
         /**
 	 * @brief add a formula to the SAT problem instance.
@@ -92,7 +93,7 @@ namespace sat {
         void push(compiler::Unit cu, step_t time, group_t group = MAINGROUP);
 
         /**
-	 * @brief Invoke Minisat
+	 * @brief Invoke SAT
 	 */
         std::vector<group_t> failed_groups() const;
 
@@ -102,21 +103,14 @@ namespace sat {
         }
 	
         /**
-	 * @brief Interrupt Minisat
+	 * @brief Interrupt SAT
 	 */
-        inline void interrupt()
-        {
-            f_solver.interrupt();
-        }
+        void interrupt();
 
         /**
-	 * @brief Configure Minisat
+	 * @brief Configure SAT
 	 */
-        inline void configure(int64_t conf_budget, int64_t prop_budget)
-        {
-            f_solver.setConfBudget(conf_budget);
-            f_solver.setPropBudget(prop_budget);
-        }
+        void configure(int64_t conf_budget, int64_t prop_budget);
 
         /**
 	 * @brief Last solving status
@@ -127,23 +121,22 @@ namespace sat {
         }
 
         /**
-	 * @brief Fetch variable value from Minisat model
+	 * @brief Fetch variable value from SAT model
 	 */
-        inline bool assigned(Var var) { return Minisat::toInt(f_solver.modelValue(var)) != 2; }
-
-        inline int value(Var var)
-        {
-            assert(STATUS_SAT == f_status);
-            return 0 == Minisat::toInt(f_solver.modelValue(var));
-        }
+        bool assigned(Var var);
+        int value(Var var);
+        Var existing_var(const enc::TCBI& tcbi) const;
+        static const char* solver_version();
+        static const char* solver_signature();
+        static bool solver_inprobing();
 
         /**
-	 * @brief TCBI -> Minisat variable mapping
+	 * @brief TCBI -> SAT variable mapping
 	 */
         Var tcbi_to_var(const enc::TCBI& tcbi);
 
         /**
-	 * @brief Minisat variable -> TCBI mapping
+	 * @brief SAT variable -> TCBI mapping
 	 */
         enc::TCBI& var_to_tcbi(Var var);
 
@@ -156,17 +149,17 @@ namespace sat {
         }
 
         /**
-	 * @brief Timed model DD nodes to Minisat variable mapping
+	 * @brief Timed model DD nodes to SAT variable mapping
 	 */
         Var find_dd_var(const DdNode* node, step_t time);
 
         /**
-	 * @brief Timed model DD nodes to Minisat variable mapping
+	 * @brief Timed model DD nodes to SAT variable mapping
 	 */
         Var find_dd_var(int node_index, step_t time);
 
         /**
-	 * @brief Artifactory DD nodes to Minisat variable mapping
+	 * @brief Artifactory DD nodes to SAT variable mapping
 	 */
         Var find_cnf_var(const DdNode* node, step_t time);
 
@@ -181,37 +174,14 @@ namespace sat {
         Var rewrite_cnf_var(Var var, step_t time);
 
         /**
-	 * @brief a new Minisat variable
+	 * @brief a new SAT variable
 	 */
-        inline Var new_sat_var(bool frozen = false) // proxy
-        {
-            query::checkpoint(query::Phase::encoding);
-            Var var(f_solver.newVar());
-
-            f_solver.setFrozen(var, frozen);
-
-            return var;
-        }
+        Var new_sat_var(bool frozen = false);
 	
         /**
 	 * @brief add a CNF clause
 	 */
-        inline void add_clause(vec<Lit>& ps) // proxy
-        {
-            query::checkpoint(query::Phase::encoding);
-            if (f_cnf_optimization_enabled && !f_optimization_in_progress) {
-                // Store clause for later optimization
-                std::vector<Lit> clause_copy;
-                clause_copy.reserve(ps.size());
-                for (int i = 0; i < ps.size(); ++i) {
-                    clause_copy.push_back(ps[i]);
-                }
-                f_pending_clauses.push_back(std::move(clause_copy));
-            } else {
-                // Direct addition to solver
-                f_solver.addClause_(ps);
-            }
-        }
+        void add_clause(const Lits& literals);
         
         /**
          * @brief Enable/disable CNF optimization
@@ -251,14 +221,18 @@ namespace sat {
         TCBI2VarMap f_tcbi2var_map;
         Var2TCBIMap f_var2tcbi_map;
 
-        // SAT solver, currently Minisat
-        SimpSolver f_solver;
+        // Keep solver headers and native types behind the implementation boundary.
+        class Backend;
+        std::unique_ptr<Backend> f_solver;
+        void commit_clause(const Lits& literals);
+        void invalidate_result();
 
         // used to partition the formula to be solved using assumptions
         Groups f_groups;
 
         // last solve() status
-        status_t f_status;
+        status_t f_status = STATUS_UNKNOWN;
+        std::vector<group_t> f_failed_groups;
 
         // -- CNF ------------------------------------------------------------
         Index2VarMap f_index2var_map;
@@ -288,8 +262,7 @@ namespace sat {
         // -- CNF Optimization ------------------------------------------------
         bool f_cnf_optimization_enabled;
         bool f_optimization_in_progress;
-        // Store clauses as std::vector of Lit to avoid MiniSat vec copy issues
-        std::vector<std::vector<Lit>> f_pending_clauses;
+        LitsVector f_pending_clauses;
         
         // Optimization statistics
         struct OptimizationStats {
@@ -341,8 +314,7 @@ namespace sat {
         
         // Helper methods for optimization
         static inline Lit negate_literal(Lit lit) {
-            // In MiniSat, negation is done by XOR with 1
-            return lit ^ 1;
+            return ~lit;
         }
         
         static inline bool are_complementary(Lit lit1, Lit lit2) {

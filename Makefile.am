@@ -11,6 +11,10 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
+EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md docs/CADICAL_OWNED_TYPES.md docs/CADICAL_BACKEND.md docs/CADICAL_MIGRATION_VALIDATION.md docs/SAT_SOLVER_PARAMETERS.md
+EXTRA_DIST_CADICAL += cadical_integration.md docs/benchmarks/cadical-m1-minisat.md \
+    docs/benchmarks/cadical-m1-minisat-reachable.json docs/benchmarks/cadical-m1-minisat-unreachable.json \
+    docs/benchmarks/cadical-m6.md docs/benchmarks/cadical-m6-reachable.json docs/benchmarks/cadical-m6-unreachable.json
 EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/verify-c.py tools/llvm2smv_c.py tests/test_llvm2smv_c.py tools/llvm2smv_translate.py tests/test_llvm2smv_scalar.py tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
     tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \
@@ -32,7 +36,7 @@ EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/ve
     docs/formats/explanation-v1.schema.json docs/formats/executable-scenario-v1.schema.json \
     tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py tools/workbench/sessions.py tests/test_analysis.py tests/test_sessions.py \
     docs/STRONGER_ANALYSIS.md docs/formats/analysis-v1.schema.json tools/benchmark-sessions.py \
-    docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tests/test_cli.py docs/CLI_WORKBENCH.md docs/formats/cli-v1.schema.json
+    docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tests/test_cli.py docs/CLI_WORKBENCH.md docs/formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
 
 AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"$(pkgdatadir)\" \
 -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
@@ -43,8 +47,7 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 -I$(top_srcdir)/src/cmd -I$(top_srcdir)/src/utils                   \
 -I$(top_srcdir)/src/witness -I$(top_srcdir)/src/3rdparty/ezlogger   \
 -I$(top_srcdir)/src/parser/grammars -I$(top_srcdir)/src/algorithms  \
--I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat/core  \
--I$(top_srcdir)/src/sat -I$(top_srcdir)/src/sat/mtl                 \
+-I$(top_srcdir)/src/3rdparty/ezlogger -I$(top_srcdir)/src/sat       \
 -I$(top_srcdir)/src/dd/cudd-2.5.0/cudd                              \
 -I$(top_srcdir)/src/dd/cudd-2.5.0/mtr                               \
 -I$(top_srcdir)/src/dd/cudd-2.5.0/st                                \
@@ -52,7 +55,15 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 bin_PROGRAMS = yasmv
-EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests
+EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests sat_literal_tests
+
+sat_literal_tests_SOURCES = tests/test_sat_literals.cc
+sat_literal_tests_CPPFLAGS = -I$(top_srcdir)/src
+
+sat-types-test: sat_literal_tests
+	./sat_literal_tests
+
+.PHONY: sat-types-test
 nobase_dist_pkgdata_DATA = docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json examples/progress/*.smv examples/progress/README.md microcode/* help/* tools/workbench/*.py tools/scenario/*.py \
     tools/workbench/static/* examples/retry-protocol/*.smv examples/retry-protocol/*.json \
     examples/retry-protocol/runner.py examples/retry-protocol/README.md docs/formats/*.json
@@ -101,10 +112,21 @@ cli-test: yasmv
 progress-test: yasmv
 	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
 
-test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test
+test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test sat-types-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: llvm-test
+
+# Opt-in raw API probe against an explicit upstream checkout. Never downloads code.
+CADICAL_SOURCE ?=
+cadical-runner-test:
+	python3 $(srcdir)/tests/test_cadical_runner.py
+
+cadical-api-test: cadical-runner-test
+	@test -n "$(CADICAL_SOURCE)" || { echo 'Set CADICAL_SOURCE to the pinned CaDiCaL checkout.' >&2; exit 1; }
+	python3 $(srcdir)/tools/test-cadical-api.py --source "$(CADICAL_SOURCE)" --cxx "$(CXX)" --cxxflags="$(CXXFLAGS)"
+
+.PHONY: cadical-api-test cadical-runner-test
 
 .PHONY: microcode
 microcode:
@@ -145,7 +167,7 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(top_builddir)/src/common/libcommon.la				\
 		$(top_builddir)/src/opts/libopts.la				\
 										\
-		$(top_builddir)/src/dd/libcudd.la $(MINISAT_LIBS)		\
+		$(top_builddir)/src/dd/libcudd.la $(CADICAL_LIBS)		\
 		$(ANTLR_LIBS) $(LIBJSONCPP_LIBS) $(LIBYAMLCPP_LIBS)		\
 		$(BOOST_PROGRAM_OPTIONS_LIBS)					\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
@@ -186,7 +208,7 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(top_builddir)/src/common/libcommon.la				\
 		$(top_builddir)/src/opts/libopts.la				\
 										\
-		$(top_builddir)/src/dd/libcudd.la $(MINISAT_LIBS)		\
+		$(top_builddir)/src/dd/libcudd.la $(CADICAL_LIBS)		\
 		$(ANTLR_LIBS) $(LIBJSONCPP_LIBS) $(LIBYAMLCPP_LIBS)		\
 		$(BOOST_PROGRAM_OPTIONS_LIBS)					\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
