@@ -9,6 +9,27 @@ on:
     branches: [ "master" ]
 
 jobs:
+  cadical-api:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+    - name: checkout pinned CaDiCaL
+      uses: actions/checkout@v4
+      with:
+        repository: arminbiere/cadical
+        ref: c60730422e758ef1cebe7aeddf2dda31c996bf04
+        path: .deps/cadical
+    - name: build assertion-enabled static library
+      working-directory: .deps/cadical
+      run: |
+        ./configure -c -fPIC
+        make -C build -j2 libcadical.a
+    - name: validate incremental API contracts
+      run: |
+        python3 tests/test_cadical_runner.py
+        python3 tools/test-cadical-api.py --source .deps/cadical
+
   build:
     runs-on: ubuntu-24.04
     timeout-minutes: 20

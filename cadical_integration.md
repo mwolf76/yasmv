@@ -222,7 +222,7 @@ choices.
 | Milestone | Status | Evidence |
 | --- | --- | --- |
 | 1. MiniSat baseline | Complete | [Full regression gate, provenance, and representative timings](docs/benchmarks/cadical-m1-minisat.md) |
-| 2. Pinned CaDiCaL API validation | Pending | |
+| 2. Pinned CaDiCaL API validation | Complete | [Standalone API contracts, sanitizer checks, full regression gate, and integration findings](docs/CADICAL_API_VALIDATION.md) |
 | 3. Owned SAT types | Pending | |
 | 4. CaDiCaL integration | Pending | |
 | 5. Migration validation | Pending | |
