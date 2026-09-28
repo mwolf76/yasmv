@@ -1,173 +1,185 @@
+# yasmv — Yet Another Symbolic Model Verifier
+
 ![master](https://github.com/mwolf76/yasmv/actions/workflows/ci.yml/badge.svg)
 
-## ABOUT
+yasmv is a finite-state model checker and interactive model-exploration
+workbench. It uses an SMV dialect with partial NuSMV compatibility and combines
+a C++20 core, CUDD-based expression compilation, and a pinned CaDiCaL SAT backend.
 
-  The yasmv (Yet Another Symbolic Model Verifier) project started off in the Fall
-2011 as a tentative and partial C++ re-implementation of the NuSMV model
-checker. As a former member of the NuSMV development team (in the years between
-2008 and 2011) I'd never been completely happy with a few architectural choices,
-inherited from the long history of the NuSMV model checker and/or due to the
-amount of legacy code and tools that relied on it.
+The project began in 2011 as an independent reimplementation inspired by NuSMV
+and has since developed its own language and exploration workflow.
 
-  Overtime, however, the project has significantly diverged from the original
-goal of making a NuSMV re-implementation. The input language for yasmv is now a
-dialect of the smv language which retains only partial compatibility with
-NuSMV's original input language. In this area, my interest is all about
-exploring ways to improve language expressiveness and usability.
+## Capabilities
 
-  The project has now approached a stage in which the program is usable to
-perform basic reachability analysis and step-by-step simulation. The source
-distribution includes a few examples to demonstrate how the program can be used
-to solve planning problems.
+- Bounded reachability and certified shortest witnesses.
+- Step-by-step simulation, trace inspection, branching, and independent replay.
+- Constraint explanations, bounded safety checks, and verified k-induction.
+- Guaranteed-progress checks with dead-end and repeating counterexamples.
+- Executable scenario export and replay.
+- A native interactive shell, a JSON Lines agent interface, and an optional
+  browser/HTTP workbench.
+- An optional LLVM 18 frontend for a documented subset of C/LLVM programs.
 
-## BUILD
+Bounded results apply only to the checked depth; they are not unbounded proofs.
+Resource exhaustion and cancellation produce UNKNOWN rather than a safety
+claim. The LLVM frontend rejects unsupported constructs and reports its
+coverage limits explicitly.
 
-  For the current core-only build, correctness regression tests, and migration
-  notes, see [the correctness baseline](docs/CORRECTNESS_BASELINE.md).
+## Build
 
-  The core requires a C++20 compiler, Python 3.10+, Autotools/libtool, ANTLR3
-  and its C runtime, Boost, JsonCpp, readline, zlib, and pinned CaDiCaL 3.0.1.
-  CUDD is vendored. The Ubuntu 24.04 core CI job installs these system packages:
+The core requires a C++20 compiler, Python 3.10+, Autotools/libtool, ANTLR3 and its
+C runtime, Boost, JsonCpp, readline, zlib, and **CaDiCaL 3.0.1**. CUDD 2.5.0 is
+vendored. MiniSat is no longer required.
 
-  ```sh
-  sudo apt-get install build-essential python3 autoconf automake libtool \
-    libboost-filesystem-dev libboost-program-options-dev libboost-test-dev \
-    libboost-thread-dev libboost-system-dev libboost-chrono-dev \
-    libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev
-  ```
-
-  The old Trusty dependency installer has been retired. After installing the
-  system dependencies and building CaDiCaL as described below:
-
-  ```sh
-  $ ./setup.sh --disable-llvm2smv --with-cadical-prefix=/path/to/cadical-prefix
-  $ make
-  ```
-
-  To include the LLVM frontend, install LLVM/Clang 18 and use
-  `--enable-llvm2smv` instead; see [the frontend guide](llvm2smv/README.md).
-
-  Build the pinned CaDiCaL dependency using the reproducible instructions in
-  [the SAT backend guide](docs/CADICAL_BACKEND.md). It must provide
-  `include/cadical.hpp` and `lib/libcadical.a`; configure validates its API,
-  runtime version, and full build revision. Neither setup nor configure
-  downloads dependencies. The default prefix is `/usr/local`.
-
-  The build may take quite a while. If your machine has multiple cores using -j
-  <number-of-parallel-tasks> option when running `make` should help in reducing
-  significantly build time, e.g.
-
-  ```
-  $ make -j8
-  ```
-
-  Another option is to use `distcc`. The setup.sh script contains a working
-  example. Refer to `distcc` documentation for more details.
-
-  The parser is written with ANTLR3[*] so you will need
-  some JRE installed at build time to generate the parser and lexer code.
-  Generated parser and lexer code itself is C++, so as long as you don't change
-  the grammar source files you will no longer need the JRE to make the build. No
-  JRE is needed when running the final executable either.
-
-## RUN
-
-  If you didn't run the setup.sh script, when done with the build there is one
-  more step that needs to be taken in order to being able to run the program.
-  yasmv requires access to the microcode data package, which is currently
-  released along with the source code as a bz2'd tarball. Unpack the microcode
-  tarball with:
-  ```
-  $ tar xfj microcode.tar.bz2 [ -C < optional-target-parent-directory > ]
-  ```
-
-  and ensure the `YASMV_HOME` environment variable points to the
-  parent of the `microcode` directory you've just created. For
-  example, assuming you want the microcode distribution unpacked in
-  the the same location as the program source code:
-
-  ```
-  $ tar xfj microcode.tar.bz2
-  $ export YASMV_HOME=`pwd`
-  $ ./yasmv
-
-  yasmv - Yet Another Symbolic Model Verifier
-  (c) 2011-2016, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >
-  https://github.com/mwolf76/yasmv
-
-  [Sat May 21 17:21:57 2016].459 src/main.cc:176 :: 2176 microcode fragments registered.
-  >>
-  ```
-
-  When launched the program will parse the contents of the `microcode` directory
-  and display the number of microcode fragments it found. The default microcode
-  distribution consists of 2176 fragments and covers the full set of supported
-  algebraic operations on n-bits integers (1 <= n <= 64).
-
-  For further information on microcode, please refer to the `README` file in the
-  microcode bzip2'd tarball.
-
-  Run the full local regression gate before committing using:
-  ```
-  $ make test
-  ```
-
-  CI validates the pinned CaDiCaL API, builds the core, and runs the SAT literal
-  and adapter matrix plus CLI/agent smoke checks. Full regression, LLVM,
-  sanitizer, and browser acceptance remain local pre-commit gates; see
-  [the testing guide](docs/CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).
-
-  Remark: The default build for C++ code now uses -O2 optimization for optimal
-  performance. If you need a debugger-friendly build, set USE_DEBUGGER=1 in the
-  setup.sh script to use -O0 instead. Vendored `CUDD` (used in the expression
-  compiler) has its own build settings. `CaDiCaL` (which powers the solving
-  engine) is built separately using the pinned dependency instructions.
-
-[*] Still haven't upgraded to ANTLR4. Nor have plans to do it.
-
-## MODEL WORKBENCH
-
-Use the CLI workbench after building the checker and extracting microcode:
+The Ubuntu 24.04 core CI job installs these system packages:
 
 ```sh
-./yasmv
-# Structured agent requests over stdin/stdout:
-./yasmv --agent --store ./investigation
-# Discover operations and argument schemas:
-./yasmv --capabilities
+sudo apt-get update
+sudo apt-get install build-essential python3 autoconf automake libtool \
+  libboost-filesystem-dev libboost-program-options-dev libboost-test-dev \
+  libboost-thread-dev libboost-system-dev libboost-chrono-dev \
+  libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev
 ```
 
-The CLI supports model revisions, bounded and shortest searches, trace inspection
-and branching, explanations, safety proofs, guaranteed progress checks, and executable scenario replay.
-Use `help` to list commands and `help workspace` for artifact storage. Python
-3.10+ is required. See [the CLI and agent guide](docs/CLI_WORKBENCH.md).
+ANTLR3 needs Java when generating the parser; the checker itself does not need
+a Java runtime.
 
-The optional browser and HTTP API remain available with
-`python3 -m tools.workbench serve`. See [the HTTP/browser guide](docs/WORKBENCH.md),
-[explanations and scenarios](docs/EXPLANATIONS_AND_SCENARIOS.md),
-[the retry example](examples/retry-protocol/README.md), and
-[the implementation plan](docs/IMPLEMENTATION_PLAN.md).
+### Build the SAT dependency
 
-## DISCLAIMER
+Follow [the CaDiCaL backend guide](docs/CADICAL_BACKEND.md) to build the pinned
+revision `c60730422e758ef1cebe7aeddf2dda31c996bf04`. The installation prefix must
+contain `include/cadical.hpp` and `lib/libcadical.a`.
+
+Configure verifies the API, version, and full revision and links the archive
+statically. Neither setup nor configure downloads dependencies. The default
+prefix is `/usr/local`; use `--with-cadical-prefix` for a different location.
+
+### Core-only build
+
+From the repository root, after installing the dependencies:
+
+```sh
+./setup.sh --disable-llvm2smv --with-cadical-prefix=/path/to/cadical-prefix
+make -j4
+export YASMV_HOME="$PWD"
+./yasmv --solver-info
+```
+
+`setup.sh` regenerates the build files and extracts the packaged arithmetic
+microcode when needed. Its default C++ settings use C++20, `-O2`, and strict
+warnings. Adjust the parallel job count for your machine.
+
+### LLVM-enabled build
+
+LLVM is enabled by default unless explicitly disabled. Install LLVM/Clang 18,
+including matching `opt` and `llvm-link`, then build with:
+
+```sh
+./setup.sh --enable-llvm2smv --with-cadical-prefix=/path/to/cadical-prefix
+make -j4
+```
+
+See [the LLVM frontend guide](llvm2smv/README.md) for toolchain detection,
+supported semantics, C verification commands, and limitations.
+
+For manual configuration or sanitizer builds, see
+[the build and testing guide](docs/CORRECTNESS_BASELINE.md) and
+[the solver validation guide](docs/CADICAL_MIGRATION_VALIDATION.md).
+
+## Run
+
+Set `YASMV_HOME` to the directory containing `microcode/`. If you did not use
+`setup.sh` and the directory is absent, extract the bundled data first:
+
+```sh
+tar xfj microcode.tar.bz2
+export YASMV_HOME="$PWD"
+./yasmv
+```
+
+The current microcode package contains 2,432 arithmetic fragments. The SAT
+migration preserves their contents and packed literal format.
+
+### Explore a model
+
+In the native shell, try the retry-protocol example:
+
+```text
+read-model "examples/retry-protocol/faulty.smv"
+reach DUPLICATE -shortest -depth 12
+list-traces
+dump-trace
+```
+
+The shortest witness reaches duplicate execution after five transitions.
+Use `help`, `help reach`, or `help workspace` for commands and artifact storage.
+Shell command options use a single dash; `--` starts an SMV comment.
+
+The [CLI guide](docs/CLI_WORKBENCH.md) walks through named goals, properties,
+watches, explanations, simulation, background jobs, and scenario replay.
+See also the [retry-protocol example](examples/retry-protocol/README.md).
+
+### Agent and browser interfaces
+
+```sh
+# Structured requests over stdin/stdout:
+./yasmv --agent --store ./investigation
+
+# Machine-readable operation schemas:
+./yasmv --capabilities
+
+# Optional browser and HTTP API:
+python3 -m tools.workbench serve
+```
+
+The agent/workspace services use Python 3.10+ and its standard library.
+Only one process may own a workspace store at a time; do not share a live
+store between the CLI, agent, and HTTP server.
+
+## Test
+
+Run the full regression gate from the repository root:
+
+```sh
+YASMV_HOME="$PWD" make -j3 test
+```
+
+This includes core tests and all eight supported CNF-option combinations.
+LLVM suites run when the frontend is enabled. Install `jsonschema` in your
+test environment to include the optional schema checks.
+
+Useful focused targets include `short-test`, `unit-test`, `functional-test`,
+`reliability-test`, `query-test`, and `llvm-test`. The standalone upstream API
+gate requires an explicit checkout of the pinned CaDiCaL revision:
+
+```sh
+make cadical-api-test CADICAL_SOURCE=/path/to/pinned/cadical
+```
+
+Run `make dist` to check the distribution manifests and create a source archive.
+
+CI validates the pinned CaDiCaL API, builds the core, and runs SAT literal and
+adapter checks plus CLI/agent smoke tests. Full regression, LLVM, sanitizer,
+and browser acceptance remain local gates. See
+[the testing guide](docs/CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).
+
+## Documentation
+
+- [CLI and agent protocol](docs/CLI_WORKBENCH.md)
+- [Browser and HTTP workbench](docs/WORKBENCH.md)
+- [Query and trace contracts](docs/QUERY_AND_TRACE_CONTRACTS.md)
+- [Explanations and executable scenarios](docs/EXPLANATIONS_AND_SCENARIOS.md)
+- [Shortest witnesses, safety proofs, and compiled sessions](docs/STRONGER_ANALYSIS.md)
+- [Guaranteed progress](docs/PROGRESS_CHECKING.md)
+- [SAT configuration and migration notes](docs/SAT_SOLVER_PARAMETERS.md)
+- [CaDiCaL performance comparison](docs/benchmarks/cadical-m6.md)
+- [LLVM frontend](llvm2smv/README.md)
+
+## License and disclaimer
 
 This code is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+PARTICULAR PURPOSE. See the GNU Lesser General Public License for details.
 
-yasmv is in no way related to, or endorsed by, the NuSMV development board
-and/or FBK. yasmv does not contain any code from NuSMV's code base.
-
-### Stronger analysis
-
-Find certified shortest witnesses and check named safety properties with
-bounded search or verified k-induction. Optional `--reuse-models` workbench
-sessions retain compiled models while keeping queries in isolated processes.
-See [shortest witnesses, safety proofs, and compiled sessions](docs/STRONGER_ANALYSIS.md).
-
-### Guaranteed progress
-
-Use `check-progress GOAL` to ask whether every execution eventually reaches a
-goal. Inspect repeating or dead-end failures, export portable evidence, and
-revalidate graph proofs. Resource limits return UNKNOWN; fairness is not assumed.
-See [the progress guide](docs/PROGRESS_CHECKING.md) and
-[the example models](examples/progress/README.md).
+yasmv is in no way related to, or endorsed by, the NuSMV development board or
+FBK. yasmv does not contain any code from NuSMV's code base.
