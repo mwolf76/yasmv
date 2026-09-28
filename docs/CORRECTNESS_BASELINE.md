@@ -9,13 +9,14 @@ M1 API and trace migration are documented in
 ## Build and test
 
 The core requires a C++20 compiler, Autotools/libtool, ANTLR3 and its C runtime,
-Boost, JsonCpp, readline, MiniSat, and zlib. LLVM is optional for a core-only build.
+Boost, JsonCpp, readline, pinned CaDiCaL, and zlib. LLVM is optional for a core-only build.
+See [the SAT backend guide](CADICAL_BACKEND.md) to build the external static solver.
 On a system with those dependencies installed, run from the repository root:
 
 ```bash
 autoreconf -vif
 tar xfj microcode.tar.bz2
-./configure --disable-llvm2smv CXXFLAGS='-std=c++20 -O2 -g -Wall -Wno-deprecated-declarations -Werror'
+./configure --disable-llvm2smv --with-cadical-prefix=/path/to/cadical-prefix CXXFLAGS='-std=c++20 -O2 -g -Wall -Wno-deprecated-declarations -Werror'
 make -j4
 YASMV_HOME="$PWD" make test
 ```
@@ -91,7 +92,7 @@ The custom `--cnf-blocked-clause`, `--cnf-variable-elimination`, and
 correctness/indexing problems; the self-subsumption implementation also lacks
 a validated literal-matching contract. The flags remain recognized, so scripts
 receive an explicit error instead of silently changing behavior. These custom
-passes are separate from MiniSat's internal preprocessing options.
+passes are separate from the SAT solver's internal preprocessing.
 
 Before a quarantined pass returns, it must preserve assumptions, committed and
 future clauses, and observable assignments; protect externally used variables;

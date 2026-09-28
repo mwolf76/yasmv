@@ -11,7 +11,7 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
-EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md docs/CADICAL_OWNED_TYPES.md
+EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md docs/CADICAL_OWNED_TYPES.md docs/CADICAL_BACKEND.md docs/SAT_SOLVER_PARAMETERS.md
 EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/verify-c.py tools/llvm2smv_c.py tests/test_llvm2smv_c.py tools/llvm2smv_translate.py tests/test_llvm2smv_scalar.py tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
     tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \
@@ -115,7 +115,7 @@ test: llvm-test progress-test cli-test short-test unit-test functional-test reli
 
 .PHONY: llvm-test
 
-# Opt-in while the production backend remains MiniSat. Never downloads code.
+# Opt-in raw API probe against an explicit upstream checkout. Never downloads code.
 CADICAL_SOURCE ?=
 cadical-runner-test:
 	python3 $(srcdir)/tests/test_cadical_runner.py
@@ -165,7 +165,7 @@ yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
 		$(top_builddir)/src/common/libcommon.la				\
 		$(top_builddir)/src/opts/libopts.la				\
 										\
-		$(top_builddir)/src/dd/libcudd.la $(MINISAT_LIBS)		\
+		$(top_builddir)/src/dd/libcudd.la $(CADICAL_LIBS)		\
 		$(ANTLR_LIBS) $(LIBJSONCPP_LIBS) $(LIBYAMLCPP_LIBS)		\
 		$(BOOST_PROGRAM_OPTIONS_LIBS)					\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\
@@ -206,7 +206,7 @@ yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(top_builddir)/src/common/libcommon.la				\
 		$(top_builddir)/src/opts/libopts.la				\
 										\
-		$(top_builddir)/src/dd/libcudd.la $(MINISAT_LIBS)		\
+		$(top_builddir)/src/dd/libcudd.la $(CADICAL_LIBS)		\
 		$(ANTLR_LIBS) $(LIBJSONCPP_LIBS) $(LIBYAMLCPP_LIBS)		\
 		$(BOOST_PROGRAM_OPTIONS_LIBS)					\
 		$(BOOST_FILESYSTEM_LIBS) $(BOOST_THREAD_LIBS)			\

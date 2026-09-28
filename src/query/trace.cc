@@ -72,7 +72,7 @@ namespace query::trace {
                 std::vector<int> values(bm.nbits(), 0);
                 for (const auto& bit : encoding->bits()) {
                     auto index = bit.getNode()->index;
-                    values[index] = engine.value(engine.tcbi_to_var(enc::TCBI(bm.find_ucbi(index), k)));
+                    values[index] = engine.value(engine.existing_var(enc::TCBI(bm.find_ucbi(index), k)));
                 }
                 auto value = encoding->expr(values.data());
                 if (value) tf.set_value(s.key, value);
@@ -239,7 +239,7 @@ namespace query::trace {
                 std::vector<int> bits(bm.nbits(), 0);
                 for (const auto& bit : encoding->bits()) {
                     auto index = bit.getNode()->index;
-                    auto var = engine.tcbi_to_var(enc::TCBI(bm.find_ucbi(index), step));
+                    auto var = engine.existing_var(enc::TCBI(bm.find_ucbi(index), step));
                     require(engine.assigned(var), "Unassigned semantic state bit");
                     bits[index] = engine.value(var);
                 }

@@ -69,4 +69,4 @@ fi
 autoreconf -vif
 
 # invoking configure script with above settings
-./configure --prefix=/usr/local CC="$CC" CXX="$CXX" CFLAGS="-O2" CXXFLAGS="$SETTINGS"
+./configure --prefix=/usr/local CC="$CC" CXX="$CXX" CFLAGS="-O2" CXXFLAGS="$SETTINGS" "$@"

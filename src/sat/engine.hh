@@ -56,7 +56,7 @@ namespace sat {
 	 */
         inline group_t new_group()
         {
-            group_t res(new_sat_var());
+            group_t res(new_sat_var(true));
 
             f_groups.push_back(res);
 
@@ -73,6 +73,7 @@ namespace sat {
 	 */
         inline void invert_last_group()
         {
+            invalidate_result();
             f_groups.back() *= -1;
         }
 
@@ -84,8 +85,10 @@ namespace sat {
 	 */
         inline Groups& groups()
         {
+            invalidate_result();
             return f_groups;
         }
+        const Groups& groups() const { return f_groups; }
 
         /**
 	 * @brief add a formula to the SAT problem instance.
@@ -93,7 +96,7 @@ namespace sat {
         void push(compiler::Unit cu, step_t time, group_t group = MAINGROUP);
 
         /**
-	 * @brief Invoke Minisat
+	 * @brief Invoke SAT
 	 */
         std::vector<group_t> failed_groups() const;
 
@@ -103,12 +106,12 @@ namespace sat {
         }
 	
         /**
-	 * @brief Interrupt Minisat
+	 * @brief Interrupt SAT
 	 */
         void interrupt();
 
         /**
-	 * @brief Configure Minisat
+	 * @brief Configure SAT
 	 */
         void configure(int64_t conf_budget, int64_t prop_budget);
 
@@ -121,18 +124,21 @@ namespace sat {
         }
 
         /**
-	 * @brief Fetch variable value from Minisat model
+	 * @brief Fetch variable value from SAT model
 	 */
         bool assigned(Var var);
         int value(Var var);
+        Var existing_var(const enc::TCBI& tcbi) const;
+        static const char* solver_version();
+        static const char* solver_signature();
 
         /**
-	 * @brief TCBI -> Minisat variable mapping
+	 * @brief TCBI -> SAT variable mapping
 	 */
         Var tcbi_to_var(const enc::TCBI& tcbi);
 
         /**
-	 * @brief Minisat variable -> TCBI mapping
+	 * @brief SAT variable -> TCBI mapping
 	 */
         enc::TCBI& var_to_tcbi(Var var);
 
@@ -145,17 +151,17 @@ namespace sat {
         }
 
         /**
-	 * @brief Timed model DD nodes to Minisat variable mapping
+	 * @brief Timed model DD nodes to SAT variable mapping
 	 */
         Var find_dd_var(const DdNode* node, step_t time);
 
         /**
-	 * @brief Timed model DD nodes to Minisat variable mapping
+	 * @brief Timed model DD nodes to SAT variable mapping
 	 */
         Var find_dd_var(int node_index, step_t time);
 
         /**
-	 * @brief Artifactory DD nodes to Minisat variable mapping
+	 * @brief Artifactory DD nodes to SAT variable mapping
 	 */
         Var find_cnf_var(const DdNode* node, step_t time);
 
@@ -170,7 +176,7 @@ namespace sat {
         Var rewrite_cnf_var(Var var, step_t time);
 
         /**
-	 * @brief a new Minisat variable
+	 * @brief a new SAT variable
 	 */
         Var new_sat_var(bool frozen = false);
 	
@@ -221,12 +227,14 @@ namespace sat {
         class Backend;
         std::unique_ptr<Backend> f_solver;
         void commit_clause(const Lits& literals);
+        void invalidate_result();
 
         // used to partition the formula to be solved using assumptions
         Groups f_groups;
 
         // last solve() status
-        status_t f_status;
+        status_t f_status = STATUS_UNKNOWN;
+        std::vector<group_t> f_failed_groups;
 
         // -- CNF ------------------------------------------------------------
         Index2VarMap f_index2var_map;

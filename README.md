@@ -40,15 +40,21 @@ to solve planning problems.
   - libyaml-cpp-dev
   - openjdk-7-jdk
   - make
-  - minisat
+  - CaDiCaL 3.0.1, pinned static build (see below)
   - zlib1g-dev
 
   when all the required packages are installed, launching the build should boil
   down to this:
   ```
-  $ ./setup.sh
+  $ ./setup.sh --with-cadical-prefix=/path/to/cadical-prefix
   $ make
   ```
+
+  Build the pinned CaDiCaL dependency using the reproducible instructions in
+  [the SAT backend guide](docs/CADICAL_BACKEND.md). It must provide
+  `include/cadical.hpp` and `lib/libcadical.a`; configure validates its API,
+  runtime version, and full build revision. Neither setup nor configure
+  downloads dependencies. The default prefix is `/usr/local`.
 
   The build may take quite a while. If your machine has multiple cores using -j
   <number-of-parallel-tasks> option when running `make` should help in reducing
@@ -117,7 +123,7 @@ to solve planning problems.
   Remark: The default build for C++ code now uses -O2 optimization for optimal
   performance. If you need a debugger-friendly build, set USE_DEBUGGER=1 in the
   setup.sh script to use -O0 instead. Core services `CUDD` (used in the expression
-  compiler) and `Minisat` (which powers the solving engine) are compiled/installed
+  compiler) and `CaDiCaL` (which powers the solving engine) are compiled/installed
   separately and already use a higher level of optimization.
 
 [*] Still haven't upgraded to ANTLR4. Nor have plans to do it.

@@ -39,6 +39,31 @@ class CheckerTests(unittest.TestCase):
                     self.assertIn("Unsupported option", r.stderr)
                     self.assertNotIn("consistency check ok", r.stdout)
 
+    def test_retired_minisat_options(self):
+        retired = (
+            "random-var-freq", "random-init-act", "ccmin-mode", "phase-saving",
+            "garbage-frac", "var-decay", "clause-decay", "luby-restart",
+            "restart-first", "restart-inc", "elim", "rcheck", "asymm",
+            "grow", "clause-lim", "subsumption-lim", "simp-garbage-frac",
+        )
+        for option in retired:
+            with self.subTest(option=option):
+                r = self.run_model("MODULE main;", options=("--sat-" + option, "0"), code=2)
+                self.assertIn("Removed MiniSat option", r.stderr)
+                self.assertIn("CaDiCaL", r.stderr)
+                self.assertIn("--sat-random-seed", r.stderr)
+
+    def test_cadical_seed_validation(self):
+        for value in ("-1", "2000000001", "2147483648", "7.5", "nan", "inf", "1e2"):
+            with self.subTest(value=value):
+                r = self.run_model("MODULE main;", options=("--sat-random-seed", value), code=2)
+                self.assertIn("sat-random-seed", r.stderr)
+        for value in ("0", "7", "2000000000"):
+            with self.subTest(value=value):
+                r = self.run_model("MODULE main\nVAR x:boolean;\nINIT x;\n",
+                                   options=("--sat-random-seed", value))
+                self.assertIn("consistency check ok", r.stdout)
+
     def test_relational_crash_original(self):
         r = self.run_model((ROOT / "short-tests/relational/relational01.smv").read_text())
         self.assertIn("consistency check failed", r.stdout)

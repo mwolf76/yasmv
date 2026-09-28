@@ -100,7 +100,7 @@ namespace sim {
                         unsigned bit { (*di).getNode()->index };
                         const enc::UCBI& ucbi { bm.find_ucbi(bit) };
                         const enc::TCBI tcbi { enc::TCBI(ucbi, k) };
-                        sat::Var var { engine.tcbi_to_var(tcbi) };
+                        sat::Var var { engine.existing_var(tcbi) };
 
                         /* Don't care is assigned to 0 */
                         int value { engine.value(var) };

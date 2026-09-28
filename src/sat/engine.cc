@@ -26,138 +26,190 @@
 #include <set>
 #include <sat.hh>
 #include <opts/opts_mgr.hh>
-#include <minisat/simp/SimpSolver.h>
+#include <cadical.hpp>
+#include <atomic>
+#include <climits>
 
 namespace sat {
 
-    class Engine::Backend : public Minisat::SimpSolver {};
+    // Only the owner thread accesses CaDiCaL. Other threads may set interrupted.
+    class Engine::Backend : public CaDiCaL::Terminator {
+    public:
+        CaDiCaL::Solver solver;
+        std::vector<int> variables;
+        std::atomic<bool> interrupted {false};
+        uint64_t solves = 0, clauses = 0;
+        int64_t configured_conflicts = -1, configured_propagations = -1;
+        uint64_t configured_conflict_base = 0, configured_propagation_base = 0;
+        uint64_t conflict_base = 0, propagation_base = 0;
+        int64_t conflict_limit = -1, propagation_limit = -1;
+
+        Backend()
+        {
+            if (std::string(CaDiCaL::Solver::version()) != "3.0.1" ||
+                std::string(CaDiCaL::Solver::signature()) != "cadical-3.0.1-c607304")
+                throw std::runtime_error("Expected the pinned CaDiCaL 3.0.1 build");
+            if (!solver.set("quiet", 1) ||
+                !solver.set("seed", opts::OptsMgr::INSTANCE().sat_random_seed()))
+                throw std::runtime_error("Invalid CaDiCaL configuration");
+            solver.connect_terminator(this);
+        }
+        ~Backend() { solver.disconnect_terminator(); }
+
+        uint64_t counter(const char* name) const
+        {
+            const auto count = solver.get_statistic_value(name);
+            if (count < 0) throw std::logic_error("Unknown CaDiCaL statistic");
+            return static_cast<uint64_t>(count);
+        }
+        int literal(Lit value) const
+        {
+            const int id = variables.at(var(value));
+            return sign(value) ? -id : id;
+        }
+        query::StopReason budget_stop() const
+        {
+            if (conflict_limit >= 0 && counter("conflicts") - conflict_base >= uint64_t(conflict_limit))
+                return query::StopReason::conflict_budget;
+            if (propagation_limit >= 0 && counter("propagations") - propagation_base >= uint64_t(propagation_limit))
+                return query::StopReason::propagation_budget;
+            return query::StopReason::none;
+        }
+        bool terminate() override
+        {
+            return interrupted.load(std::memory_order_relaxed) ||
+                   budget_stop() != query::StopReason::none;
+        }
+    };
+
+    const char* Engine::solver_version() { return CaDiCaL::Solver::version(); }
+    const char* Engine::solver_signature() { return CaDiCaL::Solver::signature(); }
 
     std::ostream& operator<<(std::ostream& os, const Engine& engine)
     {
-        const auto& solver = *engine.f_solver;
+        const auto& backend = *engine.f_solver;
         return os << "Solver: `" << engine.f_instance_name
-                  << "`, solves: " << solver.solves
-                  << ", starts: " << solver.starts
-                  << ", decs: " << solver.decisions
-                  << ", rnd decs: " << solver.rnd_decisions
-                  << ", props: " << solver.propagations
-                  << ", conflicts: " << solver.conflicts
-                  << ", dec vars: " << solver.dec_vars
-                  << ", clause lits: " << solver.clauses_literals
-                  << ", learnt lits: " << solver.learnts_literals
-                  << ", max lits: " << solver.max_literals
-                  << ", tot lits: " << solver.tot_literals;
+                  << "`, " << Engine::solver_signature()
+                  << ", solves: " << backend.solves
+                  << ", decs: " << backend.counter("decisions")
+                  << ", search props: " << backend.counter("propagations")
+                  << ", conflicts: " << backend.counter("conflicts")
+                  << ", vars: " << backend.variables.size()
+                  << ", submitted clauses: " << backend.clauses;
     }
 
     namespace {
-        Minisat::Lit native_literal(Lit literal)
+        int64_t remaining(int64_t budget, uint64_t used)
         {
-            return Minisat::mkLit(var(literal), sign(literal));
+            if (budget < 0) return -1;
+            return used >= uint64_t(budget) ? 0 : budget - static_cast<int64_t>(used);
+        }
+        int64_t tighter(int64_t first, int64_t second)
+        {
+            return first < 0 ? second : second < 0 ? first : std::min(first, second);
         }
     }
 
-    /**
- * @brief SAT instance ctor
- */
     Engine::Engine(const char* instance_name)
         : f_instance_name(instance_name)
         , f_enc_mgr(enc::EncodingMgr::INSTANCE())
         , f_solver(std::make_unique<Backend>())
-        , f_cnf_optimization_enabled(false)  // Disabled by default (performance reasons)
+        , f_cnf_optimization_enabled(false)
         , f_optimization_in_progress(false)
     {
-        const void* instance { this };
-
-        /* Default configuration */
         opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
-        f_solver->random_var_freq = opts_mgr.sat_random_var_freq();
-        f_solver->ccmin_mode = opts_mgr.sat_ccmin_mode();
-        f_solver->phase_saving = opts_mgr.sat_phase_saving();
-        f_solver->rnd_init_act = opts_mgr.sat_random_init_act();
-        f_solver->garbage_frac = opts_mgr.sat_garbage_frac();
-        f_solver->var_decay = opts_mgr.sat_var_decay();
-        f_solver->clause_decay = opts_mgr.sat_clause_decay();
-        f_solver->random_seed = opts_mgr.sat_random_seed();
-        f_solver->luby_restart = opts_mgr.sat_luby_restart();
-        f_solver->restart_first = opts_mgr.sat_restart_first();
-        f_solver->restart_inc = opts_mgr.sat_restart_inc();
-        f_solver->use_elim = opts_mgr.sat_elim();
-        f_solver->use_rcheck = opts_mgr.sat_rcheck();
-        f_solver->use_asymm = opts_mgr.sat_asymm();
-        f_solver->grow = opts_mgr.sat_grow();
-        f_solver->clause_lim = opts_mgr.sat_clause_lim();
-        f_solver->subsumption_lim = opts_mgr.sat_subsumption_lim();
-        f_solver->simp_garbage_frac = opts_mgr.sat_simp_garbage_frac();
-        
-        /* Enable CNF optimization if any individual optimization is enabled */
-        if (opts_mgr.cnf_tautology_removal() || 
+        if (opts_mgr.cnf_tautology_removal() ||
             opts_mgr.cnf_duplicate_removal() ||
             opts_mgr.cnf_subsumption() ||
             opts_mgr.cnf_variable_elimination() ||
             opts_mgr.cnf_self_subsumption() ||
-            opts_mgr.cnf_blocked_clause()) {
+            opts_mgr.cnf_blocked_clause())
             enable_cnf_optimization(true);
-        }
 
-        /* MAINGROUP (=0) is already there. */
-        f_groups.push_back(new_sat_var());
+        // Internal zero remains the main group/true microcode constant.
+        f_groups.push_back(new_sat_var(true));
         if (auto context = query::current()) context->attach(this);
-
-        EngineMgr::INSTANCE()
-            .register_instance(this);
-
-        DEBUG
-            << "Initialized Engine instance @"
-            << instance
-            << std::endl;
+        EngineMgr::INSTANCE().register_instance(this);
     }
 
     Engine::~Engine()
     {
         if (auto context = query::current()) context->detach(this);
-        EngineMgr::INSTANCE()
-            .unregister_instance(this);
+        EngineMgr::INSTANCE().unregister_instance(this);
     }
 
-    void Engine::interrupt() { f_solver->interrupt(); }
+    void Engine::interrupt()
+    {
+        f_solver->interrupted.store(true, std::memory_order_relaxed);
+    }
 
     void Engine::configure(int64_t conf_budget, int64_t prop_budget)
     {
-        f_solver->setConfBudget(conf_budget);
-        f_solver->setPropBudget(prop_budget);
+        if (conf_budget < -1 || prop_budget < -1)
+            throw std::invalid_argument("SAT budgets must be -1 or nonnegative");
+        auto& b = *f_solver;
+        b.configured_conflicts = conf_budget;
+        b.configured_propagations = prop_budget;
+        b.configured_conflict_base = b.counter("conflicts");
+        b.configured_propagation_base = b.counter("propagations");
+    }
+
+    void Engine::invalidate_result()
+    {
+        f_status = STATUS_UNKNOWN;
+        f_failed_groups.clear();
     }
 
     bool Engine::assigned(Var variable)
     {
-        return Minisat::toInt(f_solver->modelValue(variable)) != 2;
+        return f_status == STATUS_SAT && variable >= 0 &&
+               size_t(variable) < f_solver->variables.size();
     }
 
     int Engine::value(Var variable)
     {
-        assert(STATUS_SAT == f_status);
-        return Minisat::toInt(f_solver->modelValue(variable)) == 0;
+        if (!assigned(variable)) throw std::logic_error("No current SAT model for variable");
+        return f_solver->solver.val(f_solver->variables[variable]) > 0;
+    }
+
+    Var Engine::existing_var(const enc::TCBI& tcbi) const
+    {
+        const auto found = f_tcbi2var_map.find(tcbi);
+        if (found == f_tcbi2var_map.end())
+            throw std::logic_error("Observable SAT variable was not allocated before solving");
+        return found->second;
     }
 
     Var Engine::new_sat_var(bool frozen)
     {
         query::checkpoint(query::Phase::encoding);
-        if (f_solver->nVars() > MAX_VAR)
+        auto& b = *f_solver;
+        if (b.variables.size() > size_t(MAX_VAR))
             throw std::out_of_range("SAT variable exceeds packed literal range");
-        const Var variable = f_solver->newVar();
-        f_solver->setFrozen(variable, frozen);
+        invalidate_result();
+        const Var variable = b.variables.size();
+        // CaDiCaL can allocate extension variables: never derive its ID from ours.
+        const int native = b.solver.declare_one_more_variable();
+        b.variables.push_back(native);
+        if (frozen) b.solver.freeze(native);
         return variable;
     }
 
     void Engine::commit_clause(const Lits& literals)
     {
-        Minisat::vec<Minisat::Lit> native;
-        for (auto literal : literals) native.push(native_literal(literal));
-        f_solver->addClause_(native);
+        auto& b = *f_solver;
+        // Validate the whole clause before opening the native clause builder.
+        for (auto literal : literals) (void)b.literal(literal);
+        invalidate_result();
+        for (auto literal : literals) b.solver.add(b.literal(literal));
+        b.solver.add(0);
+        ++b.clauses;
     }
 
     void Engine::add_clause(const Lits& literals)
     {
         query::checkpoint(query::Phase::encoding);
+        invalidate_result();
         if (f_cnf_optimization_enabled && !f_optimization_in_progress)
             f_pending_clauses.push_back(literals);
         else
@@ -166,80 +218,68 @@ namespace sat {
 
     std::vector<group_t> Engine::failed_groups() const
     {
-        std::vector<group_t> result;
-        if (f_status != STATUS_UNSAT) return result;
-        for (int i = 0; i < f_solver->conflict.size(); ++i) {
-            const auto assumption = ~toLit(Minisat::toInt(f_solver->conflict[i]));
-            result.push_back(sign(assumption) ? -var(assumption) : var(assumption));
-        }
-        return result;
+        return f_status == STATUS_UNSAT ? f_failed_groups : std::vector<group_t>{};
     }
 
     status_t Engine::sat_solve_groups(const Groups& groups)
     {
+        // Invalidate before the checkpoint, which can throw on cancellation.
+        invalidate_result();
         query::PhaseTimer timer(query::Phase::solving);
         auto context = query::current();
-        const auto initial_conflicts = f_solver->conflicts;
-        const auto initial_propagations = f_solver->propagations;
+        auto& b = *f_solver;
+        b.conflict_base = b.counter("conflicts");
+        b.propagation_base = b.counter("propagations");
+        b.conflict_limit = remaining(b.configured_conflicts, b.conflict_base - b.configured_conflict_base);
+        b.propagation_limit = remaining(b.configured_propagations, b.propagation_base - b.configured_propagation_base);
         if (context) {
-            const auto& l = context->limits;
-            if (l.conflicts >= 0) {
-                if (context->conflicts_used >= static_cast<uint64_t>(l.conflicts)) { context->cancel(query::StopReason::conflict_budget); return f_status = STATUS_UNKNOWN; }
-                f_solver->setConfBudget(l.conflicts - context->conflicts_used);
-            }
-            if (l.propagations >= 0) {
-                if (context->propagations_used >= static_cast<uint64_t>(l.propagations)) { context->cancel(query::StopReason::propagation_budget); return f_status = STATUS_UNKNOWN; }
-                f_solver->setPropBudget(l.propagations - context->propagations_used);
-            }
+            b.conflict_limit = tighter(b.conflict_limit, remaining(context->limits.conflicts, context->conflicts_used));
+            b.propagation_limit = tighter(b.propagation_limit, remaining(context->limits.propagations, context->propagations_used));
         }
-        // Optimize pending clauses before solving
+        if (const auto reason = b.budget_stop(); reason != query::StopReason::none) {
+            if (context) context->cancel(reason);
+            return STATUS_UNKNOWN;
+        }
+        // Even trivial formulas must respect requests made before solve().
+        if (b.interrupted.load(std::memory_order_relaxed)) return STATUS_UNKNOWN;
+
         optimize_and_commit();
-        
-        Minisat::vec<Minisat::Lit> assumptions;
-
-        const clock_t t0 { clock() };
-        for (const auto grp : groups) {
-
-            /* Assumptions work like "a -> phi". Here we use both
-             * polarities of the implication, that is a positive group
-             * var asserts the formulas in the group whereas a
-             * negative group var disables those formulas. */
-            assumptions.push(native_literal(mkLit(abs(grp), grp < 0)));
+        for (const auto group : groups) {
+            if (group == std::numeric_limits<group_t>::min())
+                throw std::out_of_range("Invalid SAT group");
+            b.solver.assume(b.literal(mkLit(std::abs(group), group < 0)));
         }
+        // Native limits reset after each solve. Large 64-bit budgets are checked
+        // by the callback without narrowing to CaDiCaL's int limit argument.
+        const int native_limit = b.conflict_limit >= 0 && b.conflict_limit <= INT_MAX
+            ? static_cast<int>(b.conflict_limit) : -1;
+        if (!b.solver.limit("conflicts", native_limit))
+            throw std::logic_error("CaDiCaL conflict limit unavailable");
+        ++b.solves;
+        const int status = b.solver.solve();
+        if (status == 10) f_status = STATUS_SAT;
+        else if (status == 20) f_status = STATUS_UNSAT;
+        else if (status != 0) throw std::logic_error("Invalid CaDiCaL solve status");
 
-        TRACE
-            << "Solving ..."
-            << std::endl;
-
-        if (const int status = Minisat::toInt(f_solver->solveLimited(assumptions)); status == 0) {
-            f_status = STATUS_SAT;
-        } else if (status == 1) {
-            f_status = STATUS_UNSAT;
-        } else if (status == 2) {
-            f_status = STATUS_UNKNOWN;
-        } else {
-            assert(false); /* unreachable */
-        }
-
-        const clock_t elapsed { clock() - t0 };
-        double secs { static_cast<double>(elapsed) / static_cast<double>(CLOCKS_PER_SEC) };
-
-        TRACE
-            << "Took "
-            << secs
-            << " seconds. Status is "
-            << f_status << "."
-            << std::endl;
-
+        const auto reason = b.budget_stop();
         if (context) {
-            context->conflicts_used += f_solver->conflicts - initial_conflicts;
-            context->propagations_used += f_solver->propagations - initial_propagations;
-            context->variables = std::max(context->variables, static_cast<uint64_t>(f_solver->nVars()));
-            context->clauses = std::max(context->clauses, static_cast<uint64_t>(f_solver->nClauses()));
-            if (f_status == STATUS_UNKNOWN && context->stop == query::StopReason::none) {
-                context->cancel(context->limits.conflicts >= 0 && context->conflicts_used >= static_cast<uint64_t>(context->limits.conflicts) ? query::StopReason::conflict_budget : context->limits.propagations >= 0 && context->propagations_used >= static_cast<uint64_t>(context->limits.propagations) ? query::StopReason::propagation_budget : query::StopReason::solver_unknown);
-            }
-            if (context->stop != query::StopReason::none) f_status = STATUS_UNKNOWN;
+            context->conflicts_used += b.counter("conflicts") - b.conflict_base;
+            context->propagations_used += b.counter("propagations") - b.propagation_base;
+            context->variables = std::max(context->variables, uint64_t(b.variables.size()));
+            context->clauses = std::max(context->clauses, b.clauses);
+            if (reason != query::StopReason::none) context->cancel(reason);
+            else if (b.interrupted.load(std::memory_order_relaxed)) context->cancel();
+            else if (f_status == STATUS_UNKNOWN) context->cancel(query::StopReason::solver_unknown);
+        }
+        if (reason != query::StopReason::none || b.interrupted.load(std::memory_order_relaxed) ||
+            (context && context->stop != query::StopReason::none))
+            invalidate_result();
+
+        if (f_status == STATUS_UNSAT) {
+            // Copy signed failed assumptions while the native result is valid.
+            for (const auto group : groups)
+                if (b.solver.failed(b.literal(mkLit(std::abs(group), group < 0))))
+                    f_failed_groups.push_back(group);
         }
         return f_status;
     }
