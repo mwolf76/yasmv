@@ -226,13 +226,13 @@ namespace sat {
         /* push 1 var clause */
         inline void push1(Var x, bool px)
         {
-            vec<Lit> ps;
+            Lits ps;
 
             if (MAINGROUP != f_group) {
-                ps.push(mkLit(f_group, true));
+                ps.push_back(mkLit(f_group, true));
             }
 
-            ps.push(mkLit(x, px));
+            ps.push_back(mkLit(x, px));
 
 #ifdef DEBUG_CNF_LITERALS
             DRIVEL
@@ -246,14 +246,14 @@ namespace sat {
         /* push 2 vars clause */
         inline void push2(Var x, bool px, Var y, bool py)
         {
-            vec<Lit> ps;
+            Lits ps;
 
             if (MAINGROUP != f_group) {
-                ps.push(mkLit(f_group, true));
+                ps.push_back(mkLit(f_group, true));
             }
 
-            ps.push(mkLit(x, px));
-            ps.push(mkLit(y, py));
+            ps.push_back(mkLit(x, px));
+            ps.push_back(mkLit(y, py));
 
 #ifdef DEBUG_CNF_LITERALS
             DRIVEL
@@ -267,15 +267,15 @@ namespace sat {
         /* push 3 vars clause */
         inline void push3(Var x, bool px, Var y, bool py, Var w, bool pw)
         {
-            vec<Lit> ps;
+            Lits ps;
 
             if (MAINGROUP != f_group) {
-                ps.push(mkLit(f_group, true));
+                ps.push_back(mkLit(f_group, true));
             }
 
-            ps.push(mkLit(x, px));
-            ps.push(mkLit(y, py));
-            ps.push(mkLit(w, pw));
+            ps.push_back(mkLit(x, px));
+            ps.push_back(mkLit(y, py));
+            ps.push_back(mkLit(w, pw));
 
 #ifdef DEBUG_CNF_LITERALS
             DRIVEL

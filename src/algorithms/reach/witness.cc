@@ -107,7 +107,7 @@ namespace reach {
                             enc::TCBI(ucbi, reversed ? UINT_MAX - step : step)
                         };
 
-                        Var var { engine.tcbi_to_var(tcbi) };
+                        sat::Var var { engine.tcbi_to_var(tcbi) };
                         int value { engine.value(var) }; /* XXX: don't cares assigned to 0 */
 
                         inputs[bit] = value;

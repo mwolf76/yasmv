@@ -30,21 +30,9 @@
 
 #include <enc/tcbi.hh>
 
-/* decls from the Minisat SAT solver */
-#include <minisat/core/Solver.h>
-#include <minisat/core/SolverTypes.h>
-#include <minisat/simp/SimpSolver.h>
+#include <sat/literal.hh>
 
 #include <utils/pool.hh>
-
-using Minisat::lbool;
-using Minisat::Lit;
-using Minisat::mkLit;
-using Minisat::Var;
-using Minisat::vec;
-
-using Minisat::SimpSolver;
-using Minisat::Solver;
 
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
@@ -59,10 +47,6 @@ namespace sat {
     typedef class Engine* Engine_ptr;
     typedef class EngineMgr* EngineMgr_ptr;
     typedef boost::unordered_set<Engine_ptr> EngineSet;
-
-    // for microcode
-    typedef std::vector<Lit> Lits;
-    typedef std::vector<Lits> LitsVector;
 
     typedef unsigned id_t;
 
@@ -176,7 +160,7 @@ struct ptr_hasher  {
     typedef Var group_t;
     const group_t MAINGROUP(0);
 
-    typedef vec<group_t> Groups;
+    using Groups = std::vector<group_t>;
 
 #include <boost/unordered_map.hpp>
 #include <utils/pool.hh>

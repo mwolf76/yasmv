@@ -11,7 +11,7 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
-EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md
+EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md docs/CADICAL_OWNED_TYPES.md
 EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/verify-c.py tools/llvm2smv_c.py tests/test_llvm2smv_c.py tools/llvm2smv_translate.py tests/test_llvm2smv_scalar.py tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
     tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \
@@ -53,7 +53,15 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 bin_PROGRAMS = yasmv
-EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests
+EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests sat_literal_tests
+
+sat_literal_tests_SOURCES = tests/test_sat_literals.cc
+sat_literal_tests_CPPFLAGS = -I$(top_srcdir)/src
+
+sat-types-test: sat_literal_tests
+	./sat_literal_tests
+
+.PHONY: sat-types-test
 nobase_dist_pkgdata_DATA = docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json examples/progress/*.smv examples/progress/README.md microcode/* help/* tools/workbench/*.py tools/scenario/*.py \
     tools/workbench/static/* examples/retry-protocol/*.smv examples/retry-protocol/*.json \
     examples/retry-protocol/runner.py examples/retry-protocol/README.md docs/formats/*.json
@@ -102,7 +110,7 @@ cli-test: yasmv
 progress-test: yasmv
 	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
 
-test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test
+test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test sat-types-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: llvm-test

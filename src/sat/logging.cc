@@ -25,7 +25,6 @@
  *
  **/
 
-#include <sat/engine.hh>
 #include <sat/logging.hh>
 
 #include <iostream>
@@ -38,39 +37,14 @@ namespace sat {
         return out;
     }
 
-    std::ostream& operator<<(std::ostream& out, const vec<Lit>& lits)
+    std::ostream& operator<<(std::ostream& out, const Lits& lits)
     {
-        for (int i = 0; i < lits.size() - 1; ++i) {
-            out << lits[i] << " ";
+        const char* separator = "";
+        for (auto literal : lits) {
+            out << separator << literal;
+            separator = " ";
         }
-
-        if (0 != lits.size()) {
-            out << lits[lits.size() - 1];
-        }
-
         return out;
-    }
-
-    std::ostream& operator<<(std::ostream& os, const lbool& lb)
-    {
-        switch (toInt(lb)) {
-            case 0:
-                os << "T";
-                break;
-
-            case 1:
-                os << "F";
-                break;
-
-            case 2:
-                os << "X";
-                break;
-
-            default:
-                assert(0);
-        }
-
-        return os;
     }
 
     std::ostream& operator<<(std::ostream& os, const status_t& status)
@@ -91,52 +65,6 @@ namespace sat {
             default:
                 assert(0);
         }
-
-        return os;
-    }
-
-    std::ostream& operator<<(std::ostream& os, const Engine& engine)
-    {
-        const Solver& solver { engine.f_solver };
-
-        os
-            << "Solver: `"
-            << engine.f_instance_name
-
-            << "`, solves: "
-            << solver.solves
-
-            << ", starts: "
-            << solver.starts
-
-            << ", decs: "
-            << solver.decisions
-
-            << ", rnd decs: "
-            << solver.rnd_decisions
-
-            << ", props: "
-            << solver.propagations
-
-            << ", conflicts: "
-            << solver.conflicts
-
-            << ", dec vars: "
-            << solver.dec_vars
-
-            << ", clause lits: "
-            << solver.clauses_literals
-
-            << ", learnt lits: "
-            << solver.learnts_literals
-
-            << ", max lits: "
-            << solver.max_literals
-
-            << ", tot lits: "
-            << solver.tot_literals
-
-            ;
 
         return os;
     }
