@@ -16,6 +16,7 @@ REVISION = 'c60730422e758ef1cebe7aeddf2dda31c996bf04'
 HEADER = r'''
 #include <cstdio>
 #include <unistd.h>
+#include <tracer.hpp>
 namespace CaDiCaL {
 inline const bool colors = isatty(STDOUT_FILENO);
 struct Terminator { virtual bool terminate() = 0; virtual ~Terminator() = default; };
@@ -30,10 +31,14 @@ struct Solver {
     bool set(const char *, int) { return true; }
     void connect_terminator(Terminator *) {}
     void disconnect_terminator() {}
+    Tracer *tracer = nullptr;
+    void connect_proof_tracer(Tracer *t, bool) { tracer = t; }
+    bool disconnect_proof_tracer(Tracer *) { tracer = nullptr; return true; }
+    void conclude() {}
     int declare_one_more_variable() { return 1; }
     void freeze(int) {}
     void melt(int) {}
-    void add(int) {}
+    void add(int lit) { if (!lit && tracer) tracer->add_original_clause(1, false, {1}, false); }
     bool limit(const char *, int) { return true; }
     int assumed = 0;
     void assume(int value) { assumed = value; }
@@ -41,6 +46,20 @@ struct Solver {
     int val(int) { return 1; }
     bool failed(int) { return true; }
     long get_statistic_value(const char *) { return 0; }
+};
+}
+'''
+
+TRACER = r'''
+#pragma once
+#include <cstdint>
+#include <vector>
+namespace CaDiCaL {
+struct Tracer {
+    virtual ~Tracer() = default;
+    virtual void add_original_clause(int64_t, bool, const std::vector<int>&, bool) {}
+    virtual void add_derived_clause(int64_t, bool, int, const std::vector<int>&,
+                                     const std::vector<int64_t>&) {}
 };
 }
 '''
@@ -64,6 +83,7 @@ class ConfigureTests(unittest.TestCase):
         self.prefix = self.path / 'prefix'
         (self.prefix / 'include').mkdir(parents=True)
         (self.prefix / 'lib').mkdir()
+        (self.prefix / 'include/tracer.hpp').write_text(TRACER)
         subprocess.run(['ar', 'cr', str(self.prefix / 'lib/libcadical.a')], check=True)
 
     def configure(self, *, terminal, revision=REVISION, version='3.0.1'):
@@ -128,6 +148,19 @@ class ConfigureTests(unittest.TestCase):
 
     def test_wrong_version_is_rejected(self):
         status, output = self.configure(terminal=True, version='3.0.2')
+        self.assertNotEqual(status, 0)
+        self.assertIn('API/version check failed', output)
+
+    def test_missing_proof_header_is_rejected(self):
+        (self.prefix / 'include/tracer.hpp').unlink()
+        status, output = self.configure(terminal=False)
+        self.assertNotEqual(status, 0)
+        self.assertIn('Matching pinned tracer.hpp not found', output)
+
+    def test_incompatible_proof_header_is_rejected(self):
+        (self.prefix / 'include/tracer.hpp').write_text(
+            TRACER.replace('int64_t, bool, int,', 'int64_t, bool,'))
+        status, output = self.configure(terminal=False)
         self.assertNotEqual(status, 0)
         self.assertIn('API/version check failed', output)
 

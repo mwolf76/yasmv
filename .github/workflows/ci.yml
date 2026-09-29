@@ -28,7 +28,7 @@ jobs:
     - name: validate incremental API contracts
       run: |
         python3 tests/test_cadical_runner.py
-        python3 tools/test-cadical-api.py --source .deps/cadical
+        python3 tools/test-cadical-api.py --source .deps/cadical --suite all
 
   build:
     runs-on: ubuntu-24.04
@@ -58,11 +58,11 @@ jobs:
         ./configure -fPIC
         make -C build -j2 libcadical.a
         mkdir -p ../cadical-prefix/include ../cadical-prefix/lib
-        install -m 644 src/cadical.hpp ../cadical-prefix/include/
+        install -m 644 src/cadical.hpp src/tracer.hpp ../cadical-prefix/include/
         install -m 644 build/libcadical.a ../cadical-prefix/lib/
 
     - name: validate release API contracts
-      run: python3 tools/test-cadical-api.py --source .deps/cadical --cxxflags="-O3 -DNDEBUG"
+      run: python3 tools/test-cadical-api.py --source .deps/cadical --suite all --cxxflags="-O3 -DNDEBUG"
 
     - name: configure core build
       run: |

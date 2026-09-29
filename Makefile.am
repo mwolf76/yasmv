@@ -41,6 +41,7 @@ EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/ve
     docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tests/test_cli.py docs/CLI_WORKBENCH.md docs/formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
 EXTRA_DIST += README.md setup.sh tests/test_setup.py
 EXTRA_DIST += tests/test_cadical_configure.py
+EXTRA_DIST += docs/INTERPOLATION_PLAN.md docs/INTERPOLATION_PROOF_VALIDATION.md
 
 AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"$(pkgdatadir)\" \
 -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
@@ -59,7 +60,16 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 bin_PROGRAMS = yasmv
-EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests sat_literal_tests
+EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests sat_literal_tests cadical_proof_tests
+
+cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh
+cadical_proof_tests_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS)
+cadical_proof_tests_LDADD = $(CADICAL_LIBS)
+
+cadical-proof-test: cadical_proof_tests
+	./cadical_proof_tests
+
+.PHONY: cadical-proof-test
 
 sat_literal_tests_SOURCES = tests/test_sat_literals.cc
 sat_literal_tests_CPPFLAGS = -I$(top_srcdir)/src
@@ -116,7 +126,7 @@ cli-test: yasmv
 progress-test: yasmv
 	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
 
-test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test sat-types-test setup-test cadical-configure-test
+test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test cadical-proof-test sat-types-test setup-test cadical-configure-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: llvm-test
@@ -138,7 +148,7 @@ cadical-runner-test:
 
 cadical-api-test: cadical-runner-test
 	@test -n "$(CADICAL_SOURCE)" || { echo 'Set CADICAL_SOURCE to the pinned CaDiCaL checkout.' >&2; exit 1; }
-	python3 $(srcdir)/tools/test-cadical-api.py --source "$(CADICAL_SOURCE)" --cxx "$(CXX)" --cxxflags="$(CXXFLAGS)"
+	python3 $(srcdir)/tools/test-cadical-api.py --source "$(CADICAL_SOURCE)" --suite all --cxx "$(CXX)" --cxxflags="$(CXXFLAGS)"
 
 .PHONY: cadical-api-test cadical-runner-test
 
