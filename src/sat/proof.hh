@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <map>
+#include <functional>
+#include <limits>
 #include <vector>
 
 namespace sat::proof {
@@ -27,6 +29,9 @@ struct Node {
 // Nodes survive deletion of solver clauses; deleted IDs cannot be antecedents.
 class ResolutionProof {
 public:
+    explicit ResolutionProof(std::function<void()> checkpoint = {},
+                             size_t node_limit = std::numeric_limits<size_t>::max())
+        : checkpoint_(std::move(checkpoint)), node_limit_(node_limit) {}
     void original(Id, const Clause&, Partition);
     void restore(Id, const Clause&);
     void erase(Id, const Clause&);
@@ -39,6 +44,10 @@ private:
     struct Entry { NodeId node; bool active; };
     std::vector<Node> nodes_;
     std::map<Id, Entry> clauses_;
+    std::function<void()> checkpoint_;
+    size_t node_limit_;
+    void tick() const { if (checkpoint_) checkpoint_(); }
+    void append(Node);
     void fresh(Id) const;
 };
 

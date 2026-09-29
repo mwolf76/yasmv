@@ -174,7 +174,7 @@ namespace reach {
                     << std::endl;
 
                 tasks.push_back(new boost::thread(
-                    &Reachability::fast_forward_strategy, this, target_cu));
+                    &Reachability::fast_forward_strategy, this, boost::cref(target_cu)));
             }
 
             if (om.reach_forward_strategy()) {
@@ -183,7 +183,7 @@ namespace reach {
                     << std::endl;
 
                 tasks.push_back(new boost::thread(
-                    &Reachability::forward_strategy, this, target_cu));
+                    &Reachability::forward_strategy, this, boost::cref(target_cu)));
             }
         } else {
             TRACE
@@ -198,7 +198,7 @@ namespace reach {
                     << std::endl;
 
                 tasks.push_back(new boost::thread(
-                    &Reachability::fast_backward_strategy, this, target_cu));
+                    &Reachability::fast_backward_strategy, this, boost::cref(target_cu)));
             }
 
             if (om.reach_backward_strategy()) {
@@ -207,7 +207,7 @@ namespace reach {
                     << std::endl;
 
                 tasks.push_back(new boost::thread(
-                &Reachability::backward_strategy, this, target_cu));
+                &Reachability::backward_strategy, this, boost::cref(target_cu)));
             }
         } else {
             TRACE

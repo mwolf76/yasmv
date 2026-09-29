@@ -27,6 +27,7 @@
 #include <sat.hh>
 #include <opts/opts_mgr.hh>
 #include <cadical.hpp>
+#include <sat/proof_tracer.hh>
 #include <atomic>
 #include <climits>
 
@@ -35,6 +36,7 @@ namespace sat {
     // Only the owner thread accesses CaDiCaL. Other threads may set interrupted.
     class Engine::Backend : public CaDiCaL::Terminator {
     public:
+        std::unique_ptr<proof::ProofTracer> tracer;
         CaDiCaL::Solver solver;
         std::vector<int> variables;
         std::atomic<bool> interrupted {false};
@@ -44,11 +46,19 @@ namespace sat {
         uint64_t conflict_base = 0, propagation_base = 0;
         int64_t conflict_limit = -1, propagation_limit = -1;
 
-        Backend()
+        Backend(Mode mode, size_t proof_node_limit)
         {
             if (std::string(CaDiCaL::Solver::version()) != "3.0.1" ||
                 std::string(CaDiCaL::Solver::signature()) != "cadical-3.0.1-c607304")
                 throw std::runtime_error("Expected the pinned CaDiCaL 3.0.1 build");
+            if (mode == Mode::proof) {
+                if (!solver.configure("plain") || !solver.set("factor", 0) ||
+                    !solver.set("lucky", 0) || !solver.set("walk", 0))
+                    throw std::runtime_error("Invalid proof solver configuration");
+                tracer = std::make_unique<proof::ProofTracer>(
+                    [] { query::checkpoint(query::Phase::encoding); }, proof_node_limit);
+                solver.connect_proof_tracer(tracer.get(), true);
+            }
             if (!solver.set("quiet", 1) ||
                 // Repeated incremental solves spend excessive time in the
                 // inprobe simplification schedule on bounded LLVM models.
@@ -57,7 +67,10 @@ namespace sat {
                 throw std::runtime_error("Invalid CaDiCaL configuration");
             solver.connect_terminator(this);
         }
-        ~Backend() { solver.disconnect_terminator(); }
+        ~Backend() {
+            solver.disconnect_terminator();
+            if (tracer) solver.disconnect_proof_tracer(tracer.get());
+        }
 
         uint64_t counter(const char* name) const
         {
@@ -81,6 +94,7 @@ namespace sat {
         bool terminate() override
         {
             return interrupted.load(std::memory_order_relaxed) ||
+                   (tracer && tracer->failed()) ||
                    budget_stop() != query::StopReason::none;
         }
     };
@@ -114,24 +128,26 @@ namespace sat {
         }
     }
 
-    Engine::Engine(const char* instance_name)
+    Engine::Engine(const char* instance_name, Mode mode, size_t proof_node_limit)
         : f_instance_name(instance_name)
+        , f_mode(mode)
         , f_enc_mgr(enc::EncodingMgr::INSTANCE())
-        , f_solver(std::make_unique<Backend>())
+        , f_solver(std::make_unique<Backend>(mode, proof_node_limit))
         , f_cnf_optimization_enabled(false)
         , f_optimization_in_progress(false)
     {
         opts::OptsMgr& opts_mgr { opts::OptsMgr::INSTANCE() };
-        if (opts_mgr.cnf_tautology_removal() ||
+        if (mode == Mode::normal && (opts_mgr.cnf_tautology_removal() ||
             opts_mgr.cnf_duplicate_removal() ||
             opts_mgr.cnf_subsumption() ||
             opts_mgr.cnf_variable_elimination() ||
             opts_mgr.cnf_self_subsumption() ||
-            opts_mgr.cnf_blocked_clause())
+            opts_mgr.cnf_blocked_clause()))
             enable_cnf_optimization(true);
 
         // Internal zero remains the main group/true microcode constant.
         f_groups.push_back(new_sat_var(true));
+        if (mode == Mode::proof) add_proof_clause({mkLit(0)}, proof::Partition::a);
         if (auto context = query::current()) context->attach(this);
         EngineMgr::INSTANCE().register_instance(this);
     }
@@ -166,6 +182,7 @@ namespace sat {
 
     void Engine::set_groups(Groups groups)
     {
+        if (f_mode == Mode::proof) throw std::logic_error("Proof engines do not support assumption groups");
         // Reject the entire update before touching either assumptions or results.
         for (const auto group : groups) {
             if (group == std::numeric_limits<group_t>::min() ||
@@ -200,6 +217,7 @@ namespace sat {
     {
         query::checkpoint(query::Phase::encoding);
         auto& b = *f_solver;
+        if (b.tracer && b.solves) throw std::logic_error("Proof engines are single-query instances");
         if (b.variables.size() > size_t(MAX_VAR))
             throw std::out_of_range("SAT variable exceeds packed literal range");
         invalidate_result();
@@ -216,10 +234,59 @@ namespace sat {
         auto& b = *f_solver;
         // Validate the whole clause before opening the native clause builder.
         for (auto literal : literals) (void)b.literal(literal);
+        if (b.tracer && (!b.tracer->submitting || b.solves))
+            throw std::logic_error("Proof clauses require a partition before the first solve");
         invalidate_result();
         for (auto literal : literals) b.solver.add(b.literal(literal));
         b.solver.add(0);
         ++b.clauses;
+        if (f_mode == Mode::record) f_recorded_clauses.push_back(literals);
+        if (b.tracer) b.tracer->check();
+    }
+
+    void Engine::add_proof_clause(const Lits& literals, proof::Partition partition)
+    {
+        query::checkpoint(query::Phase::encoding);
+        auto& b = *f_solver;
+        if (!b.tracer || b.solves) throw std::logic_error("Proof clauses require a fresh proof engine");
+        b.tracer->check();
+        std::set<int> native;
+        for (auto lit : literals) native.insert(b.literal(lit));
+        for (int lit : native) if (native.count(-lit)) return; // tautology has no constraint
+        b.tracer->submitted.assign(native.begin(), native.end());
+        b.tracer->submitting = partition;
+        commit_clause(literals);
+        if (b.tracer->submitting) throw std::logic_error("Missing original proof clause callback");
+    }
+
+    LitsVector Engine::recorded_clauses() const
+    {
+        if (f_mode != Mode::record) throw std::logic_error("Engine was not configured to record CNF");
+        LitsVector result;
+        for (const auto& clause : f_recorded_clauses) {
+            query::checkpoint(query::Phase::encoding);
+            result.push_back(clause);
+        }
+        for (auto group : f_groups) result.push_back({mkLit(std::abs(group), group < 0)});
+        return result;
+    }
+
+    const proof::ResolutionProof& Engine::resolution_proof() const
+    {
+        if (!f_solver->tracer || f_status != STATUS_UNSAT || !f_solver->tracer->conclusion)
+            throw std::logic_error("No current resolution proof");
+        f_solver->tracer->check();
+        return f_solver->tracer->proof;
+    }
+    proof::NodeId Engine::proof_root() const
+    {
+        (void)resolution_proof();
+        return *f_solver->tracer->conclusion;
+    }
+    int Engine::proof_variable(Var variable) const
+    {
+        if (!f_solver->tracer) throw std::logic_error("Not a proof engine");
+        return f_solver->variables.at(variable);
     }
 
     void Engine::add_clause(const Lits& literals)
@@ -244,6 +311,7 @@ namespace sat {
         query::PhaseTimer timer(query::Phase::solving);
         auto context = query::current();
         auto& b = *f_solver;
+        if (b.tracer && b.solves) throw std::logic_error("Proof engines are single-query instances");
         b.conflict_base = b.counter("conflicts");
         b.propagation_base = b.counter("propagations");
         b.conflict_limit = remaining(b.configured_conflicts, b.conflict_base - b.configured_conflict_base);
@@ -260,7 +328,7 @@ namespace sat {
         if (b.interrupted.load(std::memory_order_relaxed)) return STATUS_UNKNOWN;
 
         optimize_and_commit();
-        for (const auto group : groups) {
+        if (!b.tracer) for (const auto group : groups) {
             if (group == std::numeric_limits<group_t>::min())
                 throw std::out_of_range("Invalid SAT group");
             b.solver.assume(b.literal(mkLit(std::abs(group), group < 0)));
@@ -291,7 +359,16 @@ namespace sat {
             (context && context->stop != query::StopReason::none))
             invalidate_result();
 
-        if (f_status == STATUS_UNSAT) {
+        if (b.tracer) {
+            try {
+                b.tracer->check();
+                if (f_status == STATUS_UNSAT) {
+                    b.solver.conclude();
+                    b.tracer->check();
+                    if (!b.tracer->conclusion) throw std::logic_error("Missing proof conclusion");
+                }
+            } catch (...) { invalidate_result(); throw; }
+        } else if (f_status == STATUS_UNSAT) {
             // Copy signed failed assumptions while the native result is valid.
             for (const auto group : groups)
                 if (b.solver.failed(b.literal(mkLit(std::abs(group), group < 0))))
@@ -300,7 +377,7 @@ namespace sat {
         return f_status;
     }
 
-    void Engine::push(compiler::Unit cu, step_t time, group_t group)
+    void Engine::push(const compiler::Unit& cu, step_t time, group_t group)
     {
         query::PhaseTimer timer(query::Phase::encoding);
         /**
@@ -346,7 +423,7 @@ namespace sat {
             while (binary_selection_descriptors_map.end() != mmi) {
                 expr::Expr_ptr toplevel { mmi->first };
 
-                compiler::BinarySelectionDescriptors descriptors { mmi->second };
+                const compiler::BinarySelectionDescriptors& descriptors { mmi->second };
 
                 compiler::BinarySelectionDescriptors::const_iterator i;
                 for (i = descriptors.begin(); descriptors.end() != i; ++i) {
@@ -486,6 +563,8 @@ namespace sat {
     
     void Engine::enable_cnf_optimization(bool enable)
     {
+        if (enable && f_mode != Mode::normal)
+            throw std::logic_error("CNF optimization is unavailable for recording and proof engines");
         f_cnf_optimization_enabled = enable;
         
         const char* status_str = enable ? "enabled" : "disabled";

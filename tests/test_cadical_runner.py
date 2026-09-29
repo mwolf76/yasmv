@@ -60,6 +60,7 @@ class RunnerTests(unittest.TestCase):
         command = execute.call_args_list[2].args[0]
         self.assertIn(str(ROOT / 'tests/test_cadical_proof.cc'), command)
         self.assertIn(str(ROOT / 'src/sat/proof.cc'), command)
+        self.assertIn(str(ROOT / 'src/sat/circuit.cc'), command)
         self.assertIn(str(ROOT / 'src'), command)
 
     def test_missing_proof_header_is_rejected(self):

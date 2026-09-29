@@ -118,22 +118,34 @@ class SessionTests(unittest.TestCase):
         self.run_query()
         session = next(iter(self.pool.sessions.values()))
         parent = session.process.pid
+        children = Path(f'/proc/{parent}/task/{parent}/children')
+        previous_children = set(children.read_text().split())
         cancel = threading.Event()
+        started = threading.Event()
+        original_query = session.query
+        def active_query(*args, **kwargs):
+            started.set()
+            return original_query(*args, **kwargs)
         query = dict(request_id='long', operation='shortest-reach', target='FALSE', limits={'depth': 10000})
-        with ThreadPoolExecutor(max_workers=1) as executor:
+        with patch.object(session, 'query', side_effect=active_query), ThreadPoolExecutor(max_workers=1) as executor:
             pending = executor.submit(self.run_query, query, cancel=cancel)
-            children = Path(f'/proc/{parent}/task/{parent}/children')
-            end = time.monotonic() + 10
             child = None
-            while time.monotonic() < end:
-                ids = children.read_text().split()
-                if ids:
-                    child = int(ids[0])
-                    os.kill(child, signal.SIGSTOP)
-                    break
-                time.sleep(.01)
-            self.assertIsNotNone(child)
-            cancel.set()
+            try:
+                # A completed query can send its result before its child exits.
+                # Wait for this lease, then stop only its new child: fingerprinting
+                # a large instrumented binary can otherwise expose the old one.
+                self.assertTrue(started.wait(timeout=10))
+                end = time.monotonic() + 10
+                while time.monotonic() < end:
+                    ids = set(children.read_text().split()) - previous_children
+                    if ids:
+                        child = int(next(iter(ids)))
+                        os.kill(child, signal.SIGSTOP)
+                        break
+                    time.sleep(.01)
+                self.assertIsNotNone(child)
+            finally:
+                cancel.set()
             with self.assertRaises(Interrupted): pending.result(timeout=10)
         self.assertFalse(Path(f'/proc/{child}').exists())
         self.assertFalse(Path(f'/proc/{parent}').exists())

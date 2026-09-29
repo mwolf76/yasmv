@@ -33,6 +33,7 @@
 #include <compiler/typedefs.hh>
 
 #include <sat/typedefs.hh>
+#include <sat/proof.hh>
 
 #include <utils/logging.hh>
 
@@ -51,11 +52,22 @@ namespace sat {
 
     class Engine {
     public:
+        enum class Mode { normal, record, proof };
+        Mode mode() const { return f_mode; }
+        // Each recording engine owns a separate encoder namespace. Snapshots
+        // include the current signed group assumptions as unit clauses.
+        LitsVector recorded_clauses() const;
+        const Var2TCBIMap& encoded_bits() const { return f_var2tcbi_map; }
+        void add_proof_clause(const Lits&, proof::Partition);
+        const proof::ResolutionProof& resolution_proof() const;
+        proof::NodeId proof_root() const;
+        int proof_variable(Var) const;
         /**
 	 * @brief Adds a new formula group to the SAT instance.
 	 */
         inline group_t new_group()
         {
+            if (f_mode == Mode::proof) throw std::logic_error("Proof engines do not support assumption groups");
             group_t res(new_sat_var(true));
 
             f_groups.push_back(res);
@@ -73,6 +85,7 @@ namespace sat {
 	 */
         inline void invert_last_group()
         {
+            if (f_mode == Mode::proof) throw std::logic_error("Proof engines do not support assumption groups");
             invalidate_result();
             f_groups.back() *= -1;
         }
@@ -90,7 +103,9 @@ namespace sat {
         /**
 	 * @brief add a formula to the SAT problem instance.
 	 */
-        void push(compiler::Unit cu, step_t time, group_t group = MAINGROUP);
+        // Borrow immutable DDs: copying ADD wrappers mutates CUDD reference
+        // counts and races when different engines encode the same unit.
+        void push(const compiler::Unit& cu, step_t time, group_t group = MAINGROUP);
 
         /**
 	 * @brief Invoke SAT
@@ -196,7 +211,8 @@ namespace sat {
         /**
 	 * @brief SAT instance ctor
 	 */
-        Engine(const char* instance_name);
+        Engine(const char* instance_name, Mode mode = Mode::normal,
+               size_t proof_node_limit = std::numeric_limits<size_t>::max());
 
         /**
 	 * @brief SAT instance dctor
@@ -210,6 +226,8 @@ namespace sat {
 
     private:
         const char* f_instance_name;
+        Mode f_mode;
+        LitsVector f_recorded_clauses;
 
         enc::EncodingMgr& f_enc_mgr;
 
@@ -330,7 +348,7 @@ namespace sat {
         status_t sat_solve_groups(const Groups& groups);
 
         /* CNFization algorithms */
-        void cnf_push(ADD add, step_t time, const group_t group);
+        void cnf_push(const ADD& add, step_t time, const group_t group);
 
         friend std::ostream& operator<<(std::ostream& os, const Engine& engine);
     };

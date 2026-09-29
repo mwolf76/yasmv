@@ -60,9 +60,9 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 bin_PROGRAMS = yasmv
-EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests sat_literal_tests cadical_proof_tests
+EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests yasmv_interpolation_tests sat_literal_tests cadical_proof_tests
 
-cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh
+cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh src/sat/proof_tracer.hh src/sat/circuit.cc src/sat/circuit.hh
 cadical_proof_tests_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS)
 cadical_proof_tests_LDADD = $(CADICAL_LIBS)
 
@@ -70,6 +70,11 @@ cadical-proof-test: cadical_proof_tests
 	./cadical_proof_tests
 
 .PHONY: cadical-proof-test
+
+interpolation-test: yasmv_interpolation_tests
+	YASMV_HOME="$(abs_top_srcdir)" ./yasmv_interpolation_tests --log_level=error
+
+.PHONY: interpolation-test
 
 sat_literal_tests_SOURCES = tests/test_sat_literals.cc
 sat_literal_tests_CPPFLAGS = -I$(top_srcdir)/src
@@ -126,7 +131,7 @@ cli-test: yasmv
 progress-test: yasmv
 	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
 
-test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test cadical-proof-test sat-types-test setup-test cadical-configure-test
+test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test cadical-proof-test interpolation-test sat-types-test setup-test cadical-configure-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: llvm-test
@@ -251,3 +256,9 @@ pkgconf_DATA = yasmv.pc
 yasmv_query_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_query.cc
 yasmv_query_tests_LDADD = $(yasmv_tests_LDADD)
 yasmv_query_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
+
+yasmv_interpolation_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_interpolation.cc
+yasmv_interpolation_tests_LDADD = $(yasmv_tests_LDADD)
+yasmv_interpolation_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
+
+EXTRA_DIST += tests/models/interpolation.smv

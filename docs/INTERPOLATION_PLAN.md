@@ -1,8 +1,8 @@
 # Interpolation-based reachability proposal
 
-Status: milestone 1 implemented, 2026-09-29; remaining milestones are proposed.
-See [proof validation](INTERPOLATION_PROOF_VALIDATION.md). No algorithm or query
-behavior has changed.
+Status: milestones 1–2 implemented, 2026-09-29; milestones 3–5 are proposed.
+See [proof validation](INTERPOLATION_PROOF_VALIDATION.md). Interpolation is an
+internal SAT capability; search and query integration follow in milestones 3–4.
 
 Reference: K. L. McMillan, [Interpolation and SAT-based Model Checking](https://mcmil.net/pubs/CAV03.pdf), CAV 2003, LNCS 2725, pp. 1–13, DOI [10.1007/978-3-540-45069-6_1](https://doi.org/10.1007/978-3-540-45069-6_1).
 
@@ -155,6 +155,15 @@ it must not silently survive in an interpolant. Reject unexpected support.
 Maintain explicit native-variable-to-semantic-bit mapping rather than assuming
 CaDiCaL IDs equal yasmv Var values. Preserve frozen-bit identity when renaming.
 
+Milestone 2 implements this isolation with two distinct recording `Engine`
+instances. Each owns its DD, microcode, mux, selector, and temporary namespaces.
+`PartitionedCnf` merges their original CNF snapshots, identifying only declared
+model state bits by TCBI. A declaration whitelist excludes inputs, instances,
+and compiler temporaries. Any shared nonfrozen bit outside the designated cut
+is rejected. Signed group assumptions become partition-local unit clauses.
+The cut check is syntactic: disabled groups are materialized, not simplified
+away before checking shared support.
+
 Introduce a small hash-consed Boolean DAG or AIG for interpolants, with constant
 folding, sharing, negation, state renaming, and direct Tseitin emission. Keep
 the existing CUDD compiler for model formulas; avoid requiring the entire
@@ -248,6 +257,7 @@ reuse learned clauses across changed partitions without reconstruction. Defer
 backward interpolation, automatic portfolios, progress/liveness reduction, and
 default changes until the forward safety implementation has evidence behind it.
 
-Next implementation task: milestone 2. Partition correctness is the next major
-dependency; the existing query and witness infrastructure already supplies much
-of the surrounding machinery.
+Next implementation task: milestone 3. Build the standalone forward search on
+`sat::StatePredicate`, `PartitionedCnf`, and the verified interpolant circuits.
+Validate the partial-transition suffix against explicit finite graphs before
+adding query dispatch in milestone 4.

@@ -62,11 +62,11 @@ namespace reach {
         reachability_status_t f_status;
 
         /* checking strategies */
-        void forward_strategy(compiler::Unit& target_cu);
-        void backward_strategy(compiler::Unit& target_cu);
+        void forward_strategy(const compiler::Unit& target_cu);
+        void backward_strategy(const compiler::Unit& target_cu);
 
-        void fast_forward_strategy(compiler::Unit& target_cu);
-        void fast_backward_strategy(compiler::Unit& target_cu);
+        void fast_forward_strategy(const compiler::Unit& target_cu);
+        void fast_backward_strategy(const compiler::Unit& target_cu);
     };
 
 } // namespace reach

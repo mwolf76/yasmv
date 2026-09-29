@@ -29,6 +29,7 @@ yasmv.pc
 yasmv_tests
 sat_literal_tests
 cadical_proof_tests
+yasmv_interpolation_tests
 yasmv_reliability_tests
 __pycache__/
 playground/

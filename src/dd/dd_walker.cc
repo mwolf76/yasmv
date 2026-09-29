@@ -33,7 +33,7 @@ namespace dd {
     ADDWalker::~ADDWalker()
     {}
 
-    ADDWalker& ADDWalker::operator()(ADD dd)
+    ADDWalker& ADDWalker::operator()(const ADD& dd)
     {
         /* setup toplevel act. record and perform walk. */
         add_activation_record call { dd.getNode() };
