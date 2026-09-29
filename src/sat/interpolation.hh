@@ -12,9 +12,19 @@ namespace sat {
 class StatePredicate {
 public:
     StatePredicate(compiler::Compiler&, expr::Expr_ptr expression, expr::Expr_ptr scope);
-    void emit(Engine&, step_t frame, bool positive = true) const;
+    void emit(Engine&, step_t frame, bool positive = true, group_t guard = MAINGROUP) const;
 private:
     compiler::Unit positive_, negative_;
+};
+
+// A time-homogeneous relation over the current and next state. Nondeterminism
+// is admitted, but absolute times and references beyond the next frame are not.
+class TransitionRelation {
+public:
+    TransitionRelation(compiler::Compiler&, expr::Expr_ptr expression, expr::Expr_ptr scope);
+    void emit(Engine&, step_t frame, group_t guard = MAINGROUP) const;
+private:
+    compiler::Unit unit_;
 };
 
 class PartitionedCnf {

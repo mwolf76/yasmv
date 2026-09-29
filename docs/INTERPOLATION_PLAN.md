@@ -1,8 +1,8 @@
 # Interpolation-based reachability proposal
 
-Status: milestones 1–2 implemented, 2026-09-29; milestones 3–5 are proposed.
+Status: milestones 1–3 implemented, 2026-09-29; milestones 4–5 are proposed.
 See [proof validation](INTERPOLATION_PROOF_VALIDATION.md). Interpolation is an
-internal SAT capability; search and query integration follow in milestones 3–4.
+internal search capability; query integration follows in milestone 4.
 
 Reference: K. L. McMillan, [Interpolation and SAT-based Model Checking](https://mcmil.net/pubs/CAV03.pdf), CAV 2003, LNCS 2725, pp. 1–13, DOI [10.1007/978-3-540-45069-6_1](https://doi.org/10.1007/978-3-540-45069-6_1).
 
@@ -50,7 +50,7 @@ F* = C AND target. A safety query uses target = NOT property. The conclusion
 applies to this restricted system and retains its exact model identity and
 assumptions.
 
-Unlike the paper's total-transition encoding, use the following proposed suffix
+Unlike the paper's total-transition encoding, use the following suffix
 formula so a short path ending in a deadlock remains visible:
 
 ```text
@@ -66,7 +66,7 @@ a real violation ending before h at a deadlock. A linear-size circuit with
 Tseitin encoding can represent the nested suffix. This is our adaptation;
 validate it against explicit finite graphs before integration.
 
-Proposed control flow:
+Implemented internal control flow:
 
 1. Check I* AND F* for a depth-zero witness. Handle empty I* explicitly.
 2. Set suffix horizon h = 0 and R = I*.
@@ -176,6 +176,11 @@ predicate. Compile semantic predicate negations before CNF conversion, or
 provide a verified circuit lowering with definitional auxiliaries. Include
 polarity and projection tests in the encoding milestone.
 
+Milestone 3 lowers I* to an exact state circuit by interpolating it against its
+independently compiled semantic complement, validating both Craig obligations.
+R then accumulates disjuncts in the circuit representation. Final invariant
+validation still uses the original native model constraints.
+
 Initially accept deterministic, untimed Boolean state predicates, including
 expanded definitions and effective inputs, for INIT/INVAR, target, and
 assumptions. Keep nondeterministic transition relations. Diagnose unsupported
@@ -257,7 +262,9 @@ reuse learned clauses across changed partitions without reconstruction. Defer
 backward interpolation, automatic portfolios, progress/liveness reduction, and
 default changes until the forward safety implementation has evidence behind it.
 
-Next implementation task: milestone 3. Build the standalone forward search on
-`sat::StatePredicate`, `PartitionedCnf`, and the verified interpolant circuits.
-Validate the partial-transition suffix against explicit finite graphs before
-adding query dispatch in milestone 4.
+Next implementation task: milestone 4. Integrate the internal
+`reach::interpolation::search` with explicit reach/property strategy selection,
+model identity, assumptions, replayable traces, proof evidence, shared budgets,
+and serialized results. Preserve existing bounded and shortest-query contracts.
+Internal image iterations and suffix horizons must remain separate from the
+concrete depths recorded in query results.

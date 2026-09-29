@@ -6,41 +6,58 @@
 
 #include <climits>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 
 namespace sat {
 namespace {
 void checkpoint() { query::checkpoint(query::Phase::encoding); }
-bool deterministic_state(expr::Expr_ptr e, expr::Expr_ptr scope, unsigned depth = 0)
+bool local_expression(expr::Expr_ptr e, expr::Expr_ptr scope, unsigned time,
+                      unsigned last, bool deterministic, unsigned depth = 0)
 {
     query::checkpoint(query::Phase::compilation);
     if (!e) return true;
     if (depth > 512) throw std::invalid_argument("State predicate expansion is too deep");
     auto& em = expr::ExprMgr::INSTANCE();
-    if (e->symb() == expr::NEXT || e->symb() == expr::ASSIGNMENT || e->symb() == expr::AT ||
-        em.is_set(e) || em.is_set_comma(e)) return false;
+    if (time > last || e->symb() == expr::AT ||
+        (deterministic && (em.is_set(e) || em.is_set_comma(e)))) return false;
+    auto recur = [&](expr::Expr_ptr child, unsigned t) {
+        return local_expression(child, scope, t, last, deterministic, depth + 1);
+    };
+    if (e->symb() == expr::NEXT) return recur(e->lhs(), time + 1);
+    if (e->symb() == expr::ASSIGNMENT) return recur(e->lhs(), time + 1) && recur(e->rhs(), time);
     if (em.is_constant(e) || e->symb() == expr::QSTRING || e->symb() == expr::INSTANT || e->symb() == expr::TYPE) return true;
-    if (em.is_dot(e)) return deterministic_state(e->rhs(), em.make_dot(scope, e->lhs()), depth + 1);
+    if (em.is_dot(e)) return local_expression(e->rhs(), em.make_dot(scope, e->lhs()), time, last, deterministic, depth + 1);
     if (em.is_identifier(e)) {
         symb::ResolverProxy resolver;
         const auto full = em.make_dot(scope, e);
         auto symbol = resolver.symbol(full);
-        if (symbol->is_define()) return deterministic_state(symbol->as_define().body(), scope, depth + 1);
+        if (symbol->is_define()) return recur(symbol->as_define().body(), time);
         if (symbol->is_parameter()) {
             auto rewrite = model::ModelMgr::INSTANCE().rewrite_parameter(full);
-            return deterministic_state(rewrite->rhs(), rewrite->lhs(), depth + 1);
+            return local_expression(rewrite->rhs(), rewrite->lhs(), time, last, deterministic, depth + 1);
         }
         if (symbol->is_variable() && symbol->as_variable().is_input())
-            return deterministic_state(env::Environment::INSTANCE().get(e), scope, depth + 1);
+            return recur(env::Environment::INSTANCE().get(e), time);
         return true;
     }
-    return deterministic_state(e->lhs(), scope, depth + 1) && deterministic_state(e->rhs(), scope, depth + 1);
+    return recur(e->lhs(), time) && recur(e->rhs(), time);
 }
 compiler::Unit compile_state(compiler::Compiler& compiler, expr::Expr_ptr expression, expr::Expr_ptr scope)
 {
-    if (!expression || !scope || !deterministic_state(expression, scope) ||
+    if (!expression || !scope || !local_expression(expression, scope, 0, 0, true) ||
+        !model::ModelMgr::INSTANCE().type(expression, scope)->is_boolean()) {
+        std::ostringstream message;
+        message << "Interpolation requires a deterministic Boolean state predicate: " << expression;
+        throw std::invalid_argument(message.str());
+    }
+    return compiler.process(scope, expression);
+}
+compiler::Unit compile_transition(compiler::Compiler& compiler, expr::Expr_ptr expression, expr::Expr_ptr scope)
+{
+    if (!expression || !scope || !local_expression(expression, scope, 0, 1, false) ||
         !model::ModelMgr::INSTANCE().type(expression, scope)->is_boolean())
-        throw std::invalid_argument("Interpolation requires a deterministic Boolean state predicate");
+        throw std::invalid_argument("Interpolation requires a one-step transition relation without absolute time references");
     return compiler.process(scope, expression);
 }
 Lits convert(const proof::Clause& clause, const std::vector<Var>& vars)
@@ -68,9 +85,16 @@ void emit_clause(Engine& engine, const proof::Clause& clause)
 StatePredicate::StatePredicate(compiler::Compiler& compiler, expr::Expr_ptr expression, expr::Expr_ptr scope)
     : positive_(compile_state(compiler, expression, scope)),
       negative_(compiler.process(scope, expr::ExprMgr::INSTANCE().make_not(expression))) {}
-void StatePredicate::emit(Engine& engine, step_t frame, bool positive) const
+void StatePredicate::emit(Engine& engine, step_t frame, bool positive, group_t guard) const
 {
-    engine.push(positive ? positive_ : negative_, frame);
+    engine.push(positive ? positive_ : negative_, frame, guard);
+}
+
+TransitionRelation::TransitionRelation(compiler::Compiler& compiler, expr::Expr_ptr expression, expr::Expr_ptr scope)
+    : unit_(compile_transition(compiler, expression, scope)) {}
+void TransitionRelation::emit(Engine& engine, step_t frame, group_t guard) const
+{
+    engine.push(unit_, frame, guard);
 }
 
 PartitionedCnf::PartitionedCnf(const Engine& a, const Engine& b, step_t cut_frame)
