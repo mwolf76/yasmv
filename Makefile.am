@@ -15,6 +15,8 @@ EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tool
 EXTRA_DIST_CADICAL += cadical_integration.md docs/benchmarks/cadical-m1-minisat.md \
     docs/benchmarks/cadical-m1-minisat-reachable.json docs/benchmarks/cadical-m1-minisat-unreachable.json \
     docs/benchmarks/cadical-m6.md docs/benchmarks/cadical-m6-reachable.json docs/benchmarks/cadical-m6-unreachable.json
+EXTRA_DIST_CADICAL += docs/benchmarks/cadical-release.md \
+    docs/benchmarks/cadical-release-reachable.json docs/benchmarks/cadical-release-unreachable.json
 EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/verify-c.py tools/llvm2smv_c.py tests/test_llvm2smv_c.py tools/llvm2smv_translate.py tests/test_llvm2smv_scalar.py tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
     tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \

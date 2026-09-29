@@ -1,0 +1,76 @@
+{
+  "machine": "Linux-6.12.107+deb13-amd64-x86_64-with-glibc2.41",
+  "processor": "x86_64",
+  "python": "3.13.5",
+  "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+  "cxxflags": "-D __STDC_LIMIT_MACROS -D __STDC_FORMAT_MACROS -DPIC -fPIC -std=c++20 -O2 -Wall -Wno-deprecated-declarations -Werror",
+  "binary_sha256": "fc8daecbadf97ecd29f69035670f135d7c3bf1181ace512ea212c1663522ee5e",
+  "source_sha256": "2c82c26c3347fddc86481216d3a221981c3cfa3d901d55912823358c66b27d9b",
+  "query": {
+    "request_id": "benchmark",
+    "operation": "shortest-reach",
+    "target": "DUPLICATE",
+    "limits": {
+      "depth": 12
+    }
+  },
+  "samples_ms": {
+    "fresh": [
+      1539.1218609875068,
+      1533.4895529958885,
+      1532.7387320285197,
+      1536.1948889913037,
+      1533.4562700008973
+    ],
+    "warm_snapshot": [
+      607.9141210066155,
+      613.8653419911861,
+      633.3475950232241,
+      620.5963249958586,
+      618.2791419851128
+    ]
+  },
+  "snapshot_initial_ms": 2742.4409030063543,
+  "session_key": "7e16351cdaba6ae5cbdba5c54aab0aa7f4ee1ce387c7289e2c1ee2f88f2d0245",
+  "result": {
+    "status": "completed",
+    "outcome": "unreachable",
+    "identity": {
+      "engine": "yasmv-0.0.10/cadical-3.0.1-c607304",
+      "environment_constraints": [
+        [],
+        [],
+        []
+      ],
+      "inputs": {},
+      "microcode_revision": "sha1:8d6c15340a294e399fc2107a84e85cae1fa77c50",
+      "model_revision": "sha1:86f13ecac0b90804b31b5d021be72a98dc316bc2",
+      "options": {
+        "cnf_duplicate_removal": true,
+        "cnf_self_subsumption": false,
+        "cnf_subsumption": false,
+        "cnf_tautology_removal": true,
+        "sat_random_seed": 0,
+        "word_width": 4
+      },
+      "root": "main",
+      "solver": {
+        "name": "cadical",
+        "propagation_counter": "search",
+        "propagation_limit": "cooperative",
+        "revision": "c60730422e758ef1cebe7aeddf2dda31c996bf04",
+        "settings": {
+          "inprobing": false
+        },
+        "signature": "cadical-3.0.1-c607304",
+        "version": "3.0.1"
+      },
+      "source_revision": "sha1:e381cebf7661d7680603b351017af30e8ea86e16"
+    },
+    "optimality": null
+  },
+  "median_ms": {
+    "fresh": 1533.4895529958885,
+    "warm_snapshot": 618.2791419851128
+  }
+}
