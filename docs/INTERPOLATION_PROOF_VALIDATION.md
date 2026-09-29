@@ -199,3 +199,70 @@ replay rather than providing an independently certified model checker.
   distribution omissions such as `src/utils/ctx.hh` were supplied from tracked
   files. This does not claim a clean distribution build.
 - Build provenance was collected with `tools/build-provenance.py`.
+
+
+## Milestone 3: internal forward search
+
+`reach::interpolation::search` implements the increasing-horizon forward loop.
+`ModelSystem` compiles the validated model hierarchy, effective inputs,
+environment constraints, and state assumptions into I*, T*, and F*. Native
+relations admit nondeterministic choices and references to the current/next
+state; state predicates require deterministic Boolean expressions. Eligibility
+expands defines, parameters, and effective inputs before checking time locality.
+
+Module-generated enum membership is expanded to Boolean disjunctions before
+negation. Recursive domain constraints also cover arrays of enums. This avoids
+using the negation of an existential set choice as a semantic complement.
+
+The initial circuit is obtained by interpolating I* against its independently
+compiled semantic complement at frame zero. Both Craig obligations establish
+exact equivalence. Image queries share only the next-state cut and frozen bits.
+The suffix uses guarded continuation branches, admitting targets at every depth
+up to its horizon, including deadlocked states. No simple-path constraints enter
+the image proof.
+
+An UNSAT image contributes a checked interpolant to the reached-state circuit.
+A fresh ordinary solver tests image inclusion. A fixed point is accepted only
+after three fresh checks of initial-state containment, transition closure, and
+target exclusion against the original system. SAT after circuit growth causes a
+restart from exact INIT with the next horizon. SAT on the initial iteration is
+checked against incremental concrete search, which completes depths in order;
+the shortest path is decoded and rechecked in another fresh solver before
+publication. Empty INIT has an explicit, freshly verified vacuous result.
+
+Image/horizon limits, proof/circuit node limits, solver UNKNOWN, and cancellation
+produce no certificate. Observers and query checkpoints cover projection, image
+construction, inclusion, growth, restarts, concrete search, and final validation.
+Search statistics distinguish image iterations, spurious SAT, and actual
+concrete checked depths. Query dispatch and serialized artifacts remain for
+milestone 4; the internal API does not update query-result depth bookkeeping.
+
+The independent graph oracle exhausts all 33,024 two- and three-state systems
+(all transition relations, initial sets, and target sets), comparing outcomes
+and shortest witnesses with breadth-first search and evaluating returned
+invariants directly. The suffix oracle checks all 49,536 graph/start/target/
+horizon combinations, including partial transitions. Native tests cover
+arithmetic, enums, enum arrays, Boolean arrays, hierarchy and parameters,
+frozen values, effective inputs, and assumptions creating dead ends. Damaged
+invariants and paths fail fresh validation; limits and cancellation publish no
+artifact and allow a subsequent search.
+
+## Milestone 3 recorded validation — 2026-09-29
+
+- Full `YASMV_HOME="$PWD" make -j3 test` passed with LLVM 18 enabled and the
+  jsonschema-enabled Python environment; no tests were skipped. This includes
+  all eight reliability CNF configurations and both interpolation suites.
+- All six new native search cases passed, including the 33,024-system search
+  oracle, 49,536 suffix checks, native model regressions, damaged certificates,
+  and cancellation and resource limits. All nine existing interpolation cases
+  also passed.
+- The normal build passed with warnings treated as errors.
+- Chromium browser acceptance passed with Playwright 1.63.0 and Node 22.
+- Source-distribution assembly passed; changed distributed files were checked
+  against their sources. This does not claim a clean distribution build (see
+  the existing omissions recorded for milestone 2).
+- Build provenance was collected with `tools/build-provenance.py`.
+- All fifteen interpolation/search cases passed in the fully instrumented
+  yasmv/CaDiCaL ASan/UBSan build, using the same production and test sources.
+  UBSan halted on errors; core leak detection was disabled for existing
+  process-lifetime managers, consistent with the repository's sanitizer setup.

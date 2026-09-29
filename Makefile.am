@@ -60,7 +60,7 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 bin_PROGRAMS = yasmv
-EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests yasmv_interpolation_tests sat_literal_tests cadical_proof_tests
+EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests yasmv_interpolation_tests yasmv_interpolation_search_tests sat_literal_tests cadical_proof_tests
 
 cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh src/sat/proof_tracer.hh src/sat/circuit.cc src/sat/circuit.hh
 cadical_proof_tests_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS)
@@ -71,8 +71,9 @@ cadical-proof-test: cadical_proof_tests
 
 .PHONY: cadical-proof-test
 
-interpolation-test: yasmv_interpolation_tests
+interpolation-test: yasmv_interpolation_tests yasmv_interpolation_search_tests
 	YASMV_HOME="$(abs_top_srcdir)" ./yasmv_interpolation_tests --log_level=error
+	YASMV_HOME="$(abs_top_srcdir)" ./yasmv_interpolation_search_tests --log_level=error
 
 .PHONY: interpolation-test
 
@@ -262,3 +263,8 @@ yasmv_interpolation_tests_LDADD = $(yasmv_tests_LDADD)
 yasmv_interpolation_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
 
 EXTRA_DIST += tests/models/interpolation.smv
+
+yasmv_interpolation_search_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_interpolation_search.cc
+yasmv_interpolation_search_tests_LDADD = $(yasmv_tests_LDADD)
+yasmv_interpolation_search_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
+EXTRA_DIST += tests/models/interpolation-search.smv

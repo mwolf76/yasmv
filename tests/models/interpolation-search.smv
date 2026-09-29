@@ -1,0 +1,37 @@
+#word-width 3
+MODULE child(p : boolean)
+VAR flag : boolean;
+INIT flag = p;
+INVAR flag = p;
+MODULE alias(p : boolean)
+DEFINE value := p;
+MODULE main
+#inertial
+VAR x, y : boolean;
+#inertial
+VAR n : uint3;
+#inertial
+VAR mode : {RED, GREEN, BLUE};
+#inertial
+VAR cells : boolean[2];
+#frozen
+VAR fixed_bit : boolean;
+VAR sub : child(fixed_bit);
+VAR view : alias(future);
+VAR distant_view : alias(distant);
+VAR palette : {RED, GREEN, BLUE}[2];
+#input
+VAR gate : boolean;
+INIT !x && !y && n = 0;
+INIT mode = RED;
+INIT cells = [FALSE, FALSE];
+INVAR n <= 3;
+TRANS n := n + 1;
+TRANS x := !x;
+TRANS y := x;
+TRANS mode := {GREEN, BLUE};
+TRANS cells[0] := !cells[0];
+TRANS cells[1] := cells[0];
+DEFINE future := next(x);
+DEFINE distant := next(next(x));
+DEFINE choice := {TRUE, FALSE};
