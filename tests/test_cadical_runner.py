@@ -24,7 +24,8 @@ class RunnerTests(unittest.TestCase):
                                       '--cxx', 'c++', '--cxxflags=-O2', *options]), \
              patch.object(runner.subprocess, 'check_output', side_effect=replies) as metadata, \
              patch.object(runner.subprocess, 'run', side_effect=failure) as execute, \
-             patch.object(Path, 'is_file', return_value=files), \
+             patch.object(Path, 'is_file', autospec=True,
+                          side_effect=files if callable(files) else lambda p: files), \
              contextlib.redirect_stdout(io.StringIO()), \
              contextlib.redirect_stderr(io.StringIO()) as errors:
             result = runner.main()
@@ -51,6 +52,22 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(result, 1)
         execute.assert_not_called()
         self.assertIn('must be pinned', error)
+
+    def test_proof_suite_compiles_reconstruction_and_both_suites_run(self):
+        result, _, execute, _ = self.invoke(options=['--suite', 'all'])
+        self.assertEqual(result, 0)
+        self.assertEqual(execute.call_count, 4)
+        command = execute.call_args_list[2].args[0]
+        self.assertIn(str(ROOT / 'tests/test_cadical_proof.cc'), command)
+        self.assertIn(str(ROOT / 'src/sat/proof.cc'), command)
+        self.assertIn(str(ROOT / 'src'), command)
+
+    def test_missing_proof_header_is_rejected(self):
+        result, _, execute, error = self.invoke(files=lambda p: p.name != 'tracer.hpp',
+                                              options=['--suite', 'proof'])
+        self.assertEqual(result, 1)
+        execute.assert_not_called()
+        self.assertIn('tracer.hpp is missing', error)
 
     def test_subdirectory_is_not_accepted_as_checkout_root(self):
         result, _, execute, error = self.invoke(git=['/tmp'])

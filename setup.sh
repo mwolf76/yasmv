@@ -133,6 +133,7 @@ if [ -z "$cadical_prefix" ]; then
         "$cadical_cxx" "$cadical_cc_version" "$cadical_cxx_version" '-O3 -DNDEBUG -fPIC')
     if [ ! -f "$cadical_prefix/lib/libcadical.a" ] ||
        [ ! -f "$cadical_prefix/include/cadical.hpp" ] ||
+       [ ! -f "$cadical_prefix/include/tracer.hpp" ] ||
        [ ! -f "$cadical_prefix/.yasmv-build-config" ] ||
        [ "$(cat "$cadical_prefix/.yasmv-build-config")" != "$cadical_build_config" ]; then
         printf '%s\n' 'Building the pinned CaDiCaL release dependency ...'
@@ -142,7 +143,7 @@ if [ -z "$cadical_prefix" ]; then
             CC="$cadical_cc" CXX="$cadical_cxx" CFLAGS= CXXFLAGS= ./configure -fPIC)
         setup_make -C "$cadical_source/build" libcadical.a
         mkdir -p "$cadical_prefix/include" "$cadical_prefix/lib"
-        install -m 644 "$cadical_source/src/cadical.hpp" "$cadical_prefix/include/"
+        install -m 644 "$cadical_source/src/cadical.hpp" "$cadical_source/src/tracer.hpp" "$cadical_prefix/include/"
         install -m 644 "$cadical_source/build/libcadical.a" "$cadical_prefix/lib/"
         printf '%s\n' "$cadical_build_config" > "$cadical_prefix/.yasmv-build-config"
     else

@@ -20,6 +20,8 @@ def main():
     parser.add_argument('--build', type=Path, help='Library directory (default: SOURCE/build)')
     parser.add_argument('--cxx', default=os.environ.get('CXX', 'c++'))
     parser.add_argument('--cxxflags', default=os.environ.get('CXXFLAGS', '-O2 -g'))
+    parser.add_argument('--suite', choices=('api', 'proof', 'all'), default='api',
+                        help='Standalone contract suite (default: api)')
     parser.add_argument('--timeout', type=float, default=60, help='Seconds for the API executable')
     args = parser.parse_args()
     if not math.isfinite(args.timeout) or args.timeout <= 0:
@@ -38,18 +40,24 @@ def main():
         header, library = source / 'src/cadical.hpp', build / 'libcadical.a'
         if not header.is_file() or not library.is_file():
             raise ValueError('Build the pinned library first; cadical.hpp or libcadical.a is missing')
+        if args.suite != 'api' and not (header.parent / 'tracer.hpp').is_file():
+            raise ValueError('Matching pinned tracer.hpp is missing')
         compiler = shlex.split(args.cxx)
         if not compiler:
             raise ValueError('--cxx must name a compiler')
         print(f'CaDiCaL source: {source} ({REVISION})', flush=True)
         print(f'CaDiCaL library: {library}', flush=True)
         with tempfile.TemporaryDirectory(prefix='yasmv-cadical-api-') as directory:
-            binary = Path(directory) / 'cadical-api-tests'
-            subprocess.run([*compiler, '-std=c++20', '-Wall', '-Wextra', '-Werror',
-                            *shlex.split(args.cxxflags), '-I', str(header.parent),
-                            str(ROOT / 'tests/test_cadical_api.cc'), str(library),
-                            '-pthread', '-o', str(binary)], check=True, timeout=120)
-            subprocess.run([str(binary)], check=True, timeout=args.timeout)
+            for suite in (('api', 'proof') if args.suite == 'all' else (args.suite,)):
+                binary = Path(directory) / ('cadical-' + suite + '-tests')
+                sources = [str(ROOT / ('tests/test_cadical_' + suite + '.cc'))]
+                if suite == 'proof':
+                    sources.append(str(ROOT / 'src/sat/proof.cc'))
+                subprocess.run([*compiler, '-std=c++20', '-Wall', '-Wextra', '-Werror',
+                                *shlex.split(args.cxxflags), '-I', str(header.parent),
+                                '-I', str(ROOT / 'src'), *sources, str(library),
+                                '-pthread', '-o', str(binary)], check=True, timeout=120)
+                subprocess.run([str(binary)], check=True, timeout=args.timeout)
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         print(f'CaDiCaL API gate failed: {error}', file=sys.stderr)
         return 1
