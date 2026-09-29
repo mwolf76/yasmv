@@ -52,7 +52,7 @@ namespace query::trace {
                 engine.tcbi_to_var(enc::TCBI(bm.find_ucbi(bit.getNode()->index), step));
         }
     }
-    witness::Witness_ptr decode(sat::Engine& engine, unsigned depth)
+    witness::Witness_ptr decode(sat::Engine& engine, unsigned depth, bool include_inputs)
     {
         PhaseTimer timer(Phase::decoding);
         auto& bm = enc::EncodingMgr::INSTANCE();
@@ -65,7 +65,7 @@ namespace query::trace {
             for (const auto& s : symbols()) {
                 checkpoint(Phase::decoding);
                 if (s.input) {
-                    tf.set_value(s.key, env::Environment::INSTANCE().get(s.key->rhs()));
+                    if (include_inputs) tf.set_value(s.key, env::Environment::INSTANCE().get(s.key->rhs()));
                     continue;
                 }
                 auto encoding = bm.find_encoding(expr::TimedExpr(s.key, s.frozen ? FROZEN : 0));

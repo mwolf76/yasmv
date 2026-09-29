@@ -9,7 +9,8 @@ namespace query::trace {
     expr::Expr_ptr valuation(const Json::Value&);
     Json::Value evaluate_watches(witness::Witness&, const std::map<std::string, expr::Expr_ptr>&);
     void allocate_state(sat::Engine&, unsigned);
-    witness::Witness_ptr decode(sat::Engine&, unsigned);
+    // Callers resolving effective inputs separately may request state values only.
+    witness::Witness_ptr decode(sat::Engine&, unsigned, bool include_inputs = true);
     Json::Value export_trace(witness::Witness&, const QuerySpec&, const Json::Value&);
     witness::Witness_ptr import_trace(const Json::Value&);
     QueryResult validate(const Json::Value&, const Json::Value&, QueryContext&, const std::string& request_id = "");

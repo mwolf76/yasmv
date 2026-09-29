@@ -1131,7 +1131,8 @@ workspace_count returns [Json::Int64 res]
     ;
 
 workspace_query_options[cmd::WorkspaceCommand* command]
-    : ( '-states' st=workspace_count { command->arguments()["query"]["limits"]["states"] = st; }
+    : ( '-strategy' strategy=workspace_name { command->arguments()["query"]["strategy"] = strategy; }
+      | '-states' st=workspace_count { command->arguments()["query"]["limits"]["states"] = st; }
       | '-depth' d=workspace_count { command->arguments()["query"]["limits"]["depth"] = d; }
       | '-wall-ms' ms=workspace_count { command->arguments()["query"]["limits"]["wall_ms"] = ms; }
       | '-conflicts' cf=workspace_count { command->arguments()["query"]["limits"]["conflicts"] = cf; }

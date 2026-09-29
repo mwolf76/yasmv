@@ -124,6 +124,7 @@ developer-workflow-test: yasmv
 
 analysis-test: yasmv
 	@YASMV_HOME=`pwd` python3 tests/test_analysis.py
+	@YASMV_HOME=`pwd` python3 tests/test_interpolation_query.py
 	@YASMV_HOME=`pwd` python3 tests/test_sessions.py
 
 cli-test: yasmv
@@ -166,7 +167,7 @@ microcode:
 tags:
 	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
-query_sources = src/workbench.cc src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/progress.cc src/query/session.cc
+query_sources = src/workbench.cc src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/interpolation.cc src/query/progress.cc src/query/session.cc
 yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc $(query_sources)
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
@@ -268,3 +269,7 @@ yasmv_interpolation_search_tests_SOURCES = $(query_sources) src/parse.cc src/tes
 yasmv_interpolation_search_tests_LDADD = $(yasmv_tests_LDADD)
 yasmv_interpolation_search_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
 EXTRA_DIST += tests/models/interpolation-search.smv
+
+EXTRA_DIST += docs/formats/invariant-v1.schema.json
+
+EXTRA_DIST += tests/test_interpolation_query.py

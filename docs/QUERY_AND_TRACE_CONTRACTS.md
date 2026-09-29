@@ -76,7 +76,10 @@ Contexts and manager-backed expression/witness pointers are process-local.
 Persistent concurrent sessions and ownership cleanup remain M4 work. The
 current service deliberately selects one compatible reachability strategy per
 query. Explicit `forward`/`backward` select direction; bounded reach supports
-forward only. Empty, unknown, or incompatible strategy configurations fail.
+forward only. Opt-in `interpolation` supports unbounded `reach` and
+`prove-property` with a positive concrete depth cap. See
+[interpolation](STRONGER_ANALYSIS.md#interpolation) for evidence and eligibility.
+Empty, unknown, or incompatible strategy configurations fail.
 
 ## Outcomes and scope
 

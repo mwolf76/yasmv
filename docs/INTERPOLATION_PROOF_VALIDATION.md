@@ -266,3 +266,58 @@ artifact and allow a subsequent search.
   yasmv/CaDiCaL ASan/UBSan build, using the same production and test sources.
   UBSan halted on errors; core leak detection was disabled for existing
   process-lifetime managers, consistent with the repository's sanitizer setup.
+
+## Milestone 4: query integration and evidence
+
+Explicit `strategy: "interpolation"` selects the internal search for unbounded
+reach and positive-depth property proofs. Bounded reach, shortest reach, and
+bounded property checks reject this selection. Default dispatch is unchanged.
+The workbench API, terminal property command, browser method selector, and
+native/query/trace schemas carry the selection consistently.
+
+The query adapter maps the internal result to reachability or safety outcomes.
+A property depth cap D limits suffix horizons to D-1. Only a completed concrete
+UNSAT prefix through D permits `holds_bounded`; other incomplete searches remain
+UNKNOWN. Search statistics and concrete checked depths have separate fields.
+
+Verified invariants are serialized as complemented AND graphs with an explicit
+semantic bit dictionary, symbol catalog, model/configuration identity, target,
+and assumptions. The three fresh-solver obligations, vacuity, and search sizes
+are retained in the result. Circuit export walks only reachable gates in
+topological order and checkpoints serialization. These inline artifacts are
+inspection evidence; no external save/revalidate operation is introduced.
+
+Concrete paths are pinned into another native solver for ordinary trace
+decoding. The adapter resolves effective input expressions against that pinned
+path using guarded SAT queries, including Boolean, signed/unsigned integer,
+enum, and array values. This avoids copying an unevaluated input expression
+into a trace value. Input decoding shares the query budgets and cancellation.
+The default decoder behavior remains available to existing callers.
+
+Cancellation and errors clear artifacts and proof-method labels, including
+interruptions after verification or during circuit serialization, decoding, and
+trace export. Native tests cancel at every solver boundary and sampled first,
+middle, and final compilation/encoding/decoding boundaries, then repeat queries.
+Integration tests compare public outcomes and shortest witnesses against finite
+graphs, evaluate serialized invariants independently, replay typed traces,
+exercise caps and shared budgets, and reopen persisted workbench evidence.
+
+## Milestone 4 recorded validation — 2026-09-29
+
+- Full `YASMV_HOME="$PWD" make -j3 test` passed with LLVM 18 enabled and the
+  jsonschema-enabled Python environment; no tests were skipped. This includes
+  all existing regressions and the six new interpolation query cases.
+- All 25 native query/interpolation/search cases passed in the fully
+  instrumented yasmv/CaDiCaL ASan/UBSan build. The sanitized `query-test` and
+  `analysis-test` targets also passed, including all six new query integration
+  cases and compiled-session regressions. The terminal interpolation selection
+  test passed under instrumentation. UBSan halted on errors; leak detection
+  remained disabled for the existing process-lifetime managers.
+- Chromium browser acceptance passed with Playwright 1.63.0 and Node 22,
+  including interpolation selection, verified evidence, persistence/reload,
+  and the existing mobile and workflow checks.
+- The normal build passed with warnings treated as errors. Build provenance
+  was collected with `tools/build-provenance.py`.
+- Source-distribution assembly passed; all changed distributed files matched
+  their sources. This does not claim a clean distribution build (see the
+  existing omissions recorded for milestone 2).

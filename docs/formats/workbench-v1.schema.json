@@ -178,6 +178,12 @@
               "$ref": "progress-counterexample-v1.schema.json"
             }
           ]
+        },
+        "strategy": {
+          "enum": [
+            "auto",
+            "interpolation"
+          ]
         }
       },
       "allOf": [
@@ -631,6 +637,16 @@
                   "explain-reach"
                 ]
               }
+            },
+            "not": {
+              "properties": {
+                "strategy": {
+                  "const": "interpolation"
+                }
+              },
+              "required": [
+                "strategy"
+              ]
             }
           },
           "then": {
@@ -641,6 +657,43 @@
                 ]
               }
             }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "strategy": {
+                "const": "interpolation"
+              }
+            },
+            "required": [
+              "strategy"
+            ]
+          },
+          "then": {
+            "oneOf": [
+              {
+                "properties": {
+                  "operation": {
+                    "const": "reach"
+                  },
+                  "limits": {
+                    "not": {
+                      "required": [
+                        "depth"
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "operation": {
+                    "const": "prove-property"
+                  }
+                }
+              }
+            ]
           }
         }
       ]

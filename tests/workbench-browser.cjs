@@ -111,6 +111,20 @@ const assert = require('node:assert/strict');
     await page.click('#prove-property'); await result('Safety property proved');
     assert.match(await page.locator('#proof-detail').innerText(), /fresh solvers/);
     await page.reload(); await result('Safety property proved');
+    // Select interpolation on a small model and inspect the method-specific evidence.
+    await page.fill('#source', 'MODULE main\n#inertial VAR x : boolean;\nINIT !x;\nTRANS x := x;\n');
+    for (const id of ['inputs', 'goals', 'watches']) await page.fill('#' + id, '{}');
+    await page.getByText('Executable scenario mappings', {exact: true}).click();
+    await page.fill('#scenario-metadata', 'null');
+    await page.fill('#properties', JSON.stringify({safe: '!x'}));
+    await page.click('#save'); await result('Model validated');
+    await page.click('.safety-controls summary');
+    await page.selectOption('#proof-strategy', 'interpolation');
+    await page.click('#prove-property'); await result('Safety property proved');
+    assert.match(await page.locator('#proof-detail').innerText(), /transition closure/);
+    assert.match(await page.locator('#result-detail').innerText(), /inductive invariant/);
+    await page.reload(); await result('Safety property proved');
+    assert.match(await page.locator('#proof-detail').innerText(), /target exclusion/);
     // Reopen the original immutable model and evidence.
     const revisions = await (await page.request.get(base + '/api/revisions')).json();
     const faulty = revisions.find(r => r.name === 'Faulty receiver');
@@ -125,7 +139,7 @@ const assert = require('node:assert/strict');
     await page.setViewportSize({width: 390, height: 844});
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     assert.deepEqual(errors, []);
-    console.log('Browser acceptance passed: load, validate, search, watches, export/import, selected-prefix branch, compare, reload, cancel, bounded negative, mobile layout, explanations, scenario export, implementation replay, shortest witnesses, safety refutation and induction proof.');
+    console.log('Browser acceptance passed: load, validate, search, watches, export/import, selected-prefix branch, compare, reload, cancel, bounded negative, mobile layout, explanations, scenario export, implementation replay, shortest witnesses, safety refutation, induction proof and interpolation proof.');
   } finally {
     if (browser) await browser.close();
     server.kill('SIGTERM');

@@ -71,6 +71,14 @@ Circuit::Ref Circuit::import(const Circuit& source, Ref root,
     }
     return edge(root);
 }
+void Circuit::visit(Ref root, const std::function<void(Ref, Atom, Ref, Ref)>& visitor) const
+{
+    for (auto id : order(root)) {
+        tick();
+        const auto& node = nodes_[id];
+        visitor(static_cast<Ref>(id * 2), node.atom, node.left, node.right);
+    }
+}
 std::set<Circuit::Atom> Circuit::support(Ref root) const
 {
     std::set<Atom> result;

@@ -65,6 +65,7 @@ namespace query {
     };
     void analyze_progress(const QuerySpec&, QueryResult&, QueryContext&);
     void analyze_property(const QuerySpec&, QueryResult&, QueryContext&);
+    void interpolation_reach(const QuerySpec&, QueryResult&, QueryContext&);
     void bounded_reach(const QuerySpec&, QueryResult&);
     void explain(const QuerySpec&, QueryResult&, QueryContext&);
     QueryResult execute(const QuerySpec&, QueryContext&);

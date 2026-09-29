@@ -29,6 +29,9 @@ public:
     int encode(Ref, const std::function<int()>& fresh,
                const std::function<int(Atom)>& atom_literal,
                const std::function<void(const proof::Clause&)>& emit) const;
+    // Visit reachable nonconstant gates in topological order. References use
+    // the low bit for complementation; 0 and 1 are false and true.
+    void visit(Ref, const std::function<void(Ref, Atom, Ref, Ref)>&) const;
     size_t size() const { return nodes_.size() - 1; }
 
 private:
