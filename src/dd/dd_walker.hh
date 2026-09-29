@@ -59,7 +59,7 @@ namespace dd {
         ADDWalker();
         virtual ~ADDWalker();
 
-        virtual ADDWalker& operator()(ADD dd);
+        virtual ADDWalker& operator()(const ADD& dd);
 
     protected:
         virtual void walk();

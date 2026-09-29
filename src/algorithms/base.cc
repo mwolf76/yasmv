@@ -418,7 +418,7 @@ namespace algorithms {
 
     void Algorithm::assert_formula(sat::Engine& engine,
                                    step_t time,
-                                   compiler::Unit& term,
+                                   const compiler::Unit& term,
                                    sat::group_t group)
     {
         INFO

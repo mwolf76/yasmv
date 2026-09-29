@@ -287,7 +287,7 @@ namespace sat {
         }
     };
 
-    void Engine::cnf_push(ADD add, step_t time, const group_t group)
+    void Engine::cnf_push(const ADD& add, step_t time, const group_t group)
     {
         CNFBuilder worker { *this, time, group };
 

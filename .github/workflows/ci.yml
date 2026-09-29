@@ -80,7 +80,7 @@ jobs:
       env:
         YASMV_HOME: ${{ github.workspace }}
       run: |
-        make sat-types-test yasmv_reliability_tests
+        make sat-types-test interpolation-test yasmv_reliability_tests
         for settings in 000 001 010 011 100 101 110 111; do
           YASMV_TEST_CNF="$settings" ./yasmv_reliability_tests --log_level=error
         done

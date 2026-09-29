@@ -14,10 +14,11 @@ void require(bool condition, const char* message)
     if (!condition) throw std::invalid_argument(std::string("Invalid resolution proof: ") + message);
 }
 
-Clause normalize(const Clause& clause)
+Clause normalize(const Clause& clause, const std::function<void()>& tick)
 {
     std::set<int> literals;
     for (int lit : clause) {
+        tick();
         require(lit != 0 && lit != INT_MIN, "invalid literal");
         require(!literals.count(-lit), "tautological clause unsupported");
         literals.insert(lit);
@@ -25,24 +26,26 @@ Clause normalize(const Clause& clause)
     return Clause(literals.begin(), literals.end());
 }
 
-Clause resolve(const Clause& left, const Clause& right, int pivot)
+Clause resolve(const Clause& left, const Clause& right, int pivot, const std::function<void()>& tick)
 {
     require(std::binary_search(left.begin(), left.end(), pivot) &&
             std::binary_search(right.begin(), right.end(), -pivot), "missing pivot");
     Clause result;
-    for (int lit : left) if (lit != pivot) result.push_back(lit);
-    for (int lit : right) if (lit != -pivot) result.push_back(lit);
-    return normalize(result);
+    for (int lit : left) { tick(); if (lit != pivot) result.push_back(lit); }
+    for (int lit : right) { tick(); if (lit != -pivot) result.push_back(lit); }
+    return normalize(result, tick);
 }
 } // namespace
 
 void ResolutionProof::fresh(Id id) const
 {
+    tick();
     require(id > 0 && !clauses_.count(id), "duplicate or invalid clause ID");
 }
 
 NodeId ResolutionProof::node(Id id) const
 {
+    tick();
     const auto found = clauses_.find(id);
     require(found != clauses_.end() && found->second.active, "missing or deleted antecedent");
     return found->second.node;
@@ -51,23 +54,23 @@ NodeId ResolutionProof::node(Id id) const
 void ResolutionProof::original(Id id, const Clause& clause, Partition partition)
 {
     fresh(id);
-    auto normalized = normalize(clause);
-    clauses_.emplace(id, Entry{nodes_.size(), true});
-    nodes_.push_back({std::move(normalized), Rule::original, partition});
+    auto normalized = normalize(clause, [this] { tick(); });
+    append({std::move(normalized), Rule::original, partition});
+    clauses_.emplace(id, Entry{nodes_.size() - 1, true});
 }
 
 void ResolutionProof::restore(Id id, const Clause& clause)
 {
     const auto found = clauses_.find(id);
     require(found != clauses_.end() && !found->second.active, "invalid restoration");
-    require(nodes_[found->second.node].clause == normalize(clause), "changed restored clause");
+    require(nodes_[found->second.node].clause == normalize(clause, [this] { tick(); }), "changed restored clause");
     // Keep the previous derivation/partition, even for a restored derived clause.
     found->second.active = true;
 }
 
 void ResolutionProof::erase(Id id, const Clause& clause)
 {
-    require(nodes_[node(id)].clause == normalize(clause), "changed deleted clause");
+    require(nodes_[node(id)].clause == normalize(clause, [this] { tick(); }), "changed deleted clause");
     clauses_.at(id).active = false;
 }
 
@@ -76,7 +79,7 @@ void ResolutionProof::derive(Id id, const Clause& clause,
 {
     fresh(id);
     require(witness == 0, "RAT/extension step unsupported");
-    const auto target = normalize(clause);
+    const auto target = normalize(clause, [this] { tick(); });
     require(!hints.empty(), "missing RUP antecedents");
     // Assume the negated candidate clause, then replay ordered unit propagation.
     std::set<int> assigned;
@@ -85,10 +88,12 @@ void ResolutionProof::derive(Id id, const Clause& clause,
     NodeId conflict = 0;
     bool contradicted = false;
     for (size_t i = 0; i < hints.size(); ++i) {
+        tick();
         require(hints[i] > 0, "RAT hint unsupported");
         const auto antecedent = node(hints[i]);
         int unit = 0;
         for (int lit : nodes_[antecedent].clause) {
+            tick();
             require(!assigned.count(lit), "satisfied RUP antecedent");
             if (!assigned.count(-lit)) {
                 require(unit == 0, "nonunit RUP antecedent");
@@ -109,11 +114,12 @@ void ResolutionProof::derive(Id id, const Clause& clause,
     // Resolve the conflict backwards through relevant reasons. Unused unit
     // propagations do not participate in the resolution derivation.
     for (auto it = reasons.rbegin(); it != reasons.rend(); ++it) {
+        tick();
         const int pivot = -it->first;
         const auto& current = nodes_[conflict].clause;
         if (!std::binary_search(current.begin(), current.end(), pivot)) continue;
-        auto resolvent = resolve(current, nodes_[it->second].clause, pivot);
-        nodes_.push_back({std::move(resolvent), Rule::resolution, Partition::a,
+        auto resolvent = resolve(current, nodes_[it->second].clause, pivot, [this] { tick(); });
+        append({std::move(resolvent), Rule::resolution, Partition::a,
                           conflict, it->second, pivot});
         conflict = nodes_.size() - 1;
     }
@@ -122,7 +128,7 @@ void ResolutionProof::derive(Id id, const Clause& clause,
             "resolvent is not a subclause of candidate");
     if (result != target) {
         // Explicit weakening preserves the antecedent's interpolation label.
-        nodes_.push_back({target, Rule::weakening, Partition::a, conflict});
+        append({target, Rule::weakening, Partition::a, conflict});
         conflict = nodes_.size() - 1;
     }
     clauses_.emplace(id, Entry{conflict, true});
@@ -133,5 +139,11 @@ NodeId ResolutionProof::conclude(Id id) const
     const auto root = node(id);
     require(nodes_[root].clause.empty(), "conclusion is not the empty clause");
     return root;
+}
+void ResolutionProof::append(Node node)
+{
+    tick();
+    if (nodes_.size() >= node_limit_) throw std::length_error("Resolution proof node limit exceeded");
+    nodes_.push_back(std::move(node));
 }
 } // namespace sat::proof

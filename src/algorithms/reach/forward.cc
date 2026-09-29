@@ -33,7 +33,7 @@
 static const char* reach_trace_prfx { "reach_" };
 
 namespace reach {
-    void Reachability::forward_strategy(compiler::Unit& target_cu)
+    void Reachability::forward_strategy(const compiler::Unit& target_cu)
     {
         sat::Engine engine { "forward" };
         step_t k { 0 };
@@ -51,7 +51,7 @@ namespace reach {
                 auto i { f_constraint_cus.find(constraint) };
                 assert(f_constraint_cus.end() != i);
 
-                compiler::Unit cu { i->second };
+                const compiler::Unit& cu { i->second };
                 this->assert_formula(engine, k, cu);
             });
 
@@ -162,7 +162,7 @@ namespace reach {
                             auto i { f_constraint_cus.find(constraint) };
                             assert(f_constraint_cus.end() != i);
 
-                            compiler::Unit cu { i->second };
+                            const compiler::Unit& cu { i->second };
                             this->assert_formula(engine, k, cu);
                         }
                     });

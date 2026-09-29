@@ -125,7 +125,7 @@ namespace algorithms {
                                    sat::group_t group = sat::MAINGROUP);
 
         /* Generic formulas */
-        void assert_formula(sat::Engine& engine, step_t time, compiler::Unit& term,
+        void assert_formula(sat::Engine& engine, step_t time, const compiler::Unit& term,
                             sat::group_t group = sat::MAINGROUP);
 
         /* TimeFrame from a witness */

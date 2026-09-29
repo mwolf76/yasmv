@@ -2,6 +2,8 @@
 #include <cadical.hpp>
 #include <tracer.hpp>
 #include <sat/proof.hh>
+#include <sat/proof_tracer.hh>
+#include <sat/circuit.hh>
 
 #include <algorithm>
 #include <climits>
@@ -19,66 +21,7 @@ namespace {
 using namespace sat::proof;
 #define CHECK(condition) do { if (!(condition)) throw std::runtime_error(#condition); } while (false)
 
-class Probe : public CaDiCaL::Tracer {
-public:
-    ResolutionProof proof;
-    std::string error;
-    std::optional<Partition> submitting;
-    Clause submitted;
-    size_t originals = 0, derived = 0, deletions = 0, queries = 0;
-    std::optional<NodeId> conclusion;
-
-    // Do not unwind through CaDiCaL internals. A callback error poisons the
-    // entire probe, and is reported after control returns from the solver.
-    template<class F> void event(F fn) noexcept
-    {
-        if (!error.empty()) return;
-        try { fn(); }
-        catch (const std::exception& e) { error = e.what(); }
-    }
-    void check() const { if (!error.empty()) throw std::runtime_error(error); }
-    void add_original_clause(int64_t id, bool, const Clause& clause, bool restored) override
-    {
-        event([&] {
-            if (restored) { proof.restore(id, clause); return; }
-            CHECK(submitting.has_value());
-            CHECK(std::set<int>(clause.begin(), clause.end()) ==
-                  std::set<int>(submitted.begin(), submitted.end()));
-            proof.original(id, clause, *submitting);
-            submitting.reset();
-            ++originals;
-        });
-    }
-    void add_derived_clause(int64_t id, bool, int witness, const Clause& clause,
-                            const std::vector<int64_t>& hints) override
-    {
-        event([&] { proof.derive(id, clause, hints, witness); ++derived; });
-    }
-    void delete_clause(int64_t id, bool, const Clause& clause) override
-    {
-        event([&] { proof.erase(id, clause); ++deletions; });
-    }
-    void conclude_unsat(CaDiCaL::ConclusionType type, const std::vector<int64_t>& ids) override
-    {
-        event([&] {
-            CHECK(type == CaDiCaL::CONFLICT && ids.size() == 1);
-            conclusion = proof.conclude(ids.front());
-        });
-    }
-    void report_status(int status, int64_t id) override
-    {
-        event([&] { if (status == 20 && id) (void)proof.conclude(id); });
-    }
-    void solve_query() override { event([&] { CHECK(++queries == 1); }); }
-    void add_assumption(int) override { event([] { throw std::runtime_error("Native assumptions unsupported; submit partitioned units"); }); }
-    void add_constraint(const Clause&) override { event([] { throw std::runtime_error("Native constraint unsupported"); }); }
-    void add_assumption_clause(int64_t, const Clause&, const std::vector<int64_t>&) override
-    { event([] { throw std::runtime_error("Assumption proof unsupported"); }); }
-    void notify_equivalence(int, int) override
-    { event([] { throw std::runtime_error("Equivalence notification unsupported"); }); }
-    // weaken_minus, strengthen and demote only change solver bookkeeping;
-    // they grant no new proof fact. Actual additions/deletions are checked.
-};
+using Probe = sat::proof::ProofTracer;
 
 struct SolverProbe {
     Probe tracer; // outlives solver and is explicitly disconnected
@@ -137,6 +80,38 @@ void check_dag(const ResolutionProof& proof)
             CHECK(expected == std::set<int>(n.clause.begin(), n.clause.end()));
             for (int lit : expected) CHECK(!expected.count(-lit));
         }
+    }
+}
+
+void check_craig(const Probe& probe, unsigned variables)
+{
+    CHECK(probe.conclusion.has_value());
+    std::map<int, unsigned> ownership;
+    for (const auto& node : probe.proof.nodes()) if (node.rule == Rule::original)
+        for (int lit : node.clause) ownership[std::abs(lit)] |= node.partition == Partition::a ? 1 : 2;
+    std::map<int, sat::Circuit::Atom> shared;
+    for (auto [var, sides] : ownership) if (sides == 3) shared[var] = var;
+    sat::Circuit circuit;
+    const auto root = sat::interpolate(probe.proof, *probe.conclusion, shared, circuit);
+    for (auto atom : circuit.support(root)) CHECK(shared.count(atom));
+    for (unsigned row = 0; row < (1u << variables); ++row) {
+        bool a = true, b = true;
+        auto bit = [&](sat::Circuit::Atom var) { CHECK(var >= 1 && var <= variables); return bool(row & (1u << (var - 1))); };
+        for (const auto& node : probe.proof.nodes()) if (node.rule == Rule::original) {
+            bool value = false;
+            for (int lit : node.clause) value |= bit(std::abs(lit)) == (lit > 0);
+            (node.partition == Partition::a ? a : b) &= value;
+        }
+        const bool j = circuit.evaluate(root, bit);
+        CHECK(!a || j);
+        CHECK(!j || !b);
+    }
+    if (!shared.empty()) {
+        shared.erase(shared.begin());
+        bool rejected = false;
+        try { sat::interpolate(probe.proof, *probe.conclusion, shared, circuit); }
+        catch (const std::invalid_argument&) { rejected = true; }
+        CHECK(rejected);
     }
 }
 
@@ -207,7 +182,7 @@ void truth_table_oracle()
         }
         const bool expected = satisfiable(clauses, 2);
         CHECK(probe.solve() == (expected ? 10 : 20));
-        if (expected) ++sat; else ++unsat;
+        if (expected) ++sat; else { ++unsat; check_craig(probe.tracer, 2); }
         check_dag(probe.tracer.proof);
     }
     CHECK(sat && unsat);
@@ -224,7 +199,9 @@ void truth_table_oracle()
             clauses.push_back(clause);
             probe.add(clause, n % 2 ? Partition::a : Partition::b);
         }
-        CHECK(probe.solve() == (satisfiable(clauses, 5) ? 10 : 20));
+        const bool expected = satisfiable(clauses, 5);
+        CHECK(probe.solve() == (expected ? 10 : 20));
+        if (!expected) check_craig(probe.tracer, 5);
         check_dag(probe.tracer.proof);
     }
 }
@@ -297,8 +274,75 @@ void materialized_assumptions()
     SolverProbe unsupported;
     unsupported.add({1});
     unsupported.solver.assume(-1);
-    CHECK(!unsupported.tracer.error.empty());
+    CHECK(unsupported.tracer.failed());
     CHECK(!unsupported.tracer.conclusion);
+}
+
+void circuits_and_polarities()
+{
+    using sat::Circuit;
+    Circuit circuit;
+    const auto x = circuit.atom(1), y = circuit.atom(2), z = circuit.atom(3);
+    const auto root = circuit.disjunction(circuit.conjunction(x, y), circuit.conjunction(circuit.negate(x), z));
+    CHECK(circuit.conjunction(x, y) == circuit.conjunction(y, x));
+    CHECK(circuit.conjunction(x, circuit.negate(x)) == Circuit::False);
+    (void)circuit.atom(999); // irrelevant atoms must not enter CNF or support
+    CHECK(circuit.support(root) == std::set<Circuit::Atom>({1, 2, 3}));
+    for (unsigned row = 0; row < 8; ++row) for (bool positive : {false, true}) {
+        SolverProbe probe;
+        std::vector<int> vars{0};
+        for (unsigned v = 1; v <= 3; ++v) vars.push_back(probe.solver.declare_one_more_variable());
+        int top = circuit.encode(positive ? root : circuit.negate(root),
+            [&] { return probe.solver.declare_one_more_variable(); },
+            [&](Circuit::Atom a) { return vars.at(a); },
+            [&](const Clause& c) { probe.add(c); });
+        probe.add({top});
+        for (unsigned v = 1; v <= 3; ++v) probe.add({row & (1u << (v - 1)) ? vars[v] : -vars[v]});
+        const bool expected = row & 1 ? row & 2 : row & 4;
+        CHECK(probe.solve() == (positive == expected ? 10 : 20));
+    }
+    Circuit renamed;
+    const auto changed = renamed.import(circuit, root, [](Circuit::Atom a) { return a == 1 ? 3 : a == 3 ? 1 : a; });
+    for (unsigned row = 0; row < 8; ++row)
+        CHECK(renamed.evaluate(changed, [&](Circuit::Atom a) { return bool(row & (1u << (a - 1))); }) ==
+              bool(row & 4 ? row & 2 : row & 1));
+    CHECK(renamed.import(circuit, root, [](Circuit::Atom) { return 1; }) == renamed.atom(1));
+    for (auto constant : {Circuit::True, Circuit::False}) {
+        SolverProbe probe;
+        int top = circuit.encode(constant, [&] { return probe.solver.declare_one_more_variable(); },
+            [](Circuit::Atom) -> int { throw std::runtime_error("Unexpected atom"); },
+            [&](const Clause& c) { probe.add(c); });
+        probe.add({top});
+        CHECK(probe.solve() == (constant == Circuit::True ? 10 : 20));
+    }
+}
+
+void work_limits_and_cancellation()
+{
+    bool stop = false;
+    auto checkpoint = [&] { if (stop) throw std::runtime_error("cancelled"); };
+    ResolutionProof proof(checkpoint, 2);
+    proof.original(1, {1}, Partition::a);
+    proof.original(2, {-1}, Partition::b);
+    bool rejected = false;
+    try { proof.derive(3, {}, {1, 2}); } catch (const std::length_error&) { rejected = true; }
+    CHECK(rejected);
+    sat::Circuit circuit(checkpoint, 10);
+    const auto x = circuit.atom(1);
+    stop = true;
+    for (auto operation : std::vector<std::function<void()>>{
+             [&] { proof.derive(3, {}, {1, 2}); },
+             [&] { (void)circuit.support(x); },
+             [&] { circuit.import(circuit, x, [](auto a) { return a; }); }}) {
+        bool cancelled = false;
+        try { operation(); } catch (const std::runtime_error&) { cancelled = true; }
+        CHECK(cancelled);
+    }
+    sat::Circuit bounded({}, 1);
+    bounded.atom(1);
+    rejected = false;
+    try { bounded.atom(2); } catch (const std::length_error&) { rejected = true; }
+    CHECK(rejected);
 }
 } // namespace
 
@@ -313,7 +357,9 @@ int main()
                  {"exhaustive and random truth-table oracles", truth_table_oracle},
                  {"weakening, deletion and restoration", weakening_and_lifecycle},
                  {"malformed proofs", malformed_proofs},
-                 {"materialized assumptions", materialized_assumptions}}) {
+                 {"materialized assumptions", materialized_assumptions},
+                 {"circuits, renaming and CNF polarities", circuits_and_polarities},
+                 {"proof/circuit limits and cancellation", work_limits_and_cancellation}}) {
             test.second();
             std::cout << "PASS " << test.first << '\n';
         }
