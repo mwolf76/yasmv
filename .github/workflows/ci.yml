@@ -52,14 +52,17 @@ jobs:
         ref: c60730422e758ef1cebe7aeddf2dda31c996bf04
         path: .deps/cadical
 
-    - name: build pinned static SAT dependency
+    - name: build pinned release SAT dependency
       run: |
         cd .deps/cadical
-        ./configure -c -fPIC
+        ./configure -fPIC
         make -C build -j2 libcadical.a
         mkdir -p ../cadical-prefix/include ../cadical-prefix/lib
         install -m 644 src/cadical.hpp ../cadical-prefix/include/
         install -m 644 build/libcadical.a ../cadical-prefix/lib/
+
+    - name: validate release API contracts
+      run: python3 tools/test-cadical-api.py --source .deps/cadical --cxxflags="-O3 -DNDEBUG"
 
     - name: configure core build
       run: |

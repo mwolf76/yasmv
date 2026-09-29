@@ -48,7 +48,10 @@ a Java runtime.
 
 Follow [the CaDiCaL backend guide](docs/CADICAL_BACKEND.md) to build the pinned
 revision `c60730422e758ef1cebe7aeddf2dda31c996bf04`. The installation prefix must
-contain `include/cadical.hpp` and `lib/libcadical.a`.
+contain `include/cadical.hpp` and `lib/libcadical.a`. Production builds use
+upstream release defaults (`-O3 -DNDEBUG`) plus `-fPIC`; separate API and
+sanitizer validation builds retain assertions. These dependency flags do not
+change yasmv's own compiler flags.
 
 Configure verifies the API, version, and full revision and links the archive
 statically. Neither setup nor configure downloads dependencies. The default
