@@ -39,6 +39,8 @@ EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/ve
     tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py tools/workbench/sessions.py tests/test_analysis.py tests/test_sessions.py \
     docs/STRONGER_ANALYSIS.md docs/formats/analysis-v1.schema.json tools/benchmark-sessions.py \
     docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tests/test_cli.py docs/CLI_WORKBENCH.md docs/formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
+EXTRA_DIST += README.md setup.sh tests/test_setup.py
+EXTRA_DIST += tests/test_cadical_configure.py
 
 AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"$(pkgdatadir)\" \
 -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
@@ -114,10 +116,20 @@ cli-test: yasmv
 progress-test: yasmv
 	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
 
-test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test sat-types-test
+test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test sat-types-test setup-test cadical-configure-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: llvm-test
+
+setup-test:
+	python3 $(srcdir)/tests/test_setup.py
+
+.PHONY: setup-test
+
+cadical-configure-test:
+	python3 $(srcdir)/tests/test_cadical_configure.py
+
+.PHONY: cadical-configure-test
 
 # Opt-in raw API probe against an explicit upstream checkout. Never downloads code.
 CADICAL_SOURCE ?=

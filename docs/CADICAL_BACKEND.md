@@ -11,6 +11,16 @@ switch from assertion-enabled production builds to upstream release defaults.
 
 ## Build the external dependency
 
+The recommended `./setup.sh` command downloads, verifies, and builds the pinned
+release automatically under `.deps/`, then configures and builds yasmv. No
+CaDiCaL prefix argument is needed. Later runs reuse the cached archive when the
+compiler and release configuration match. System build prerequisites must
+already be installed; see the [quick start](../README.md#quick-start-recommended).
+
+### Optional manual installation
+
+To manage the dependency yourself, set `CADICAL_PREFIX` or pass
+`--with-cadical-prefix` to setup; either skips its automatic dependency build.
 Use a C++ compiler compatible with the one used for yasmv. From the repository:
 
 ```sh
@@ -25,12 +35,11 @@ mkdir -p "$cadical_work/prefix/include" "$cadical_work/prefix/lib"
 install -m 644 "$cadical_work/cadical/src/cadical.hpp" "$cadical_work/prefix/include/"
 install -m 644 "$cadical_work/cadical/build/libcadical.a" "$cadical_work/prefix/lib/"
 ./setup.sh --with-cadical-prefix="$cadical_work/prefix"
-make -j4
 YASMV_HOME="$PWD" make -j3 test
 ```
 
-The prefix defaults to `/usr/local`. Normal configure/build never downloads
-dependencies. Configure links the archive explicitly, exercises the APIs used,
+Raw `./configure` defaults to `/usr/local` and, unlike setup, never downloads or
+builds dependencies. Configure links the archive explicitly, exercises the APIs used,
 and checks runtime version, signature, and the full revision reported by
 `Solver::build()`. It rejects missing libraries, incompatible builds, and
 cross-compilation environments that cannot run the check. Use a prefix without

@@ -31,11 +31,11 @@ The core requires a C++20 compiler, Python 3.10+, Autotools/libtool, ANTLR3 and 
 C runtime, Boost, JsonCpp, readline, zlib, and **CaDiCaL 3.0.1**. CUDD 2.5.0 is
 vendored. MiniSat is no longer required.
 
-The Ubuntu 24.04 core CI job installs these system packages:
+On Ubuntu 24.04, install the core dependencies and bootstrap tools:
 
 ```sh
 sudo apt-get update
-sudo apt-get install build-essential python3 autoconf automake libtool \
+sudo apt-get install build-essential python3 autoconf automake libtool git bzip2 \
   libboost-filesystem-dev libboost-program-options-dev libboost-test-dev \
   libboost-thread-dev libboost-system-dev libboost-chrono-dev \
   libjsoncpp-dev libreadline-dev zlib1g-dev antlr3 libantlr3c-dev
@@ -44,45 +44,62 @@ sudo apt-get install build-essential python3 autoconf automake libtool \
 ANTLR3 needs Java when generating the parser; the checker itself does not need
 a Java runtime.
 
-### Build the SAT dependency
+### SAT dependency
 
-Follow [the CaDiCaL backend guide](docs/CADICAL_BACKEND.md) to build the pinned
-revision `c60730422e758ef1cebe7aeddf2dda31c996bf04`. The installation prefix must
-contain `include/cadical.hpp` and `lib/libcadical.a`. Production builds use
-upstream release defaults (`-O3 -DNDEBUG`) plus `-fPIC`; separate API and
-sanitizer validation builds retain assertions. These dependency flags do not
-change yasmv's own compiler flags.
+`setup.sh` automatically downloads and builds the pinned CaDiCaL revision
+`c60730422e758ef1cebe7aeddf2dda31c996bf04` inside the ignored `.deps/` directory.
+No manual solver installation or prefix argument is needed. The first run needs
+access to GitHub; subsequent runs reuse the cached release build. Production
+flags are `-O3 -DNDEBUG -fPIC`, independent of yasmv's own compiler flags.
 
 Configure verifies the API, version, and full revision and links the archive
-statically. Neither setup nor configure downloads dependencies. The default
-prefix is `/usr/local`; use `--with-cadical-prefix` for a different location.
+statically. For an externally managed solver, use `CADICAL_PREFIX` or
+`--with-cadical-prefix` to skip the automatic bootstrap. See the
+[CaDiCaL backend guide](docs/CADICAL_BACKEND.md) for manual and diagnostic builds.
+
+### Quick start (recommended)
+
+Use `setup.sh` for the quickest route from a checkout to a running checker.
+Install the core dependencies above and LLVM/Clang 18 for the recommended full
+build:
+
+```sh
+sudo apt-get install llvm-18-dev clang-18
+```
+
+From the repository root, no additional setup arguments are required:
+
+```sh
+./setup.sh
+export YASMV_HOME="$PWD"
+./yasmv --version
+./yasmv --solver-info
+./yasmv
+```
+
+`setup.sh` prepares CaDiCaL, extracts the packaged arithmetic microcode when
+needed, regenerates the build files, configures, and builds, stopping if any
+step fails. Both dependency and project builds use
+`make -j "$(nproc)"` when `nproc` is available and succeeds, otherwise plain `make`.
+Its defaults match the tested build: LLVM enabled, GCC/G++, C++20, `-O2`,
+position-independent code,
+strict warnings (`-Wall -Wno-deprecated-declarations -Werror`), and installation
+under `/usr/local`.
+
+Explicit configure arguments override the defaults, including
+`--with-cadical-prefix`, `--prefix`, and compiler/flag assignments. Setup does
+not install system packages, require root access, or run tests; use the
+[test commands](#test) below to validate the build.
 
 ### Core-only build
 
-From the repository root, after installing the dependencies:
+If you do not need the LLVM frontend, omit the LLVM packages and disable it:
 
 ```sh
-./setup.sh --disable-llvm2smv --with-cadical-prefix=/path/to/cadical-prefix
-make -j4
-export YASMV_HOME="$PWD"
-./yasmv --solver-info
+./setup.sh --disable-llvm2smv
 ```
 
-`setup.sh` regenerates the build files and extracts the packaged arithmetic
-microcode when needed. Its default C++ settings use C++20, `-O2`, and strict
-warnings. Adjust the parallel job count for your machine.
-
-### LLVM-enabled build
-
-LLVM is enabled by default unless explicitly disabled. Install LLVM/Clang 18,
-including matching `opt` and `llvm-link`, then build with:
-
-```sh
-./setup.sh --enable-llvm2smv --with-cadical-prefix=/path/to/cadical-prefix
-make -j4
-```
-
-See [the LLVM frontend guide](llvm2smv/README.md) for toolchain detection,
+See [the LLVM frontend guide](llvm2smv/README.md) for LLVM 18 toolchain detection,
 supported semantics, C verification commands, and limitations.
 
 For manual configuration or sanitizer builds, see
