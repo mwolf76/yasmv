@@ -6,6 +6,8 @@ This implements milestone 4 of the [integration plan](../cadical_integration.md)
 The [milestone 5 audit](CADICAL_MIGRATION_VALIDATION.md) adds validation and an
 incremental-workload tuning policy. The [milestone 6 report](benchmarks/cadical-m6.md)
 records the matched performance comparison and remaining dependency cleanup.
+The [release-build report](benchmarks/cadical-release.md) covers the subsequent
+switch from assertion-enabled production builds to upstream release defaults.
 
 ## Build the external dependency
 
@@ -17,7 +19,7 @@ git clone --depth 1 --branch rel-3.0.1 \
   https://github.com/arminbiere/cadical.git "$cadical_work/cadical"
 test "$(git -C "$cadical_work/cadical" rev-parse HEAD)" = \
   c60730422e758ef1cebe7aeddf2dda31c996bf04
-(cd "$cadical_work/cadical" && ./configure -c -fPIC && \
+(cd "$cadical_work/cadical" && ./configure -fPIC && \
   make -C build -j4 libcadical.a)
 mkdir -p "$cadical_work/prefix/include" "$cadical_work/prefix/lib"
 install -m 644 "$cadical_work/cadical/src/cadical.hpp" "$cadical_work/prefix/include/"
@@ -34,7 +36,19 @@ and checks runtime version, signature, and the full revision reported by
 cross-compilation environments that cannot run the check. Use a prefix without
 spaces, as its path is passed through compiler/linker flags.
 
-CI builds the same pinned archive before compiling yasmv. The standalone
+The production archive uses upstream release defaults: `-O3 -DNDEBUG`, plus
+`-fPIC` for linkage into yasmv. API contract checks remain enabled; neither
+`--no-contracts` nor `--competition` is used. These flags apply only to CaDiCaL;
+yasmv's own compiler flags are independent.
+
+Use fresh build directories when changing the dependency's compiler flags, then
+relink yasmv and its test executables against the new archive. Keep assertion
+validation builds separate: `./configure -c -fPIC` enables assertions, while
+the sanitizer recipe uses `-g` (which also enables assertions). See the
+[API validation guide](CADICAL_API_VALIDATION.md) for those diagnostic builds.
+
+CI builds the release archive before compiling yasmv and validates its API;
+a separate job retains the assertion-enabled API gate. The standalone
 `make cadical-api-test CADICAL_SOURCE=...` gate remains available for validating
 an explicit upstream checkout; normal `make test` exercises the actual adapter.
 
@@ -95,7 +109,7 @@ and trace identities include the same solver identity and the new counter/budget
 semantics; their engine identity no longer names MiniSat. The fixed `inprobing=0`
 setting disables CaDiCaL's inprobe schedule, leaving other optimizations enabled.
 
-## Verification
+## Milestone 4 verification (assertion-enabled archive)
 
 Local verification on 2026-09-28 used GCC 14.2, LLVM/Clang 18.1.8, and the
 assertion-enabled pinned CaDiCaL archive (`./configure -c -fPIC`):
