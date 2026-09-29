@@ -66,6 +66,7 @@ jobs:
 
     - name: configure core build
       run: |
+        python3 tests/test_cadical_configure.py
         autoreconf -vif
         tar xfj microcode.tar.bz2
         ./configure --disable-llvm2smv --with-cadical-prefix="$PWD/.deps/cadical-prefix" CXXFLAGS="-std=c++20 -O2 -Wall -Wno-deprecated-declarations -Werror"

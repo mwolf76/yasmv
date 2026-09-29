@@ -17,6 +17,10 @@ AC_DEFUN([AC_CADICAL], [
   LIBS="$CADICAL_LIBS $LIBS"
   AC_LANG_PUSH([C++])
   AC_MSG_CHECKING([for the pinned CaDiCaL version, revision, and incremental API])
+  # Capture stdout before process startup: CaDiCaL caches terminal colour
+  # support in global constructors, so freopen inside main is too late.
+  cadical_api_ok=no
+  {
   AC_RUN_IFELSE([AC_LANG_PROGRAM([[
 #include <cadical.hpp>
 #include <cstdio>
@@ -41,14 +45,18 @@ struct Stop : CaDiCaL::Terminator { bool terminate() override { return false; } 
     if (solver.solve() != 20 || !solver.failed(-x)) return 5;
     if (solver.solve() != 10) return 6;
     solver.melt(x); solver.disconnect_terminator();
-    if (!std::freopen("conftest.cadical-build", "w", stdout)) return 7;
     CaDiCaL::Solver::build(stdout, "");
   ]])],
-    [AS_IF([grep -F "Version 3.0.1 c60730422e758ef1cebe7aeddf2dda31c996bf04" conftest.cadical-build >/dev/null],
-      [AC_MSG_RESULT([yes])],
-      [AC_MSG_ERROR([CaDiCaL library does not report the required full build revision])])],
-    [AC_MSG_ERROR([CaDiCaL API/version check failed; see config.log and docs/CADICAL_BACKEND.md])],
+    [cadical_api_ok=yes],
+    [cadical_api_ok=no],
     [AC_MSG_ERROR([Cross compilation requires a runnable pinned CaDiCaL validation; unsupported by this gate])])
+  } >conftest.cadical-build
+  cat conftest.cadical-build >&AS_MESSAGE_LOG_FD
+  AS_IF([test "$cadical_api_ok" != yes],
+    [AC_MSG_ERROR([CaDiCaL API/version check failed; see config.log and docs/CADICAL_BACKEND.md])])
+  AS_IF([grep -F "Version 3.0.1 c60730422e758ef1cebe7aeddf2dda31c996bf04" conftest.cadical-build >/dev/null],
+    [AC_MSG_RESULT([yes])],
+    [AC_MSG_ERROR([CaDiCaL library does not report the required full build revision; see config.log])])
   AC_LANG_POP([C++])
   CPPFLAGS="$cadical_save_CPPFLAGS"
   LIBS="$cadical_save_LIBS"

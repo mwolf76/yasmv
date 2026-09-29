@@ -18,19 +18,24 @@ SMV output through `-o` is disabled; publication requires native validation.
 Use LLVM **18** development libraries and matching Clang, `opt`, and `llvm-link`
 versions, plus the repository's C++20 and Autotools dependencies. On Debian/Ubuntu
 the LLVM packages are `llvm-18-dev` and `clang-18`. The rest of the build
-requirements are in the [core build guide](../docs/CORRECTNESS_BASELINE.md).
+requirements are in the
+[recommended quick start](../README.md#quick-start-recommended).
 
 From the repository root:
 
 ```sh
-autoreconf -vif
-./configure --enable-llvm2smv --with-llvm-config=/usr/bin/llvm-config-18
-make
+./setup.sh
 make llvm-test
 ```
 
-`./llvm2smv/build.sh` performs those steps; arguments are passed to configure.
-Configure discovers `llvm-config-18` before unversioned `llvm-config`. It selects
+`setup.sh` automatically prepares the pinned CaDiCaL archive, enables LLVM by
+default, uses the tested compiler settings, and builds
+with `make -j "$(nproc)"` when available (plain `make` otherwise).
+`./llvm2smv/build.sh` is an alternative manual configure/build/test helper;
+it passes arguments to configure but does not apply the setup defaults or
+extract microcode.
+Configure discovers `llvm-config-18` before unversioned `llvm-config`; override
+this with `--with-llvm-config=/path/to/llvm-config-18`. It selects
 Clang, opt, and llvm-link from that installation's binary directory and requires
 all three version strings to match `llvm-config --version`. Explicit `CLANG`,
 `LLVM_OPT`, and `LLVM_LINK` environment overrides undergo the same checks.
