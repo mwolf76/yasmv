@@ -305,7 +305,11 @@ namespace query {
             if (spec.prefix_length != -1 && ((spec.operation != Operation::simulate && spec.operation != Operation::explain_step) || spec.prefix_length <= 0)) throw std::invalid_argument("Prefix length applies only to continuation");
             for (const auto& [name, e] : spec.watches)
                 if (name.empty() || !state_expression(e) || !mm.type(e)->is_boolean()) throw std::invalid_argument("Watches require named Boolean state expressions");
-            if (!reaching && spec.strategy != "auto") throw std::invalid_argument("Strategy selection applies only to reachability");
+            const bool interpolating = spec.strategy == "interpolation";
+            if (interpolating && !((spec.operation == Operation::reach && spec.limits.depth < 0) || spec.operation == Operation::prove_property))
+                throw std::invalid_argument("Interpolation requires unbounded reach or prove-property");
+            if (!reaching && spec.strategy != "auto" && !(spec.operation == Operation::prove_property && interpolating))
+                throw std::invalid_argument("Strategy selection requires reachability or interpolation proof");
             if (spec.target && ((!reaching && spec.operation != Operation::check_progress && spec.operation != Operation::explain_reach) || !state_expression(spec.target))) throw std::invalid_argument("Reachability target must be a state expression");
             if (spec.until && spec.operation != Operation::simulate) throw std::invalid_argument("Until condition applies only to simulation");
             if (spec.operation != Operation::pick_state && (spec.enumerate || spec.count)) throw std::invalid_argument("Enumeration/counting applies only to pick-state");
@@ -320,7 +324,7 @@ namespace query {
             context.requested_strategy = spec.strategy;
             context.check(Phase::compilation);
             r.identity = identity();
-            if (spec.strategy != "auto" && spec.strategy != "forward" && spec.strategy != "backward") throw std::invalid_argument("Unknown or empty strategy configuration");
+            if (spec.strategy != "auto" && spec.strategy != "forward" && spec.strategy != "backward" && !interpolating) throw std::invalid_argument("Unknown or empty strategy configuration");
             if (reaching && !spec.target) throw std::invalid_argument("Reachability requires a target");
             if (progress) {
                 analyze_progress(spec, r, context);
@@ -373,7 +377,9 @@ namespace query {
                 for (auto w : witness::WitnessMgr::INSTANCE().witnesses())
                     if (index++ >= previous) w->artifact = trace::export_trace(*w, spec, r.identity);
             } else if (reaching) {
-                if (spec.limits.depth >= 0) {
+                if (interpolating) {
+                    interpolation_reach(spec, r, context);
+                } else if (spec.limits.depth >= 0) {
                     if (spec.strategy == "backward") throw std::invalid_argument("Bounded queries currently support the forward strategy");
                     bounded_reach(spec, r);
                 } else {
@@ -418,7 +424,7 @@ namespace query {
                 r.watches = trace::evaluate_watches(*r.witness, spec.watches);
             if (context.stop != StopReason::none) throw Cancelled();
             if (r.witness && r.status == ExecutionStatus::completed &&
-                (spec.operation == Operation::simulate || (reaching && spec.limits.depth >= 0))) {
+                (spec.operation == Operation::simulate || (reaching && (spec.limits.depth >= 0 || interpolating)))) {
                 auto& wm = witness::WitnessMgr::INSTANCE();
                 wm.record(*r.witness);
                 wm.set_current(*r.witness);
@@ -434,6 +440,7 @@ namespace query {
             r.explanation = Json::Value();
             r.optimality = Json::Value();
             r.proof = Json::Value();
+            r.proof_method.clear();
             r.progress = Json::Value();
             r.witness = nullptr;
         } catch (const Exception& e) {
@@ -465,6 +472,7 @@ namespace query {
             r.explanation = Json::Value();
             r.optimality = Json::Value();
             r.proof = Json::Value();
+            r.proof_method.clear();
             r.progress = Json::Value();
             r.witness = nullptr;
         }

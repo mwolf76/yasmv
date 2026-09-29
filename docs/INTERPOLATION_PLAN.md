@@ -1,8 +1,8 @@
 # Interpolation-based reachability proposal
 
-Status: milestones 1–3 implemented, 2026-09-29; milestones 4–5 are proposed.
+Status: milestones 1–4 implemented, 2026-09-29; milestone 5 is proposed.
 See [proof validation](INTERPOLATION_PROOF_VALIDATION.md). Interpolation is an
-internal search capability; query integration follows in milestone 4.
+opt-in reachability and safety strategy; benchmarking follows in milestone 5.
 
 Reference: K. L. McMillan, [Interpolation and SAT-based Model Checking](https://mcmil.net/pubs/CAV03.pdf), CAV 2003, LNCS 2725, pp. 1–13, DOI [10.1007/978-3-540-45069-6_1](https://doi.org/10.1007/978-3-540-45069-6_1).
 
@@ -215,10 +215,10 @@ verification. For safety return `proven`; concrete violations retain normal
 trace replay. Approximation-started SAT assignments never become user traces.
 Only completed concrete smaller-depth checks justify shortest evidence.
 
-Proposed native API: opt-in `strategy: interpolation` for unbounded `reach`,
+Native API: opt-in `strategy: interpolation` for unbounded `reach`,
 and explicit selection on `prove-property`; `auto` initially keeps its current
-meaning. Property dispatch currently rejects strategy selection, so update its
-validation, schema, documentation, and tests together. Preserve bounded `reach`,
+meaning. Native, workbench, and trace schemas validate strategy selection alongside
+operation and depth restrictions. Preserve bounded `reach`,
 `shortest-reach`, and `check-property` semantics. For interpolation on
 `prove-property`, use positive `limits.depth = D` as the concrete search cap,
 with h <= D-1; exhaustion without a proof gives `holds_bounded` only when every
@@ -262,9 +262,9 @@ reuse learned clauses across changed partitions without reconstruction. Defer
 backward interpolation, automatic portfolios, progress/liveness reduction, and
 default changes until the forward safety implementation has evidence behind it.
 
-Next implementation task: milestone 4. Integrate the internal
-`reach::interpolation::search` with explicit reach/property strategy selection,
-model identity, assumptions, replayable traces, proof evidence, shared budgets,
-and serialized results. Preserve existing bounded and shortest-query contracts.
-Internal image iterations and suffix horizons must remain separate from the
-concrete depths recorded in query results.
+Next implementation task: milestone 5. Benchmark interpolation against bounded
+search, simple-path exhaustion, and k-induction with matching models, inputs,
+assumptions, and budgets. Measure total time, memory, image queries, restarts,
+proof nodes, and invariant size before selecting optimizations or changing any
+default strategy. Query selection and evidence are documented in
+[Stronger analysis](STRONGER_ANALYSIS.md#interpolation).

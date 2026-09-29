@@ -7,7 +7,7 @@ VERSION = 1
 OPERATIONS = ('check-progress', 'validate-progress', 'shortest-reach', 'check-property', 'prove-property', 'validate-model', 'pick-state', 'reach', 'validate-trace', 'simulate', 'explain-init', 'explain-step', 'explain-reach', 'export-scenario', 'replay-scenario')
 CAPABILITIES = {
     'version': VERSION, 'operations': list(OPERATIONS), 'events': ['started', 'progress', 'result'],
-    'trace_version': 1, 'bounded_only': False, 'progress': {'form': 'universal-eventuality', 'backend': 'explicit-sat-graph', 'fairness': 'none', 'artifact_version': 1}, 'proof_methods': ['k-induction', 'finite-graph-ranking'], 'shortest_witnesses': True, 'compiled_sessions': 'process-snapshot', 'watch_types': ['boolean'],
+    'trace_version': 1, 'bounded_only': False, 'progress': {'form': 'universal-eventuality', 'backend': 'explicit-sat-graph', 'fairness': 'none', 'artifact_version': 1}, 'proof_methods': ['k-induction', 'interpolation', 'finite-graph-ranking'], 'interpolation': {'reach': 'unbounded', 'prove_property': 'positive-depth-cap', 'invariant_version': 1}, 'shortest_witnesses': True, 'compiled_sessions': 'process-snapshot', 'watch_types': ['boolean'],
     'explanations': ['initial', 'single_step_continuation', 'bounded_reach'],
     'scenario_adapters': ['retry-protocol-v1'], 'selected_prefix': True, 'process_isolation': True,
     'limits': ['states', 'depth', 'wall_ms', 'conflicts', 'propagations'],
@@ -94,7 +94,7 @@ def request(value):
     if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0.05 <= timeout <= 300:
         raise ValueError('Hard timeout must be between 0.05 and 300 seconds')
     q = value['query']
-    fields(q, ('operation', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation', 'property', 'progress'), ('operation',))
+    fields(q, ('operation', 'strategy', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation', 'property', 'progress'), ('operation',))
     op = q['operation']
     if op not in OPERATIONS:
         raise ValueError('Unsupported operation')
@@ -108,11 +108,19 @@ def request(value):
             raise ValueError('Select a named safety property from the revision')
     elif 'property' in q:
         raise ValueError('Property applies only to safety queries')
+    strategy = q.get('strategy', 'auto')
+    if strategy not in ('auto', 'interpolation'):
+        raise ValueError('Unsupported query strategy')
+    if strategy == 'interpolation' and op not in ('reach', 'prove-property'):
+        raise ValueError('Interpolation requires unbounded reach or prove-property')
+    unbounded = strategy == 'interpolation' and op == 'reach'
     limits = q.get('limits', {})
+    if unbounded and 'depth' in limits:
+        raise ValueError('Interpolation reach does not accept a depth limit')
     fields(limits, CAPABILITIES['limits'])
     for key, val in limits.items():
         integer(val, 0, 10000 if key == 'depth' else 2147483647, key)
-    if op in ('reach', 'shortest-reach', 'simulate', 'explain-reach', 'check-property', 'prove-property'):
+    if not unbounded and op in ('reach', 'shortest-reach', 'simulate', 'explain-reach', 'check-property', 'prove-property'):
         integer(limits.get('depth'), 1 if op in ('simulate', 'prove-property') else 0, 10000, 'depth')
     elif 'depth' in limits and not (op == 'explain-step' and limits['depth'] == 1):
         raise ValueError('Depth applies only to reach and simulate')

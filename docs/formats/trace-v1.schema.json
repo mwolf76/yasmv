@@ -106,7 +106,8 @@
           "enum": [
             "auto",
             "forward",
-            "backward"
+            "backward",
+            "interpolation"
           ]
         },
         "target": {
@@ -277,6 +278,64 @@
                   "depth": {
                     "minimum": 0
                   }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "strategy": {
+                "const": "interpolation"
+              }
+            },
+            "required": [
+              "strategy"
+            ]
+          },
+          "then": {
+            "oneOf": [
+              {
+                "properties": {
+                  "operation": {
+                    "const": "reach"
+                  },
+                  "limits": {
+                    "properties": {
+                      "depth": {
+                        "const": -1
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "properties": {
+                  "operation": {
+                    "const": "prove-property"
+                  }
+                }
+              }
+            ]
+          },
+          "else": {
+            "if": {
+              "properties": {
+                "operation": {
+                  "not": {
+                    "enum": [
+                      "reach",
+                      "shortest-reach"
+                    ]
+                  }
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "strategy": {
+                  "const": "auto"
                 }
               }
             }

@@ -85,6 +85,17 @@ prove-property once -depth 12
 ''')
         self.assertIn('Safety property proven', proven)
 
+    def test_native_interpolation_property_selection(self):
+        source = ROOT / 'tests/models/query.smv'
+        text = self.native(f'''read-model "{source}"
+property set safe TRUE
+prove-property safe -strategy interpolation -depth 2
+''')
+        self.assertIn('Safety property proven', text)
+        proof = next(r for r in self.results() if r.get('proof_method') == 'interpolation')
+        self.assertTrue(proof['proof']['verified'])
+        self.assertEqual(proof['strategy'], 'interpolation')
+
     def test_native_state_and_command_composition(self):
         source = ROOT / 'tests/models/query.smv'
         export = Path(self.temp.name) / 'trace.json'

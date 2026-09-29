@@ -93,14 +93,14 @@ action('shortest', async () => {
 });
 for (const operation of ['check-property', 'prove-property']) action(operation, () => {
   if (!$('property').value) throw new Error('Save and select a named safety property.');
-  return submit({operation, property: $('property').value, limits: {depth: number('depth', operation === 'prove-property' ? 1 : 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
+  return submit({operation, strategy: operation === 'prove-property' ? $('proof-strategy').value : 'auto', property: $('property').value, limits: {depth: number('depth', operation === 'prove-property' ? 1 : 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
 });
 action('pick', () => submit({operation: 'pick-state', assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)}));
 action('cancel', () => api('jobs/' + state.job + '/cancel', {}));
 function describeResult(result, query) {
   if (result.status === 'error') return ['Query failed', 'Read the diagnostics below. The saved revision is unchanged.', 'error'];
   if (result.status === 'unknown') return ['Inconclusive · ' + result.stop_reason.replaceAll('_', ' '), 'No reachability or safety conclusion follows from this interrupted or incomplete computation.', 'unknown'];
-  if (result.outcome === 'proven') return ['Safety property proved', 'Verified k-induction establishes the selected property for all reachable states under the recorded assumptions.', 'success'];
+  if (result.outcome === 'proven') return ['Safety property proved', result.proof_method === 'interpolation' ? 'A verified inductive invariant establishes the property under the recorded assumptions.' : 'Verified k-induction establishes the selected property for all reachable states under the recorded assumptions.', 'success'];
   if (result.outcome === 'violated') return ['Safety property violated at depth ' + (result.trace.steps.length - 1), 'A shortest reachable counterexample passed model replay.', 'error'];
   if (result.outcome === 'holds_bounded') return ['Property holds through depth ' + query.limits.depth, result.proof?.step_status === 'satisfiable' ? 'Induction was inconclusive. Its step assignment may be unreachable; unbounded safety is unknown.' : 'No counterexample within this bound. Unbounded safety is unknown.', 'unknown'];
   if (query.operation === 'shortest-reach' && result.outcome === 'reachable') return ['Shortest witness at depth ' + result.optimality.depth, 'Every smaller depth was UNSAT. This witness passed model replay; the certificate measures transitions.', 'success'];
@@ -115,6 +115,7 @@ function describeResult(result, query) {
     return result.outcome === 'matched' ? ['Implementation matched the scenario', replay.duplicate_execution ? 'Duplicate execution reproduced in the faulty receiver.' : 'All observations matched the exported expectations.', 'success'] :
       ['Implementation diverged at step ' + replay.first_divergence.step, replay.duplicate_execution ? 'The first differing observation is shown below.' : 'Duplicate execution has not been reproduced. The first differing observation is shown below.', 'unknown'];
   }
+  if (result.outcome === 'unreachable' && result.scope === 'unbounded') return ['Goal proved unreachable', 'A verified inductive invariant excludes the target under the recorded assumptions.', 'success'];
   if (result.outcome === 'unreachable') return [`No witness through depth ${query.limits.depth}`, 'Bounded negative result. Reachability beyond this bound is unknown; this is not a safety proof.', 'unknown'];
   if (result.outcome === 'reachable') return [`Goal reached at depth ${result.trace.steps.length - 1}`, 'A concrete witness was found and independently replayed in a fresh checker process.', 'success'];
   if (result.outcome === 'deadlocked') return ['Continuation blocked', 'No extension meets the constraint at the pinned source state. If the constraint conflicts with the prefix, start a fresh search. The child preserves the valid prefix.', 'unknown'];
@@ -131,11 +132,14 @@ function renderAnalysisEvidence(result) {
   if (result.optimality) container.append(node('p', `Shortest witness: ${result.optimality.depth} transitions. UNSAT at smaller depths: ${depths(result.optimality.unsat_depths)}.`));
   const proof = result.proof;
   if (proof) {
-    container.append(node('p', `Property: ${proof.property.name} · ${proof.property.expression}`));
-    if (proof.assumptions.length) container.append(node('p', 'Under assumptions: ' + proof.assumptions.join('; ')));
-    if (proof.base_unsat_depths.length) container.append(node('p', 'No reachable violation at depths: ' + depths(proof.base_unsat_depths) + '.'));
+    if (proof.property) container.append(node('p', `Property: ${proof.property.name} · ${proof.property.expression}`));
+    if (proof.assumptions?.length) container.append(node('p', 'Under assumptions: ' + proof.assumptions.join('; ')));
+    if (proof.base_unsat_depths?.length) container.append(node('p', 'No reachable violation at depths: ' + depths(proof.base_unsat_depths) + '.'));
     if (proof.step_status) container.append(node('p', `Induction step at k = ${proof.induction_depth}: ${proof.step_status === 'unsatisfiable' ? 'UNSAT' : 'SAT; the assignment may be unreachable'}.`));
-    if (proof.verified) container.append(node('p', 'All base obligations and the induction step were rechecked in fresh solvers.'));
+    if (proof.verified) container.append(node('p', result.proof_method === 'interpolation' ? 'Initial-state containment, transition closure, and target exclusion were checked in fresh solvers.' : 'All base obligations and the induction step were rechecked in fresh solvers.'));
+    if (proof.vacuous) container.append(node('p', 'No initial states satisfy the model and recorded assumptions.'));
+    const interpolation = result.statistics?.interpolation;
+    if (interpolation) container.append(node('p', `Interpolation: ${interpolation.images} image queries, ${interpolation.restarts} restarts, suffix horizon ${interpolation.horizon}.`));
   }
   const details = node('details');
   details.append(node('summary', proof?.induction_counterexample ? 'Inspect induction assignment and analysis evidence' : 'Inspect analysis evidence'));

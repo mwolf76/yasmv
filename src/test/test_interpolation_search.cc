@@ -5,6 +5,7 @@
 #include <parse.hh>
 #include <queue>
 #include <env/environment.hh>
+#include <query/query.hh>
 
 namespace {
 using namespace reach::interpolation;
@@ -318,4 +319,35 @@ BOOST_AUTO_TEST_CASE(limits_and_cancellation_never_publish_certificates)
         no_certificate(search(safe));
     }
     BOOST_CHECK(search(safe).verified); BOOST_CHECK(search(reachable).verified);
+}
+
+BOOST_AUTO_TEST_CASE(query_input_decoding_cancellation_has_no_artifact)
+{
+    load();
+    auto& environment = env::Environment::INSTANCE();
+    environment.set(expression("gate"), expression("x"));
+    struct ResetInput { ~ResetInput() { env::Environment::INSTANCE().set(expression("gate"), nullptr); } } reset;
+    query::QuerySpec spec;
+    spec.operation = query::Operation::reach;
+    spec.strategy = "interpolation";
+    spec.target = expression("n = 2");
+    query::QueryContext measured;
+    std::map<query::Phase, unsigned> counts;
+    measured.checkpoint_hook = [&](query::Phase phase) { ++counts[phase]; };
+    BOOST_REQUIRE(query::execute(spec, measured).outcome == query::Outcome::reachable);
+    for (auto phase : {query::Phase::solving, query::Phase::decoding}) {
+        BOOST_REQUIRE_GT(counts[phase], 0u);
+        query::QueryContext context;
+        unsigned count = 0;
+        context.checkpoint_hook = [&](query::Phase p) {
+            if (p == phase && ++count == counts[phase]) context.cancel();
+        };
+        auto result = query::execute(spec, context);
+        BOOST_CHECK(result.status == query::ExecutionStatus::unknown);
+        BOOST_CHECK(result.trace.isNull());
+        BOOST_CHECK(result.optimality.isNull());
+        BOOST_CHECK(result.proof.isNull());
+        BOOST_CHECK(!result.witness);
+    }
+    BOOST_CHECK(query::execute(spec).outcome == query::Outcome::reachable);
 }

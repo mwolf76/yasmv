@@ -208,3 +208,69 @@ BOOST_AUTO_TEST_CASE(progress_discovery_and_verification_cancellation)
         }
     }
 }
+
+BOOST_AUTO_TEST_CASE(interpolation_query_evidence_and_cancellation)
+{
+    load_model();
+    for (unsigned kind = 0; kind < 3; ++kind) {
+        auto spec = reach();
+        spec.strategy = "interpolation";
+        spec.limits.depth = -1;
+        if (kind == 1) spec.target = parse::parseExpression("FALSE");
+        if (kind == 2) {
+            spec.operation = query::Operation::prove_property;
+            spec.target = nullptr;
+            spec.property["name"] = "safe";
+            spec.property["expression"] = "TRUE";
+            spec.limits.depth = 2;
+        }
+        auto result = query::execute(spec);
+        BOOST_REQUIRE(result.status == query::ExecutionStatus::completed);
+        BOOST_CHECK_EQUAL(result.strategy, "interpolation");
+        BOOST_CHECK_EQUAL(result.scope, "unbounded");
+        if (!kind) {
+            BOOST_CHECK(result.outcome == query::Outcome::reachable);
+            BOOST_REQUIRE(result.witness);
+            BOOST_CHECK_EQUAL(result.witness->size(), 2u);
+            BOOST_CHECK(result.optimality["certified"].asBool());
+            query::QuerySpec replay;
+            replay.operation = query::Operation::validate_trace; replay.trace = result.trace;
+            BOOST_CHECK(query::execute(replay).outcome == query::Outcome::valid);
+        } else {
+            BOOST_CHECK(result.outcome == (kind == 1 ? query::Outcome::unreachable : query::Outcome::proven));
+            BOOST_CHECK_EQUAL(result.proof_method, "interpolation");
+            BOOST_CHECK(result.proof["verified"].asBool());
+            BOOST_CHECK(result.proof["invariant"]["identity"] == result.identity);
+            BOOST_CHECK_EQUAL(result.proof["obligations"].size(), 3u);
+        }
+        std::map<query::Phase, unsigned> counts;
+        query::QueryContext measured(spec.limits);
+        measured.checkpoint_hook = [&](query::Phase p) { ++counts[p]; };
+        BOOST_REQUIRE(query::execute(spec, measured).status == query::ExecutionStatus::completed);
+        for (auto phase : {query::Phase::compilation, query::Phase::encoding, query::Phase::solving, query::Phase::decoding}) {
+            if (!counts[phase]) continue;
+            std::set<unsigned> stops{1u, std::max(1u, counts[phase] / 2), counts[phase]};
+            if (phase == query::Phase::solving) for (unsigned i = 1; i <= counts[phase]; ++i) stops.insert(i);
+            for (auto stop_at : stops) {
+                query::QueryContext context(spec.limits);
+                unsigned count = 0;
+                context.checkpoint_hook = [&](query::Phase p) {
+                    if (p == phase && ++count == stop_at) context.cancel();
+                };
+                const auto interrupted = query::execute(spec, context);
+                BOOST_TEST_CONTEXT("kind=" << kind << " phase=" << int(phase) << " stop=" << stop_at) {
+                    BOOST_CHECK(interrupted.status == query::ExecutionStatus::unknown);
+                    BOOST_CHECK(interrupted.reason == query::StopReason::cancelled);
+                    BOOST_CHECK(interrupted.outcome == query::Outcome::none);
+                    BOOST_CHECK(interrupted.proof.isNull());
+                    BOOST_CHECK(interrupted.optimality.isNull());
+                    BOOST_CHECK(interrupted.trace.isNull());
+                    BOOST_CHECK(!interrupted.witness);
+                    for (unsigned i = 0; i < interrupted.checked_depths.size(); ++i)
+                        BOOST_CHECK_EQUAL(interrupted.checked_depths[i], i);
+                }
+            }
+        }
+        BOOST_CHECK(query::execute(spec).status == query::ExecutionStatus::completed);
+    }
+}

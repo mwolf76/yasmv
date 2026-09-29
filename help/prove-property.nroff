@@ -5,7 +5,7 @@ YASMV manual                                                 prove-property
 SYNOPSIS
 
 .in 3
-prove-property <name> -depth <N> [options]
+prove-property <name> -depth <N> [ -strategy interpolation ] [options]
 
 .ti 0
 DESCRIPTION
@@ -14,7 +14,16 @@ DESCRIPTION
 .in 3
 Attempt to prove a saved safety property by k-induction, with N from 1 to
 10000. Requires a loaded model and a property saved with property set.
-A conclusive proof checks both the base and inductive-step obligations.
+A conclusive induction proof checks both base and inductive-step obligations.
+
+-strategy interpolation selects forward interpolation instead. N caps concrete
+counterexample search; an invariant can establish an unbounded proof before
+that cap. A bounded fallback establishes only the checked depths. The invariant
+is verified for initial-state containment, transition closure, and exclusion of
+violations. Its circuit, model identity, assumptions, and search statistics are
+available through job show -full. Deterministic Boolean state predicates and
+one-step transition relations are required; nondeterministic transitions are
+supported.
 
 A reachable counterexample is replayed into the native trace register.
 An inconclusive inductive step does not establish that the property is false;
@@ -33,6 +42,7 @@ EXAMPLES
 .in 3
 >> property set once !DUPLICATE
 >> prove-property once -depth 12
+>> prove-property once -strategy interpolation -depth 12
 >> job show -full
 
 .ti 0

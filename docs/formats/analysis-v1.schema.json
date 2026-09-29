@@ -154,6 +154,29 @@
         },
         "vacuous": {
           "type": "boolean"
+        },
+        "invariant": {
+          "$ref": "invariant-v1.schema.json"
+        },
+        "obligations": {
+          "type": "object",
+          "required": [
+            "initial_containment",
+            "transition_closure",
+            "target_exclusion"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "initial_containment": {
+              "const": "unsatisfiable"
+            },
+            "transition_closure": {
+              "const": "unsatisfiable"
+            },
+            "target_exclusion": {
+              "const": "unsatisfiable"
+            }
+          }
         }
       },
       "additionalProperties": false
@@ -279,6 +302,135 @@
                 "const": true
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "proof_method": {
+            "const": "interpolation"
+          }
+        },
+        "required": [
+          "proof_method"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "completed"
+          },
+          "outcome": {
+            "enum": [
+              "proven",
+              "unreachable"
+            ]
+          },
+          "scope": {
+            "const": "unbounded"
+          },
+          "trace": {
+            "type": "null"
+          },
+          "proof": {
+            "type": "object",
+            "required": [
+              "verified",
+              "verification",
+              "vacuous",
+              "initial_satisfiable",
+              "assumptions",
+              "invariant",
+              "obligations"
+            ],
+            "properties": {
+              "verified": {
+                "const": true
+              }
+            }
+          },
+          "statistics": {
+            "type": "object",
+            "required": [
+              "interpolation"
+            ],
+            "properties": {
+              "interpolation": {
+                "type": "object",
+                "required": [
+                  "horizon",
+                  "images",
+                  "enlargements",
+                  "restarts",
+                  "concrete_sat",
+                  "spurious_sat",
+                  "proof_nodes",
+                  "circuit_nodes"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "horizon": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "images": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "enlargements": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "restarts": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "concrete_sat": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "spurious_sat": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "proof_nodes": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "circuit_nodes": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "statistics"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "proof": {
+            "type": "object",
+            "required": [
+              "invariant"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "proof_method"
+        ],
+        "properties": {
+          "proof_method": {
+            "const": "interpolation"
           }
         }
       }

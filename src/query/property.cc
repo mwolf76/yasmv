@@ -14,9 +14,21 @@ namespace query {
         for (auto e : spec.assumptions)
             if (!state_expression(e) || !mm.type(e)->is_boolean()) throw std::invalid_argument("Safety assumptions must be Boolean state expressions");
         if (spec.operation == Operation::prove_property && spec.limits.depth < 1)
-            throw std::invalid_argument("Induction requires a positive depth");
+            throw std::invalid_argument("Property proof requires a positive depth");
         auto search = spec;
         search.target = em.make_not(property);
+        if (spec.strategy == "interpolation") {
+            interpolation_reach(search, r, context);
+            if (r.status != ExecutionStatus::completed) return;
+            r.proof["property"] = spec.property;
+            r.proof["assumptions"] = spec_json(spec)["assumptions"];
+            r.proof["base_unsat_depths"] = Json::arrayValue;
+            for (auto d : r.checked_depths)
+                if (!r.witness || d + 1 < r.witness->size()) r.proof["base_unsat_depths"].append(d);
+            if (r.outcome == Outcome::reachable) r.outcome = Outcome::violated;
+            else r.outcome = r.scope == "unbounded" ? Outcome::proven : Outcome::holds_bounded;
+            return;
+        }
         bounded_reach(search, r);
         r.proof["property"] = spec.property;
         r.proof["assumptions"] = spec_json(spec)["assumptions"];

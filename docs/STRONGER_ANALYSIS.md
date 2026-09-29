@@ -277,3 +277,58 @@ Universal eventuality is available through `check-progress`. Its graph proofs,
 loop/dead-end evidence, and resource semantics are documented separately in
 [the progress guide](PROGRESS_CHECKING.md). It complements safety induction and
 does not add general LTL/CTL or fairness.
+
+## Interpolation
+
+Select `strategy: "interpolation"` on native `reach` with no depth cap, or on
+`prove-property` with a positive `limits.depth`. `auto` retains the existing
+algorithms. Bounded `reach`, `shortest-reach`, and `check-property` reject the
+interpolation strategy. The workbench job API uses the same selection; unbounded
+workbench reach omits `limits.depth` and can supply a wall or solver budget.
+The browser offers **Interpolation** under **Proof method**. In the terminal:
+
+```text
+property set safe !bad
+prove-property safe -strategy interpolation -depth 12 -wall-ms 60000
+job show -full
+```
+
+An interpolating property query may prove safety before its depth cap. At cap
+exhaustion it returns `holds_bounded` only after concrete UNSAT checks at every
+depth from zero through the cap. Interruption returns `unknown`. A reachable
+violation is a shortest concrete path, decoded to normal trace v1 and replayed
+by the workbench. An approximation-started SAT result never becomes a trace.
+`checked_depths` and `optimality.unsat_depths` describe actual concrete checks;
+image iterations and suffix horizons are separate statistics.
+
+The initial fragment requires deterministic, untimed Boolean INIT, INVAR,
+target/property, and assumptions, expanding defines, parameters, and effective
+inputs. Transition constraints may be nondeterministic but must refer only to
+the current and next state, without absolute time. Arithmetic, finite enums,
+arrays, hierarchy, frozen variables, and partial transitions are supported.
+Assumptions constrain every state and can create dead ends or an empty initial
+set. The result explicitly records vacuity for the latter. Effective input
+values in interpolation witnesses are evaluated with SAT against the pinned
+path; their decoding shares the query's cancellation and solver budgets.
+
+A successful proof has `proof_method: "interpolation"`, `scope: "unbounded"`,
+and `proof.verified: true`. The fresh-solver obligations are
+`initial_containment`, `transition_closure`, and `target_exclusion`, each
+`unsatisfiable`. `statistics.interpolation` records the suffix horizon, image
+queries, enlargements, restarts, concrete/spurious SAT counts, proof nodes, and
+circuit nodes. These counters are not byte-accurate memory accounting.
+
+`proof.invariant` uses [state invariant v1](formats/invariant-v1.schema.json).
+It binds the circuit to the full model/configuration identity, target, and
+assumptions, with a symbol catalog and a one-based atom dictionary. Each atom
+identifies a symbol's flattened native encoding bit and whether it is frozen;
+integer bits are most-significant first, arrays concatenate element encodings.
+`nodes` contains reachable gates in topological order. Even `id` values identify
+gates, `atom` identifies an input, and `and: [left, right]` identifies a
+conjunction. References use their low bit for negation; 0 and 1 denote false
+and true. Gate IDs can have gaps. `root` selects the invariant output.
+
+The inline artifact is inspection evidence, not a new save/revalidate command.
+Schema validation checks structure; it does not establish inductiveness or
+model identity. The engine establishes the three obligations before publishing
+it. Model compilation and these checks share the native compiler/backend.
