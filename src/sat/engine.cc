@@ -340,6 +340,7 @@ namespace sat {
         if (!b.solver.limit("conflicts", native_limit))
             throw std::logic_error("CaDiCaL conflict limit unavailable");
         ++b.solves;
+        if (context) ++context->solver_calls;
         const int status = b.solver.solve();
         if (status == 10) f_status = STATUS_SAT;
         else if (status == 20) f_status = STATUS_UNSAT;

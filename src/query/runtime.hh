@@ -59,6 +59,7 @@ namespace query {
         std::atomic<Phase> phase { Phase::loading };
         uint64_t conflicts_used = 0, propagations_used = 0;
         uint64_t variables = 0, clauses = 0;
+        std::atomic<uint64_t> solver_calls { 0 };
         double compile_ms = 0, encode_ms = 0, solve_ms = 0, decode_ms = 0;
         // Deterministic cancellation at actual work boundaries, also useful to embedders.
         std::function<void(Phase)> checkpoint_hook;

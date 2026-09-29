@@ -121,6 +121,11 @@ solver work, and maximum observed solver variables/clauses. These are measured
 phase totals, not disjoint CPU accounting. Replay additionally reports the
 number of constraints checked by the independent evaluator.
 
+`statistics.solver_calls` counts actual native SAT solver invocations across
+the query, including evidence verification and input decoding. A call rejected
+before entering the solver by a budget or cancellation does not increment it.
+It is independent of interpolation image counts and concrete checked depths.
+
 ## Limits
 
 All limits default to `-1` (unlimited):

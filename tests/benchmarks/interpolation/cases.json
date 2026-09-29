@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "retry-deduplicating",
+      "source": "examples/retry-protocol/deduplicating.smv",
+      "target": "DUPLICATE",
+      "depth": 12,
+      "expected": "safe"
+    },
+    {
+      "id": "retry-faulty",
+      "source": "examples/retry-protocol/faulty.smv",
+      "target": "DUPLICATE",
+      "depth": 12,
+      "expected": "unsafe"
+    },
+    {
+      "id": "retry-constrained",
+      "source": "examples/retry-protocol/faulty.smv",
+      "target": "DUPLICATE",
+      "depth": 12,
+      "expected": "safe",
+      "assumptions": [
+        "executions <= 1"
+      ]
+    },
+    {
+      "id": "progress-deadlock",
+      "source": "examples/progress/stalled.smv",
+      "target": "FINISHED",
+      "depth": 4,
+      "expected": "safe"
+    },
+    {
+      "id": "progress-completion",
+      "source": "examples/progress/complete.smv",
+      "target": "FINISHED",
+      "depth": 4,
+      "expected": "unsafe"
+    },
+    {
+      "id": "long-cycle-4",
+      "source": "tests/benchmarks/interpolation/long-cycle-4.smv",
+      "target": "bad",
+      "depth": 16,
+      "expected": "safe"
+    },
+    {
+      "id": "long-cycle-8",
+      "source": "tests/benchmarks/interpolation/long-cycle-8.smv",
+      "target": "bad",
+      "depth": 16,
+      "expected": "safe"
+    },
+    {
+      "id": "long-cycle-12",
+      "source": "tests/benchmarks/interpolation/long-cycle-12.smv",
+      "target": "bad",
+      "depth": 16,
+      "expected": "safe"
+    },
+    {
+      "id": "arithmetic-safe",
+      "source": "tests/benchmarks/interpolation/arithmetic-safe.smv",
+      "target": "y != x * 3",
+      "depth": 16,
+      "expected": "safe"
+    },
+    {
+      "id": "arithmetic-unsafe",
+      "source": "tests/benchmarks/interpolation/arithmetic-unsafe.smv",
+      "target": "y != x * 3",
+      "depth": 16,
+      "expected": "unsafe"
+    },
+    {
+      "id": "llvm-safe",
+      "source": "tests/benchmarks/interpolation/llvm-safe.ll",
+      "target": "p_617373657274696f6e5f6661696c6564",
+      "depth": 12,
+      "expected": "safe"
+    },
+    {
+      "id": "llvm-unsafe",
+      "source": "tests/benchmarks/interpolation/llvm-unsafe.ll",
+      "target": "p_617373657274696f6e5f6661696c6564",
+      "depth": 12,
+      "expected": "unsafe"
+    }
+  ]
+}

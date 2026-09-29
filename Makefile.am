@@ -125,6 +125,7 @@ developer-workflow-test: yasmv
 analysis-test: yasmv
 	@YASMV_HOME=`pwd` python3 tests/test_analysis.py
 	@YASMV_HOME=`pwd` python3 tests/test_interpolation_query.py
+	@YASMV_HOME=`pwd` python3 tests/test_interpolation_benchmark.py
 	@YASMV_HOME=`pwd` python3 tests/test_sessions.py
 
 cli-test: yasmv
@@ -273,3 +274,7 @@ EXTRA_DIST += tests/models/interpolation-search.smv
 EXTRA_DIST += docs/formats/invariant-v1.schema.json
 
 EXTRA_DIST += tests/test_interpolation_query.py
+EXTRA_DIST += tools/benchmark-interpolation.py tests/test_interpolation_benchmark.py \
+    tests/benchmarks/interpolation/cases.json tests/benchmarks/interpolation/*.smv \
+    tests/benchmarks/interpolation/*.ll docs/INTERPOLATION_BENCHMARKS.md \
+    docs/benchmarks/interpolation-m5.json
