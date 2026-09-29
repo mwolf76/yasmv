@@ -1,0 +1,262 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="600" viewBox="0 0 1040 600">
+<rect width="1040" height="600" fill="#f7f9fc"/>
+<style>text{font-family:system-ui,sans-serif;fill:#172638}.tile{fill:white;stroke:#b8c4d4;stroke-width:1.5}.swapped{fill:#fff0d4;stroke:#bf7400;stroke-width:2}.blank{fill:#172638}</style>
+<text x="32" y="34" font-size="23" font-weight="600">The 63-puzzle: an unreachable goal</text>
+<text x="32" y="77" font-size="19">INIT: ordered board</text>
+<rect class="tile" x="32" y="95" width="51" height="51" rx="6"/>
+<text x="57.5" y="128" font-size="22" text-anchor="middle">1</text>
+<rect class="tile" x="89" y="95" width="51" height="51" rx="6"/>
+<text x="114.5" y="128" font-size="22" text-anchor="middle">2</text>
+<rect class="tile" x="146" y="95" width="51" height="51" rx="6"/>
+<text x="171.5" y="128" font-size="22" text-anchor="middle">3</text>
+<rect class="tile" x="203" y="95" width="51" height="51" rx="6"/>
+<text x="228.5" y="128" font-size="22" text-anchor="middle">4</text>
+<rect class="tile" x="260" y="95" width="51" height="51" rx="6"/>
+<text x="285.5" y="128" font-size="22" text-anchor="middle">5</text>
+<rect class="tile" x="317" y="95" width="51" height="51" rx="6"/>
+<text x="342.5" y="128" font-size="22" text-anchor="middle">6</text>
+<rect class="tile" x="374" y="95" width="51" height="51" rx="6"/>
+<text x="399.5" y="128" font-size="22" text-anchor="middle">7</text>
+<rect class="tile" x="431" y="95" width="51" height="51" rx="6"/>
+<text x="456.5" y="128" font-size="22" text-anchor="middle">8</text>
+<rect class="tile" x="32" y="152" width="51" height="51" rx="6"/>
+<text x="57.5" y="185" font-size="22" text-anchor="middle">9</text>
+<rect class="tile" x="89" y="152" width="51" height="51" rx="6"/>
+<text x="114.5" y="185" font-size="22" text-anchor="middle">10</text>
+<rect class="tile" x="146" y="152" width="51" height="51" rx="6"/>
+<text x="171.5" y="185" font-size="22" text-anchor="middle">11</text>
+<rect class="tile" x="203" y="152" width="51" height="51" rx="6"/>
+<text x="228.5" y="185" font-size="22" text-anchor="middle">12</text>
+<rect class="tile" x="260" y="152" width="51" height="51" rx="6"/>
+<text x="285.5" y="185" font-size="22" text-anchor="middle">13</text>
+<rect class="tile" x="317" y="152" width="51" height="51" rx="6"/>
+<text x="342.5" y="185" font-size="22" text-anchor="middle">14</text>
+<rect class="tile" x="374" y="152" width="51" height="51" rx="6"/>
+<text x="399.5" y="185" font-size="22" text-anchor="middle">15</text>
+<rect class="tile" x="431" y="152" width="51" height="51" rx="6"/>
+<text x="456.5" y="185" font-size="22" text-anchor="middle">16</text>
+<rect class="tile" x="32" y="209" width="51" height="51" rx="6"/>
+<text x="57.5" y="242" font-size="22" text-anchor="middle">17</text>
+<rect class="tile" x="89" y="209" width="51" height="51" rx="6"/>
+<text x="114.5" y="242" font-size="22" text-anchor="middle">18</text>
+<rect class="tile" x="146" y="209" width="51" height="51" rx="6"/>
+<text x="171.5" y="242" font-size="22" text-anchor="middle">19</text>
+<rect class="tile" x="203" y="209" width="51" height="51" rx="6"/>
+<text x="228.5" y="242" font-size="22" text-anchor="middle">20</text>
+<rect class="tile" x="260" y="209" width="51" height="51" rx="6"/>
+<text x="285.5" y="242" font-size="22" text-anchor="middle">21</text>
+<rect class="tile" x="317" y="209" width="51" height="51" rx="6"/>
+<text x="342.5" y="242" font-size="22" text-anchor="middle">22</text>
+<rect class="tile" x="374" y="209" width="51" height="51" rx="6"/>
+<text x="399.5" y="242" font-size="22" text-anchor="middle">23</text>
+<rect class="tile" x="431" y="209" width="51" height="51" rx="6"/>
+<text x="456.5" y="242" font-size="22" text-anchor="middle">24</text>
+<rect class="tile" x="32" y="266" width="51" height="51" rx="6"/>
+<text x="57.5" y="299" font-size="22" text-anchor="middle">25</text>
+<rect class="tile" x="89" y="266" width="51" height="51" rx="6"/>
+<text x="114.5" y="299" font-size="22" text-anchor="middle">26</text>
+<rect class="tile" x="146" y="266" width="51" height="51" rx="6"/>
+<text x="171.5" y="299" font-size="22" text-anchor="middle">27</text>
+<rect class="tile" x="203" y="266" width="51" height="51" rx="6"/>
+<text x="228.5" y="299" font-size="22" text-anchor="middle">28</text>
+<rect class="tile" x="260" y="266" width="51" height="51" rx="6"/>
+<text x="285.5" y="299" font-size="22" text-anchor="middle">29</text>
+<rect class="tile" x="317" y="266" width="51" height="51" rx="6"/>
+<text x="342.5" y="299" font-size="22" text-anchor="middle">30</text>
+<rect class="tile" x="374" y="266" width="51" height="51" rx="6"/>
+<text x="399.5" y="299" font-size="22" text-anchor="middle">31</text>
+<rect class="tile" x="431" y="266" width="51" height="51" rx="6"/>
+<text x="456.5" y="299" font-size="22" text-anchor="middle">32</text>
+<rect class="tile" x="32" y="323" width="51" height="51" rx="6"/>
+<text x="57.5" y="356" font-size="22" text-anchor="middle">33</text>
+<rect class="tile" x="89" y="323" width="51" height="51" rx="6"/>
+<text x="114.5" y="356" font-size="22" text-anchor="middle">34</text>
+<rect class="tile" x="146" y="323" width="51" height="51" rx="6"/>
+<text x="171.5" y="356" font-size="22" text-anchor="middle">35</text>
+<rect class="tile" x="203" y="323" width="51" height="51" rx="6"/>
+<text x="228.5" y="356" font-size="22" text-anchor="middle">36</text>
+<rect class="tile" x="260" y="323" width="51" height="51" rx="6"/>
+<text x="285.5" y="356" font-size="22" text-anchor="middle">37</text>
+<rect class="tile" x="317" y="323" width="51" height="51" rx="6"/>
+<text x="342.5" y="356" font-size="22" text-anchor="middle">38</text>
+<rect class="tile" x="374" y="323" width="51" height="51" rx="6"/>
+<text x="399.5" y="356" font-size="22" text-anchor="middle">39</text>
+<rect class="tile" x="431" y="323" width="51" height="51" rx="6"/>
+<text x="456.5" y="356" font-size="22" text-anchor="middle">40</text>
+<rect class="tile" x="32" y="380" width="51" height="51" rx="6"/>
+<text x="57.5" y="413" font-size="22" text-anchor="middle">41</text>
+<rect class="tile" x="89" y="380" width="51" height="51" rx="6"/>
+<text x="114.5" y="413" font-size="22" text-anchor="middle">42</text>
+<rect class="tile" x="146" y="380" width="51" height="51" rx="6"/>
+<text x="171.5" y="413" font-size="22" text-anchor="middle">43</text>
+<rect class="tile" x="203" y="380" width="51" height="51" rx="6"/>
+<text x="228.5" y="413" font-size="22" text-anchor="middle">44</text>
+<rect class="tile" x="260" y="380" width="51" height="51" rx="6"/>
+<text x="285.5" y="413" font-size="22" text-anchor="middle">45</text>
+<rect class="tile" x="317" y="380" width="51" height="51" rx="6"/>
+<text x="342.5" y="413" font-size="22" text-anchor="middle">46</text>
+<rect class="tile" x="374" y="380" width="51" height="51" rx="6"/>
+<text x="399.5" y="413" font-size="22" text-anchor="middle">47</text>
+<rect class="tile" x="431" y="380" width="51" height="51" rx="6"/>
+<text x="456.5" y="413" font-size="22" text-anchor="middle">48</text>
+<rect class="tile" x="32" y="437" width="51" height="51" rx="6"/>
+<text x="57.5" y="470" font-size="22" text-anchor="middle">49</text>
+<rect class="tile" x="89" y="437" width="51" height="51" rx="6"/>
+<text x="114.5" y="470" font-size="22" text-anchor="middle">50</text>
+<rect class="tile" x="146" y="437" width="51" height="51" rx="6"/>
+<text x="171.5" y="470" font-size="22" text-anchor="middle">51</text>
+<rect class="tile" x="203" y="437" width="51" height="51" rx="6"/>
+<text x="228.5" y="470" font-size="22" text-anchor="middle">52</text>
+<rect class="tile" x="260" y="437" width="51" height="51" rx="6"/>
+<text x="285.5" y="470" font-size="22" text-anchor="middle">53</text>
+<rect class="tile" x="317" y="437" width="51" height="51" rx="6"/>
+<text x="342.5" y="470" font-size="22" text-anchor="middle">54</text>
+<rect class="tile" x="374" y="437" width="51" height="51" rx="6"/>
+<text x="399.5" y="470" font-size="22" text-anchor="middle">55</text>
+<rect class="tile" x="431" y="437" width="51" height="51" rx="6"/>
+<text x="456.5" y="470" font-size="22" text-anchor="middle">56</text>
+<rect class="tile" x="32" y="494" width="51" height="51" rx="6"/>
+<text x="57.5" y="527" font-size="22" text-anchor="middle">57</text>
+<rect class="tile" x="89" y="494" width="51" height="51" rx="6"/>
+<text x="114.5" y="527" font-size="22" text-anchor="middle">58</text>
+<rect class="tile" x="146" y="494" width="51" height="51" rx="6"/>
+<text x="171.5" y="527" font-size="22" text-anchor="middle">59</text>
+<rect class="tile" x="203" y="494" width="51" height="51" rx="6"/>
+<text x="228.5" y="527" font-size="22" text-anchor="middle">60</text>
+<rect class="tile" x="260" y="494" width="51" height="51" rx="6"/>
+<text x="285.5" y="527" font-size="22" text-anchor="middle">61</text>
+<rect class="swapped" x="317" y="494" width="51" height="51" rx="6"/>
+<text x="342.5" y="527" font-size="22" text-anchor="middle">62</text>
+<rect class="swapped" x="374" y="494" width="51" height="51" rx="6"/>
+<text x="399.5" y="527" font-size="22" text-anchor="middle">63</text>
+<rect class="blank" x="431" y="494" width="51" height="51" rx="6"/>
+<text x="550" y="77" font-size="19">GOAL: tiles 62 and 63 exchanged</text>
+<rect class="tile" x="550" y="95" width="51" height="51" rx="6"/>
+<text x="575.5" y="128" font-size="22" text-anchor="middle">1</text>
+<rect class="tile" x="607" y="95" width="51" height="51" rx="6"/>
+<text x="632.5" y="128" font-size="22" text-anchor="middle">2</text>
+<rect class="tile" x="664" y="95" width="51" height="51" rx="6"/>
+<text x="689.5" y="128" font-size="22" text-anchor="middle">3</text>
+<rect class="tile" x="721" y="95" width="51" height="51" rx="6"/>
+<text x="746.5" y="128" font-size="22" text-anchor="middle">4</text>
+<rect class="tile" x="778" y="95" width="51" height="51" rx="6"/>
+<text x="803.5" y="128" font-size="22" text-anchor="middle">5</text>
+<rect class="tile" x="835" y="95" width="51" height="51" rx="6"/>
+<text x="860.5" y="128" font-size="22" text-anchor="middle">6</text>
+<rect class="tile" x="892" y="95" width="51" height="51" rx="6"/>
+<text x="917.5" y="128" font-size="22" text-anchor="middle">7</text>
+<rect class="tile" x="949" y="95" width="51" height="51" rx="6"/>
+<text x="974.5" y="128" font-size="22" text-anchor="middle">8</text>
+<rect class="tile" x="550" y="152" width="51" height="51" rx="6"/>
+<text x="575.5" y="185" font-size="22" text-anchor="middle">9</text>
+<rect class="tile" x="607" y="152" width="51" height="51" rx="6"/>
+<text x="632.5" y="185" font-size="22" text-anchor="middle">10</text>
+<rect class="tile" x="664" y="152" width="51" height="51" rx="6"/>
+<text x="689.5" y="185" font-size="22" text-anchor="middle">11</text>
+<rect class="tile" x="721" y="152" width="51" height="51" rx="6"/>
+<text x="746.5" y="185" font-size="22" text-anchor="middle">12</text>
+<rect class="tile" x="778" y="152" width="51" height="51" rx="6"/>
+<text x="803.5" y="185" font-size="22" text-anchor="middle">13</text>
+<rect class="tile" x="835" y="152" width="51" height="51" rx="6"/>
+<text x="860.5" y="185" font-size="22" text-anchor="middle">14</text>
+<rect class="tile" x="892" y="152" width="51" height="51" rx="6"/>
+<text x="917.5" y="185" font-size="22" text-anchor="middle">15</text>
+<rect class="tile" x="949" y="152" width="51" height="51" rx="6"/>
+<text x="974.5" y="185" font-size="22" text-anchor="middle">16</text>
+<rect class="tile" x="550" y="209" width="51" height="51" rx="6"/>
+<text x="575.5" y="242" font-size="22" text-anchor="middle">17</text>
+<rect class="tile" x="607" y="209" width="51" height="51" rx="6"/>
+<text x="632.5" y="242" font-size="22" text-anchor="middle">18</text>
+<rect class="tile" x="664" y="209" width="51" height="51" rx="6"/>
+<text x="689.5" y="242" font-size="22" text-anchor="middle">19</text>
+<rect class="tile" x="721" y="209" width="51" height="51" rx="6"/>
+<text x="746.5" y="242" font-size="22" text-anchor="middle">20</text>
+<rect class="tile" x="778" y="209" width="51" height="51" rx="6"/>
+<text x="803.5" y="242" font-size="22" text-anchor="middle">21</text>
+<rect class="tile" x="835" y="209" width="51" height="51" rx="6"/>
+<text x="860.5" y="242" font-size="22" text-anchor="middle">22</text>
+<rect class="tile" x="892" y="209" width="51" height="51" rx="6"/>
+<text x="917.5" y="242" font-size="22" text-anchor="middle">23</text>
+<rect class="tile" x="949" y="209" width="51" height="51" rx="6"/>
+<text x="974.5" y="242" font-size="22" text-anchor="middle">24</text>
+<rect class="tile" x="550" y="266" width="51" height="51" rx="6"/>
+<text x="575.5" y="299" font-size="22" text-anchor="middle">25</text>
+<rect class="tile" x="607" y="266" width="51" height="51" rx="6"/>
+<text x="632.5" y="299" font-size="22" text-anchor="middle">26</text>
+<rect class="tile" x="664" y="266" width="51" height="51" rx="6"/>
+<text x="689.5" y="299" font-size="22" text-anchor="middle">27</text>
+<rect class="tile" x="721" y="266" width="51" height="51" rx="6"/>
+<text x="746.5" y="299" font-size="22" text-anchor="middle">28</text>
+<rect class="tile" x="778" y="266" width="51" height="51" rx="6"/>
+<text x="803.5" y="299" font-size="22" text-anchor="middle">29</text>
+<rect class="tile" x="835" y="266" width="51" height="51" rx="6"/>
+<text x="860.5" y="299" font-size="22" text-anchor="middle">30</text>
+<rect class="tile" x="892" y="266" width="51" height="51" rx="6"/>
+<text x="917.5" y="299" font-size="22" text-anchor="middle">31</text>
+<rect class="tile" x="949" y="266" width="51" height="51" rx="6"/>
+<text x="974.5" y="299" font-size="22" text-anchor="middle">32</text>
+<rect class="tile" x="550" y="323" width="51" height="51" rx="6"/>
+<text x="575.5" y="356" font-size="22" text-anchor="middle">33</text>
+<rect class="tile" x="607" y="323" width="51" height="51" rx="6"/>
+<text x="632.5" y="356" font-size="22" text-anchor="middle">34</text>
+<rect class="tile" x="664" y="323" width="51" height="51" rx="6"/>
+<text x="689.5" y="356" font-size="22" text-anchor="middle">35</text>
+<rect class="tile" x="721" y="323" width="51" height="51" rx="6"/>
+<text x="746.5" y="356" font-size="22" text-anchor="middle">36</text>
+<rect class="tile" x="778" y="323" width="51" height="51" rx="6"/>
+<text x="803.5" y="356" font-size="22" text-anchor="middle">37</text>
+<rect class="tile" x="835" y="323" width="51" height="51" rx="6"/>
+<text x="860.5" y="356" font-size="22" text-anchor="middle">38</text>
+<rect class="tile" x="892" y="323" width="51" height="51" rx="6"/>
+<text x="917.5" y="356" font-size="22" text-anchor="middle">39</text>
+<rect class="tile" x="949" y="323" width="51" height="51" rx="6"/>
+<text x="974.5" y="356" font-size="22" text-anchor="middle">40</text>
+<rect class="tile" x="550" y="380" width="51" height="51" rx="6"/>
+<text x="575.5" y="413" font-size="22" text-anchor="middle">41</text>
+<rect class="tile" x="607" y="380" width="51" height="51" rx="6"/>
+<text x="632.5" y="413" font-size="22" text-anchor="middle">42</text>
+<rect class="tile" x="664" y="380" width="51" height="51" rx="6"/>
+<text x="689.5" y="413" font-size="22" text-anchor="middle">43</text>
+<rect class="tile" x="721" y="380" width="51" height="51" rx="6"/>
+<text x="746.5" y="413" font-size="22" text-anchor="middle">44</text>
+<rect class="tile" x="778" y="380" width="51" height="51" rx="6"/>
+<text x="803.5" y="413" font-size="22" text-anchor="middle">45</text>
+<rect class="tile" x="835" y="380" width="51" height="51" rx="6"/>
+<text x="860.5" y="413" font-size="22" text-anchor="middle">46</text>
+<rect class="tile" x="892" y="380" width="51" height="51" rx="6"/>
+<text x="917.5" y="413" font-size="22" text-anchor="middle">47</text>
+<rect class="tile" x="949" y="380" width="51" height="51" rx="6"/>
+<text x="974.5" y="413" font-size="22" text-anchor="middle">48</text>
+<rect class="tile" x="550" y="437" width="51" height="51" rx="6"/>
+<text x="575.5" y="470" font-size="22" text-anchor="middle">49</text>
+<rect class="tile" x="607" y="437" width="51" height="51" rx="6"/>
+<text x="632.5" y="470" font-size="22" text-anchor="middle">50</text>
+<rect class="tile" x="664" y="437" width="51" height="51" rx="6"/>
+<text x="689.5" y="470" font-size="22" text-anchor="middle">51</text>
+<rect class="tile" x="721" y="437" width="51" height="51" rx="6"/>
+<text x="746.5" y="470" font-size="22" text-anchor="middle">52</text>
+<rect class="tile" x="778" y="437" width="51" height="51" rx="6"/>
+<text x="803.5" y="470" font-size="22" text-anchor="middle">53</text>
+<rect class="tile" x="835" y="437" width="51" height="51" rx="6"/>
+<text x="860.5" y="470" font-size="22" text-anchor="middle">54</text>
+<rect class="tile" x="892" y="437" width="51" height="51" rx="6"/>
+<text x="917.5" y="470" font-size="22" text-anchor="middle">55</text>
+<rect class="tile" x="949" y="437" width="51" height="51" rx="6"/>
+<text x="974.5" y="470" font-size="22" text-anchor="middle">56</text>
+<rect class="tile" x="550" y="494" width="51" height="51" rx="6"/>
+<text x="575.5" y="527" font-size="22" text-anchor="middle">57</text>
+<rect class="tile" x="607" y="494" width="51" height="51" rx="6"/>
+<text x="632.5" y="527" font-size="22" text-anchor="middle">58</text>
+<rect class="tile" x="664" y="494" width="51" height="51" rx="6"/>
+<text x="689.5" y="527" font-size="22" text-anchor="middle">59</text>
+<rect class="tile" x="721" y="494" width="51" height="51" rx="6"/>
+<text x="746.5" y="527" font-size="22" text-anchor="middle">60</text>
+<rect class="tile" x="778" y="494" width="51" height="51" rx="6"/>
+<text x="803.5" y="527" font-size="22" text-anchor="middle">61</text>
+<rect class="swapped" x="835" y="494" width="51" height="51" rx="6"/>
+<text x="860.5" y="527" font-size="22" text-anchor="middle">63</text>
+<rect class="swapped" x="892" y="494" width="51" height="51" rx="6"/>
+<text x="917.5" y="527" font-size="22" text-anchor="middle">62</text>
+<rect class="blank" x="949" y="494" width="51" height="51" rx="6"/>
+<text x="32" y="584" font-size="16">Legal slides preserve permutation parity XOR blank-square color. INIT and GOAL differ.</text>
+</svg>
