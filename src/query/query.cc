@@ -483,6 +483,7 @@ namespace query {
         r.statistics["elapsed_ms"] = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
         r.statistics["variables"] = Json::UInt64(context.variables);
         r.statistics["clauses"] = Json::UInt64(context.clauses);
+        r.statistics["solver_calls"] = Json::UInt64(context.solver_calls.load());
         r.statistics["conflicts"] = Json::UInt64(context.conflicts_used);
         r.statistics["propagations"] = Json::UInt64(context.propagations_used);
         return r;

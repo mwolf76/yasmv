@@ -332,3 +332,7 @@ The inline artifact is inspection evidence, not a new save/revalidate command.
 Schema validation checks structure; it does not establish inductiveness or
 model identity. The engine establishes the three obligations before publishing
 it. Model compilation and these checks share the native compiler/backend.
+
+The [benchmark guide](INTERPOLATION_BENCHMARKS.md) compares interpolation with
+bounded search, simple-path exhaustion, and k-induction on fixed safety cases,
+including process time, memory, proof sizes, and incomplete outcomes.

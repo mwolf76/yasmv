@@ -321,3 +321,46 @@ exercise caps and shared budgets, and reopen persisted workbench evidence.
 - Source-distribution assembly passed; all changed distributed files matched
   their sources. This does not claim a clean distribution build (see the
   existing omissions recorded for milestone 2).
+
+## Milestone 5: benchmark accounting and baseline
+
+The benchmark runner compares bounded checks, forward simple-path exhaustion,
+k-induction, and interpolation against identical models, inputs, assumptions,
+and safety targets. It records each fresh process's elapsed time and Linux
+`wait4` peak RSS, query statistics, proof sizes, and explicit outcome/scope.
+Native UNKNOWN exit codes and hard timeouts remain incomplete samples. Every
+counterexample must pass a separately timed fresh replay; interpolation proofs
+must carry the three verified obligations and matching model identity.
+
+The shared query context now counts actual native solver invocations. Calls
+stopped by cancellation or a budget before entering the solver do not count.
+Native tests check both a completed bounded query and cancellation before the
+first solve. Runner tests cover problem/depth matching, outcome distinctions,
+per-process RSS isolation, hard timeouts, native UNKNOWN handling, and real
+safe/unsafe four-method runs.
+
+The [baseline](INTERPOLATION_BENCHMARKS.md) contains 144 queries and 48 successful
+counterexample replays. It supports keeping interpolation opt-in. No search
+optimization or default change is selected without a demonstrated benefit.
+
+## Milestone 5 recorded validation — 2026-09-29
+
+- All 25 native query/interpolation/search cases passed in the fully
+  instrumented yasmv/CaDiCaL ASan/UBSan build, including the solver-call
+  accounting assertions. Production and test sources matched the normal
+  build. UBSan halted on errors; leak detection remained disabled for the
+  existing process-lifetime managers.
+- Full `YASMV_HOME="$PWD" make -j3 test` passed with LLVM 18 enabled and the
+  jsonschema-enabled Python environment; no tests were skipped. This includes
+  all five new benchmark tests, the native solver-call accounting assertions,
+  the exhaustive interpolation/search oracles, and existing regressions.
+- The three-repetition benchmark completed all 144 queries, including nine
+  cooperative timeouts retained as UNKNOWN. All 48 counterexample replays
+  passed; every interpolation proof carried verified invariant obligations.
+  Recorded binary, runner, manifest, and fixture hashes matched their sources.
+- Chromium browser acceptance passed with Playwright 1.63.0 and Node 22.
+- The normal build passed with warnings treated as errors. Build provenance
+  was collected with `tools/build-provenance.py`.
+- Source-distribution assembly passed, with all 21 changed distributed files
+  checked against their sources. This does not claim a clean distribution
+  build (see the existing omissions recorded for milestone 2).

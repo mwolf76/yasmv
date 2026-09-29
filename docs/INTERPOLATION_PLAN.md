@@ -1,8 +1,9 @@
 # Interpolation-based reachability proposal
 
-Status: milestones 1–4 implemented, 2026-09-29; milestone 5 is proposed.
+Status: milestones 1–5 implemented, 2026-09-29.
 See [proof validation](INTERPOLATION_PROOF_VALIDATION.md). Interpolation is an
-opt-in reachability and safety strategy; benchmarking follows in milestone 5.
+opt-in reachability and safety strategy. The
+[benchmark baseline](INTERPOLATION_BENCHMARKS.md) records the optimization decision.
 
 Reference: K. L. McMillan, [Interpolation and SAT-based Model Checking](https://mcmil.net/pubs/CAV03.pdf), CAV 2003, LNCS 2725, pp. 1–13, DOI [10.1007/978-3-540-45069-6_1](https://doi.org/10.1007/978-3-540-45069-6_1).
 
@@ -262,9 +263,13 @@ reuse learned clauses across changed partitions without reconstruction. Defer
 backward interpolation, automatic portfolios, progress/liveness reduction, and
 default changes until the forward safety implementation has evidence behind it.
 
-Next implementation task: milestone 5. Benchmark interpolation against bounded
-search, simple-path exhaustion, and k-induction with matching models, inputs,
-assumptions, and budgets. Measure total time, memory, image queries, restarts,
-proof nodes, and invariant size before selecting optimizations or changing any
-default strategy. Query selection and evidence are documented in
-[Stronger analysis](STRONGER_ANALYSIS.md#interpolation).
+Milestone 5 measured 144 fresh-process queries across 12 safety cases, with
+matching model/configuration identities and common wall budgets. All concrete
+counterexamples passed separate replay. Interpolation avoided simple-path
+timeouts on larger cycles and a safe LLVM model, but did not establish a
+general advantage over k-induction or a material memory reduction. Keep the
+current defaults and fresh proof engines. Further circuit, frontier-image, or
+suffix-reuse optimizations require a measured benefit and the same correctness
+gates. Query selection and evidence are documented in
+[Stronger analysis](STRONGER_ANALYSIS.md#interpolation); measurements and their
+limits are in the [benchmark guide](INTERPOLATION_BENCHMARKS.md).

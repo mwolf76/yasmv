@@ -42,6 +42,7 @@ BOOST_AUTO_TEST_CASE(typed_outcomes_and_serialization)
     BOOST_CHECK(r.outcome == query::Outcome::unreachable);
     BOOST_CHECK_EQUAL(r.scope, "through_depth");
     BOOST_CHECK_EQUAL(r.checked_depths.size(), 1);
+    BOOST_CHECK_EQUAL(r.statistics["solver_calls"].asUInt64(), 1);
     BOOST_CHECK_EQUAL(r.json()["outcome"].asString(), "unreachable");
     r = query::execute(reach());
     BOOST_REQUIRE(r.witness != nullptr);
@@ -67,6 +68,8 @@ BOOST_AUTO_TEST_CASE(cancellation_at_work_boundaries_does_not_poison_next_query)
         BOOST_CHECK(r.outcome == query::Outcome::none);
         BOOST_CHECK(r.reason == query::StopReason::cancelled);
         BOOST_CHECK(r.trace.isNull());
+        if (phase == query::Phase::solving)
+            BOOST_CHECK_EQUAL(r.statistics["solver_calls"].asUInt64(), 0);
         auto next = query::execute(reach());
         BOOST_REQUIRE(next.outcome == query::Outcome::reachable);
     }
