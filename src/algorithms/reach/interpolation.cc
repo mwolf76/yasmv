@@ -243,11 +243,15 @@ Result search(const System& system, Limits limits, const Observer& observer)
         notify(observer, Event::initial_projection);
         sat::InterpolationResult initial;
         {
-            sat::Engine a("interpolation-initial-a", sat::Engine::Mode::record);
-            sat::Engine b("interpolation-initial-b", sat::Engine::Mode::record);
-            system.initial(a, 0);
-            system.initial(b, 0, false);
-            initial = sat::compute_interpolant(sat::PartitionedCnf(a, b, 0), limits.interpolation);
+            const auto input = [&] {
+                sat::Engine a("interpolation-initial-a", sat::Engine::Mode::record);
+                sat::Engine b("interpolation-initial-b", sat::Engine::Mode::record);
+                system.initial(a, 0);
+                system.initial(b, 0, false);
+                return sat::PartitionedCnf(a, b, 0);
+            }();
+            diagnostics::sample("initial_engines_destroyed");
+            initial = sat::compute_interpolant(input, limits.interpolation);
         }
         if (completed(initial.status) != sat::STATUS_UNSAT)
             throw std::logic_error("Initial predicate and its semantic complement overlap");
@@ -274,19 +278,23 @@ Result search(const System& system, Limits limits, const Observer& observer)
                 diagnostics::sample("image_begin", {{"horizon",horizon},{"image",stats.images}});
                 sat::InterpolationResult image;
                 {
-                    sat::Engine a("interpolation-image-a", sat::Engine::Mode::record);
-                    sat::Engine b("interpolation-image-b", sat::Engine::Mode::record);
-                    // Use the original INIT on the first iteration explicitly.
-                    if (first) system.initial(a, 0);
-                    else reached.emit(a, 0);
-                    system.transition(a, 0);
-                    emit_suffix(system, b, 1, horizon);
-                    image = sat::compute_interpolant(sat::PartitionedCnf(a, b, 1), limits.interpolation);
+                    const auto input = [&] {
+                        sat::Engine a("interpolation-image-a", sat::Engine::Mode::record);
+                        sat::Engine b("interpolation-image-b", sat::Engine::Mode::record);
+                        // Use the original INIT on the first iteration explicitly.
+                        if (first) system.initial(a, 0);
+                        else reached.emit(a, 0);
+                        system.transition(a, 0);
+                        emit_suffix(system, b, 1, horizon);
+                        return sat::PartitionedCnf(a, b, 1);
+                    }();
+                    diagnostics::sample("image_engines_destroyed", {{"image",stats.images},{"horizon",horizon}});
+                    image = sat::compute_interpolant(input, limits.interpolation);
                 }
                 if (diagnostics::enabled()) {
                     auto memory = diagnostics::circuit_memory(reached.circuit, reached.root);
                     memory["image"] = stats.images; memory["horizon"] = horizon;
-                    diagnostics::sample("image_engines_destroyed", std::move(memory));
+                    diagnostics::sample("image_cnf_destroyed", std::move(memory));
                 }
                 completed(image.status);
                 stats.proof_nodes += image.proof_nodes;

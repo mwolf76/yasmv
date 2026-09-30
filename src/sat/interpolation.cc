@@ -193,55 +193,59 @@ status_t PartitionedCnf::verify(const Circuit& circuit, Circuit::Ref root) const
 InterpolationResult compute_interpolant(const PartitionedCnf& input, InterpolationLimits limits)
 {
     diagnostics::Run diagnostic;
-    Engine engine("interpolation-proof", Engine::Mode::proof, limits.proof_nodes);
-    const auto vars = allocate(engine, input.variables());
-    if (!diagnostic.directory().empty()) {
-        Json::Value metadata;
-        metadata["format"] = "yasmv-interpolation-capture";
-        metadata["version"] = 1;
-        metadata["solver"] = Engine::solver_signature();
-        metadata["interface"] = Json::arrayValue;
-        for (auto [atom, variable] : input.interface()) {
-            const auto& bit = input.state_bits().at(atom);
-            Json::Value entry;
-            entry["atom"] = Json::UInt64(atom);
-            entry["variable"] = engine.proof_variable(vars.at(variable));
-            std::ostringstream name; name << bit.expr();
-            entry["symbol"] = name.str();
-            entry["bit"] = bit.bitno();
-            entry["frozen"] = bit.time() == FROZEN;
-            entry["frame"] = 0;
-            metadata["interface"].append(entry);
-        }
-        std::ofstream out(diagnostic.directory() / "interface.json");
-        out.exceptions(std::ios::badbit | std::ios::failbit);
-        out << metadata << '\n';
-    }
-    for (const auto& clause : input.clauses()) {
-        checkpoint(); engine.add_proof_clause(convert(clause.literals, vars), clause.partition);
-    }
-    diagnostic.phase("proof_solve_begin");
-    const auto status = engine.solve();
-    if (status != STATUS_UNSAT) {
-        diagnostic.complete(false);
-        InterpolationResult result; result.status = status; return result;
-    }
     InterpolationResult result;
-    diagnostic.phase("proof_solve_end", &engine.resolution_proof());
-    result.circuit = Circuit(checkpoint, limits.circuit_nodes);
-    std::map<int, Circuit::Atom> shared;
-    for (auto [atom, variable] : input.interface()) shared.emplace(engine.proof_variable(vars.at(variable)), atom);
-    result.root = interpolate(engine.resolution_proof(), engine.proof_root(), shared, result.circuit, checkpoint);
-    diagnostic.phase("craig_verification_begin", &engine.resolution_proof(), &result.circuit, result.root);
+    {
+        Engine engine("interpolation-proof", Engine::Mode::proof, limits.proof_nodes);
+        const auto vars = allocate(engine, input.variables());
+        if (!diagnostic.directory().empty()) {
+            Json::Value metadata;
+            metadata["format"] = "yasmv-interpolation-capture";
+            metadata["version"] = 1;
+            metadata["solver"] = Engine::solver_signature();
+            metadata["interface"] = Json::arrayValue;
+            for (auto [atom, variable] : input.interface()) {
+                const auto& bit = input.state_bits().at(atom);
+                Json::Value entry;
+                entry["atom"] = Json::UInt64(atom);
+                entry["variable"] = engine.proof_variable(vars.at(variable));
+                std::ostringstream name; name << bit.expr();
+                entry["symbol"] = name.str();
+                entry["bit"] = bit.bitno();
+                entry["frozen"] = bit.time() == FROZEN;
+                entry["frame"] = 0;
+                metadata["interface"].append(entry);
+            }
+            std::ofstream out(diagnostic.directory() / "interface.json");
+            out.exceptions(std::ios::badbit | std::ios::failbit);
+            out << metadata << '\n';
+        }
+        for (const auto& clause : input.clauses()) {
+            checkpoint(); engine.add_proof_clause(convert(clause.literals, vars), clause.partition);
+        }
+        diagnostic.phase("proof_solve_begin");
+        const auto status = engine.solve();
+        if (status != STATUS_UNSAT) {
+            diagnostic.complete(false);
+            result.status = status; return result;
+        }
+        diagnostic.phase("proof_solve_end", &engine.resolution_proof());
+        result.circuit = Circuit(checkpoint, limits.circuit_nodes);
+        std::map<int, Circuit::Atom> shared;
+        for (auto [atom, variable] : input.interface()) shared.emplace(engine.proof_variable(vars.at(variable)), atom);
+        result.root = interpolate(engine.resolution_proof(), engine.proof_root(), shared, result.circuit, checkpoint);
+        result.proof_nodes = engine.resolution_proof().nodes().size();
+        diagnostic.phase("interpolant_complete", &engine.resolution_proof(), &result.circuit, result.root);
+    } // Release the solver, proof graph and variable maps before fresh checks.
+    diagnostic.phase("proof_engine_destroyed", nullptr, &result.circuit, result.root);
+    diagnostic.phase("craig_verification_begin", nullptr, &result.circuit, result.root);
     const auto verification = input.verify(result.circuit, result.root);
-    diagnostic.phase("craig_verification_end", &engine.resolution_proof(), &result.circuit, result.root);
+    diagnostic.phase("craig_verification_end", nullptr, &result.circuit, result.root);
     if (verification == STATUS_UNKNOWN) return InterpolationResult();
     if (verification != STATUS_UNSAT) throw std::logic_error("Interpolant failed fresh Craig-condition checks");
     checkpoint();
     result.status = STATUS_UNSAT;
     result.verified = true;
     result.state_bits = input.state_bits();
-    result.proof_nodes = engine.resolution_proof().nodes().size();
     diagnostic.complete(true);
     return result;
 }
