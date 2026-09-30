@@ -142,3 +142,58 @@ request for the large experiment is:
 
 Run it with `YASMV_HOME="$PWD" ./yasmv --quiet --query-file request.json`.
 Exit code 3 with `status: "unknown"` means incomplete search, not a proof.
+
+## Half-size rerun: the 31-puzzle
+
+After the unlimited-time 63-puzzle attempt, the user reported a host crash.
+Its last saved sample recorded 55,278,809,088 bytes of current cgroup memory
+(51.48 GiB), with no cgroup OOM event at that sample. No final checker result
+was saved. The old run's `status: running` is a stale pre-crash snapshot;
+it does not mean the process survived the reboot. The old artifacts are kept
+in `results-unlimited-60gb`.
+
+The [31-puzzle model](puzzle-31.smv) halves the cell count to a **4×8 board**.
+It has 32 five-bit cells (160 board bits), 496 pairwise distinctness constraints,
+32 legal-move guards, and 104 directed adjacent slides. INIT is `1..31,0`;
+GOAL swaps tiles 30 and 31, leaving the blank fixed. The same parity argument
+and the same A/B induction-step construction above apply to this rectangle.
+Its reachable board component contains `32! / 2`, about `1.316 × 10^35`, boards.
+No parity lemma is supplied to the checker.
+
+Generate it with:
+
+```sh
+python3 examples/sliding-puzzle-experiment/generate.py --rows 4 --columns 8 \
+  --output examples/sliding-puzzle-experiment/puzzle-31.smv
+python3 examples/sliding-puzzle-experiment/check.py
+```
+
+The checks also cover all 32 blank positions and all four directions on
+representative rectangular boards: 104 legal successors match the independent
+oracle and 24 boundary moves are rejected. The rectangle has a satisfiable
+initial state and a reachable one-slide control with fresh trace replay.
+Generation, opposite parity, and induction-step paths through k=1024 are
+checked for both large models; the original exhaustive 2×2 checks and verified
+small interpolation proof are retained.
+
+The new interpolation run was launched on 2026-09-30 with seed 0 and no query
+limits. Its persistent user service is `yasmv-puzzle31-unlimited-32gb.service`.
+`MemoryMax=32000000000` caps cgroup memory at 32 decimal GB (29.80 GiB), and
+`MemorySwapMax=0` disables swap. Wall-clock and CPU time limits are both
+infinite. The separate `yasmv-puzzle31-monitor.service` records resources every
+30 seconds and the eventual exit status. Both services run independently of
+the interactive session; they do not restart the experiment after a reboot.
+
+The new artifacts are in `results-puzzle31-unlimited-32gb`: `request.json`
+holds the exact query, `run.json` contains hashes, the boot ID and latest status,
+`resources.jsonl` contains resource samples, `stdout.json` receives the final
+native result, and `stderr.log` receives diagnostics. Check the sample timestamp
+and service state when reading a saved status. While it is running there is
+no new reachability result; memory exhaustion without a verified result is
+an incomplete attempt.
+
+```sh
+systemctl --user show yasmv-puzzle31-unlimited-32gb.service \
+  -p ActiveState -p SubState -p Result -p MemoryCurrent -p MemoryPeak \
+  -p CPUUsageNSec -p ExecMainStatus
+```
