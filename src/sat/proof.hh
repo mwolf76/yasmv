@@ -14,17 +14,21 @@ namespace sat::proof {
 using Clause = std::vector<int>;
 using Id = int64_t;
 using NodeId = size_t;
-enum class Partition { a, b };
-enum class Rule { original, resolution, weakening };
+enum class Partition : uint8_t { a, b };
+enum class Rule : uint8_t { original, resolution, weakening };
 
 struct Node {
     Rule rule;
     Partition partition = Partition::a; // meaningful only for original nodes
-    NodeId left = 0, right = 0;
     int pivot = 0; // signed literal in the left antecedent
+    NodeId left = 0, right = 0;
     // Only originals and named derivation endpoints own a retained clause.
     static constexpr size_t no_clause = std::numeric_limits<size_t>::max();
     size_t clause_index = no_clause;
+    // Pack the small tags beside the pivot, without narrowing graph indices.
+    Node(Rule rule, Partition partition = Partition::a, NodeId left = 0,
+         NodeId right = 0, int pivot = 0)
+        : rule(rule), partition(partition), pivot(pivot), left(left), right(right) {}
 };
 
 // A checked, nonincremental refutation. No solver headers or global managers.

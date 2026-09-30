@@ -138,6 +138,17 @@ combined capacity of the old and new rolling resolvent buffers while checking
 a chain. It excludes the candidate clause, normalization scratch structures,
 and unrelated solver allocations. RSS and allocator measurements include them.
 
+The metadata/traversal milestone packs proof-node tags without narrowing IDs
+and replaces proof ancestry/label trees with indexed buffers. At
+`interpolant_traversal`, `interpolant_mark_bytes` and `interpolant_label_bytes`
+report those live vector capacities in bytes. `interpolant_pending_bytes_peak`
+reports the largest work-stack capacity; that stack is already released before
+labels are allocated. These exclude ownership/interface maps and circuit
+storage, and must not be summed as simultaneously live allocations. Marks and
+labels cover IDs through the requested root, including holes in its ancestry.
+Circuit scratch arrays likewise cover the root's prefix; reachable IDs keep
+the same ascending order for circuit visiting and CNF emission.
+
 `proof_ancestry` records how many stored nodes are ancestors of the empty
 clause, plus original-node and original-literal counts. An unused ancestor
 is not necessarily dispensable during earlier proof checking. `proof_sat`,
@@ -196,5 +207,6 @@ The diagnostic environment variables are opt-in developer instrumentation:
 files and selected capture directories are rejected to prevent mixing runs.
 No variable enables a memory optimization or disables proof checking.
 
-Measured optimization reports: [clause storage](benchmarks/interpolation-clause-storage.md)
-and [shorter object lifetimes](benchmarks/interpolation-lifetimes.md).
+Measured optimization reports: [clause storage](benchmarks/interpolation-clause-storage.md),
+[shorter object lifetimes](benchmarks/interpolation-lifetimes.md), and
+[metadata and traversal](benchmarks/interpolation-traversal.md).
