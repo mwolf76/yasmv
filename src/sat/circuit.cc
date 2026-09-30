@@ -45,25 +45,39 @@ Circuit::Ref Circuit::conjunction(Ref a, Ref b)
     ands_.emplace(key, result);
     return result;
 }
-std::vector<size_t> Circuit::order(Ref root) const
+std::vector<Circuit::Ref> Circuit::order(Ref root) const
 {
     valid(root);
-    std::set<size_t> seen;
-    std::vector<size_t> pending{root / 2};
+    // Internal IDs are dense and parents precede children. Bound scratch space
+    // by the root, not by unrelated nodes appended later to this circuit.
+    std::vector<uint8_t> seen(root / 2 + 1);
+    std::vector<Ref> pending, result;
+    const auto enqueue = [&](Ref id) {
+        if (id && !seen[id]) { seen[id] = 1; pending.push_back(id); }
+    };
+    enqueue(root / 2);
     while (!pending.empty()) {
         tick();
         const auto id = pending.back(); pending.pop_back();
-        if (!id || !seen.insert(id).second) continue;
+        result.push_back(id);
         const auto& n = nodes_[id];
-        if (!n.atom) { pending.push_back(n.left / 2); pending.push_back(n.right / 2); }
+        if (!n.atom) { enqueue(n.left / 2); enqueue(n.right / 2); }
     }
-    return {seen.begin(), seen.end()}; // append-only graph is topological
+    // Preserve the former ascending order, including callback/CNF allocation
+    // order. Sorting only reachable IDs avoids scanning an unrelated prefix.
+    size_t comparisons = 0;
+    std::sort(result.begin(), result.end(), [&](Ref a, Ref b) {
+        if (++comparisons % 4096 == 0) tick();
+        return a < b;
+    });
+    tick();
+    return result;
 }
 Circuit::Ref Circuit::import(const Circuit& source, Ref root,
                               const std::function<Atom(Atom)>& rename)
 {
     const auto ids = source.order(root);
-    std::map<size_t, Ref> result{{0, False}};
+    std::vector<Ref> result(root / 2 + 1, False);
     auto edge = [&](Ref r) { return result.at(r / 2) ^ (r & 1); };
     for (const auto id : ids) {
         tick();
@@ -88,7 +102,8 @@ std::set<Circuit::Atom> Circuit::support(Ref root) const
 }
 bool Circuit::evaluate(Ref root, const std::function<bool(Atom)>& value) const
 {
-    std::map<size_t, bool> values{{0, false}};
+    valid(root);
+    std::vector<uint8_t> values(root / 2 + 1);
     auto edge = [&](Ref r) { return values.at(r / 2) != bool(r & 1); };
     for (auto id : order(root)) {
         tick(); const auto& n = nodes_[id];
@@ -107,7 +122,8 @@ int Circuit::encode(Ref root, const std::function<int()>& fresh,
     const auto ids = order(root);
     // A dedicated constant is local to this emission, even across polarities.
     const int truth = literal(fresh()); emit({truth});
-    std::map<size_t, int> values{{0, -truth}};
+    std::vector<int> values(root / 2 + 1);
+    values[0] = -truth;
     auto edge = [&](Ref r) { return (r & 1) ? -values.at(r / 2) : values.at(r / 2); };
     for (auto id : ids) {
         tick(); const auto& n = nodes_[id];
@@ -149,28 +165,45 @@ Circuit::Ref interpolate(const proof::ResolutionProof& proof, proof::NodeId root
         if (sides == 3 && !authorized_atoms.insert(shared.at(var)).second)
             throw std::invalid_argument("Distinct shared variables cannot alias a state atom");
     }
-    std::set<size_t> needed;
-    std::vector<size_t> todo{root};
-    while (!todo.empty()) {
-        tick(); const auto id = todo.back(); todo.pop_back();
-        if (!needed.insert(id).second) continue;
-        if (diagnostic && needed.size() % 4096 == 0) diagnostic->progress(proof);
-        const auto& n = nodes[id];
-        if (n.rule != proof::Rule::original) {
-            if (n.left >= id) throw std::invalid_argument("Invalid proof DAG order");
-            todo.push_back(n.left);
-            if (n.rule == proof::Rule::resolution) {
-                if (n.right >= id) throw std::invalid_argument("Invalid proof DAG order");
-                todo.push_back(n.right);
+    // Unlike solver IDs, graph IDs form a dense append-only range. Marks and
+    // labels can index that range directly, without one tree allocation per
+    // ancestor. Keep classifying *all* originals above, even after the root.
+    std::vector<uint8_t> needed(root + 1);
+    size_t needed_count = 0, pending_capacity_peak = 0;
+    {
+        std::vector<proof::NodeId> todo;
+        const auto enqueue = [&](proof::NodeId id) {
+            if (!needed[id]) {
+                needed[id] = 1;
+                todo.push_back(id);
+                pending_capacity_peak = std::max(pending_capacity_peak, todo.capacity());
+            }
+        };
+        enqueue(root);
+        while (!todo.empty()) {
+            tick(); const auto id = todo.back(); todo.pop_back();
+            ++needed_count;
+            if (diagnostic && needed_count % 4096 == 0) diagnostic->progress(proof);
+            const auto& n = nodes[id];
+            if (n.rule != proof::Rule::original) {
+                if (n.left >= id) throw std::invalid_argument("Invalid proof DAG order");
+                enqueue(n.left);
+                if (n.rule == proof::Rule::resolution) {
+                    if (n.right >= id) throw std::invalid_argument("Invalid proof DAG order");
+                    enqueue(n.right);
+                }
             }
         }
     }
-    std::map<size_t, Circuit::Ref> labels;
-    if (diagnostic) diagnostic->counters("proof_ancestry", {{"needed_proof_nodes",needed.size()},
+    if (diagnostic) diagnostic->counters("proof_ancestry", {{"needed_proof_nodes",needed_count},
         {"stored_proof_nodes",nodes.size()},{"original_nodes",original_nodes},{"original_literals",original_literals}});
     if (diagnostic) diagnostic->phase("interpolant_labels_begin", &proof);
-    for (auto id : needed) {
-        tick(); const auto& n = nodes[id];
+    std::vector<Circuit::Ref> labels(root + 1);
+    size_t labelled = 0;
+    for (size_t id = 0; id < needed.size(); ++id) {
+        tick();
+        if (!needed[id]) continue;
+        const auto& n = nodes[id];
         auto label = Circuit::True;
         if (n.rule == proof::Rule::original && n.partition == proof::Partition::a) {
             label = Circuit::False;
@@ -186,9 +219,13 @@ Circuit::Ref interpolate(const proof::ResolutionProof& proof, proof::NodeId root
             label = ownership.at(std::abs(n.pivot)) == 1
                 ? circuit.disjunction(a, b) : circuit.conjunction(a, b);
         }
-        labels.emplace(id, label);
-        if (diagnostic && labels.size() % 4096 == 0) diagnostic->progress(proof, &circuit);
+        labels[id] = label;
+        if (diagnostic && ++labelled % 4096 == 0) diagnostic->progress(proof, &circuit);
     }
+    if (diagnostic) diagnostic->counters("interpolant_traversal", {
+        {"interpolant_mark_bytes",needed.capacity() * sizeof(decltype(needed)::value_type)},
+        {"interpolant_label_bytes",labels.capacity() * sizeof(Circuit::Ref)},
+        {"interpolant_pending_bytes_peak",pending_capacity_peak * sizeof(proof::NodeId)}});
     return labels.at(root);
 }
 } // namespace sat

@@ -387,6 +387,86 @@ void circuits_and_polarities()
     }
 }
 
+void sparse_ids_and_unreachable_originals()
+{
+    // External IDs and variables must not become dense allocation indices.
+    const Id first = std::numeric_limits<Id>::max() - 4;
+    const auto atom = std::numeric_limits<sat::Circuit::Atom>::max();
+    ResolutionProof proof;
+    proof.original(first, {INT_MAX}, Partition::a);
+    proof.original(first+1, {-INT_MAX}, Partition::b);
+    proof.derive(first+2, {}, {first,first+1});
+    const auto root = proof.conclude(first+2);
+    proof.original(first+3, {INT_MAX-1}, Partition::a);
+    proof.original(first+4, {INT_MAX-1}, Partition::b);
+    sat::Circuit circuit;
+    // Even originals appended after the empty clause determine sharing.
+    rejects([&] { sat::interpolate(proof, root, {{INT_MAX,atom}}, circuit); });
+    rejects([&] { sat::interpolate(proof, root, {{INT_MAX,atom},{INT_MAX-1,atom}}, circuit); });
+    const auto label = sat::interpolate(proof, root, {{INT_MAX,atom},{INT_MAX-1,atom-1}}, circuit);
+    CHECK(circuit.support(label) == std::set<sat::Circuit::Atom>{atom});
+    CHECK(circuit.evaluate(label, [](auto) { return true; }));
+    CHECK(!circuit.evaluate(label, [](auto) { return false; }));
+    check_dag(proof);
+}
+
+void circuit_traversal_with_unreachable_nodes()
+{
+    using sat::Circuit;
+    Circuit circuit;
+    for (unsigned i = 1000; i < 1256; ++i) circuit.atom(i);
+    const auto x = circuit.atom(1), y = circuit.atom(2), z = circuit.atom(3);
+    const auto left = circuit.conjunction(x,y), right = circuit.conjunction(circuit.negate(x),z);
+    const auto root = circuit.disjunction(left,right);
+    for (unsigned i = 2000; i < 2256; ++i) circuit.atom(i);
+    std::vector<Circuit::Ref> visited;
+    circuit.visit(root, [&](auto ref, auto, auto a, auto b) {
+        CHECK(a / 2 < ref / 2 && b / 2 < ref / 2);
+        visited.push_back(ref);
+    });
+    auto expected = std::vector<Circuit::Ref>{x,y,z,left,right,root & ~Circuit::Ref{1}};
+    std::sort(expected.begin(),expected.end());
+    CHECK(visited == expected && circuit.reachable_size(root) == expected.size());
+    CHECK(circuit.support(root) == std::set<Circuit::Atom>({1,2,3}));
+    for (unsigned row = 0; row < 8; ++row) {
+        auto bit = [&](Circuit::Atom atom) {
+            CHECK(atom >= 1 && atom <= 3);
+            return bool(row & (1u << (atom-1)));
+        };
+        CHECK(circuit.evaluate(root,bit) == bool(row & 1 ? row & 2 : row & 4));
+        CHECK(circuit.evaluate(circuit.negate(root),bit) != circuit.evaluate(root,bit));
+    }
+    int fresh = 0;
+    std::vector<Circuit::Atom> encoded_atoms;
+    std::vector<Clause> clauses;
+    const auto top = circuit.encode(root, [&] { return ++fresh; },
+        [&](Circuit::Atom atom) { encoded_atoms.push_back(atom); return int(atom)+10; },
+        [&](const Clause& clause) { clauses.push_back(clause); });
+    CHECK(encoded_atoms == std::vector<Circuit::Atom>({1,2,3}));
+    CHECK(top == -4 && fresh == 4);
+    CHECK(clauses == std::vector<Clause>({{1},{-2,11},{-2,12},{2,-11,-12},
+        {-3,-11},{-3,13},{3,11,-13},{-4,-2},{-4,-3},{4,2,3}}));
+    rejects([&] {
+        circuit.encode(root, [] { return INT_MIN; }, [](auto) { return 1; }, [](const Clause&) {});
+    });
+    // Self-import may grow and reallocate the source while renaming atoms.
+    bool expanded = false;
+    const auto imported = circuit.import(circuit,root,[&](auto atom) {
+        if (!expanded) {
+            expanded = true;
+            for (unsigned i = 3000; i < 6000; ++i) circuit.atom(i);
+        }
+        return atom + 10000;
+    });
+    for (unsigned row = 0; row < 8; ++row)
+        CHECK(circuit.evaluate(imported,[&](auto atom) { return bool(row & (1u << (atom-10001))); }) ==
+              circuit.evaluate(root,[&](auto atom) { return bool(row & (1u << (atom-1))); }));
+    CHECK(circuit.reachable_size(Circuit::False) == 0 && circuit.reachable_size(Circuit::True) == 0);
+    const auto invalid = std::numeric_limits<Circuit::Ref>::max();
+    rejects([&] { circuit.evaluate(invalid, [](auto) { return false; }); });
+    rejects([&] { circuit.import(circuit, invalid, [](auto a) { return a; }); });
+}
+
 void work_limits_and_cancellation()
 {
     bool stop = false;
@@ -430,6 +510,8 @@ int main()
                  {"malformed proofs", malformed_proofs},
                  {"materialized assumptions", materialized_assumptions},
                  {"circuits, renaming and CNF polarities", circuits_and_polarities},
+                 {"sparse IDs and unreachable originals", sparse_ids_and_unreachable_originals},
+                 {"circuit traversal with unreachable nodes", circuit_traversal_with_unreachable_nodes},
                  {"proof/circuit limits and cancellation", work_limits_and_cancellation}}) {
             test.second();
             std::cout << "PASS " << test.first << '\n';

@@ -49,7 +49,7 @@ private:
     void tick() const;
     void valid(Ref) const;
     Ref append(Node);
-    std::vector<size_t> order(Ref) const;
+    std::vector<Ref> order(Ref) const;
 };
 
 // Extract labels from a checked resolution DAG. The dictionary must authorize

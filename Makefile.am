@@ -72,6 +72,7 @@ EXTRA_DIST += tools/benchmark-interpolation-memory.py tests/test_interpolation_m
 EXTRA_DIST += docs/benchmarks/interpolation-memory-baseline.json docs/benchmarks/interpolation-memory-baseline.md
 EXTRA_DIST += docs/benchmarks/interpolation-clause-storage.json docs/benchmarks/interpolation-clause-storage.md
 EXTRA_DIST += docs/benchmarks/interpolation-lifetimes.json docs/benchmarks/interpolation-lifetimes.md
+EXTRA_DIST += docs/benchmarks/interpolation-traversal.json docs/benchmarks/interpolation-traversal.md
 
 cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh src/sat/proof_tracer.hh src/sat/circuit.cc src/sat/circuit.hh src/sat/interpolation_diagnostics.cc src/sat/interpolation_diagnostics.hh
 cadical_proof_tests_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS)
