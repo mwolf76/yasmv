@@ -18,11 +18,13 @@ enum class Partition { a, b };
 enum class Rule { original, resolution, weakening };
 
 struct Node {
-    Clause clause;
     Rule rule;
     Partition partition = Partition::a; // meaningful only for original nodes
     NodeId left = 0, right = 0;
     int pivot = 0; // signed literal in the left antecedent
+    // Only originals and named derivation endpoints own a retained clause.
+    static constexpr size_t no_clause = std::numeric_limits<size_t>::max();
+    size_t clause_index = no_clause;
 };
 
 // A checked, nonincremental refutation. No solver headers or global managers.
@@ -39,9 +41,15 @@ public:
     NodeId conclude(Id) const;
     const std::vector<Node>& nodes() const { return nodes_; }
     NodeId node(Id) const;
+    const Clause& clause(NodeId) const;
+    struct ClauseMemory {
+        size_t clauses = 0, literals = 0, capacity = 0;
+    };
     struct Memory {
         size_t nodes, node_capacity, literals, literal_capacity, active_ids, archived_ids;
         size_t node_bytes, literal_bytes, id_payload_bytes;
+        size_t clause_slot_bytes, expanded_literals, temporary_literal_bytes_peak;
+        ClauseMemory original, derived;
     };
     Memory memory() const;
     void observe(std::function<void(const ResolutionProof&)> observer) { observer_ = std::move(observer); }
@@ -49,13 +57,16 @@ public:
 private:
     struct Entry { NodeId node; bool active; };
     std::vector<Node> nodes_;
+    std::vector<Clause> retained_;
     std::map<Id, Entry> clauses_;
     std::function<void()> checkpoint_;
     size_t node_limit_;
-    size_t literals_ = 0, literal_capacity_ = 0, active_ids_ = 0;
+    ClauseMemory original_, derived_;
+    size_t active_ids_ = 0, expanded_literals_ = 0, temporary_capacity_peak_ = 0;
     std::function<void(const ResolutionProof&)> observer_;
     void tick() const { if (checkpoint_) checkpoint_(); }
     void append(Node);
+    void retain(NodeId, Clause);
     void fresh(Id) const;
 };
 

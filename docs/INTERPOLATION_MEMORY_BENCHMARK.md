@@ -1,12 +1,15 @@
 # Interpolation memory benchmark
 
-This benchmark measures the existing proof representation and its lifetimes.
-It does not change proof retention, interpolation rules, or invariant checking.
+This benchmark measures the current proof representation and its lifetimes.
+Enabling instrumentation does not change proof retention, interpolation rules,
+or invariant checking.
 The small correctness suite is separate from the memory workload.
 
 The [initial measured baseline](benchmarks/interpolation-memory-baseline.md)
 records the retained puzzle obligation, three event replays, fresh solving,
 and the observed proof-storage and allocator-retention costs.
+The [clause-storage milestone](benchmarks/interpolation-clause-storage.md)
+documents the first optimization and compares the same captured obligation.
 
 Build and validate:
 
@@ -115,9 +118,24 @@ Samples include current RSS, process high-water RSS, and, on glibc, allocated
 arena bytes, free arena bytes, and mmap allocation bytes. Proof measurements
 include stored nodes and node-vector capacity, literal count/capacity,
 active clause IDs, archived clause IDs, and separately attributed node,
-literal, and ID-value payload bytes. Archived IDs include active IDs. Full
-clauses of intermediate resolution nodes contribute literal storage even
-though those nodes have no solver clause ID.
+literal, and ID-value payload bytes. Archived IDs include active IDs.
+
+The clause-storage milestone separates graph nodes from retained clauses.
+`proof_literals` and `proof_literal_bytes` now count retained originals and
+named derivation endpoints, including deleted clauses that may be restored.
+Their separate counts and literal bytes are reported as `proof_original_*`
+and `proof_derived_*`. These count unique storage owners: multiple solver IDs
+can alias one endpoint without copying its clause. `proof_clause_slot_bytes`
+counts the retained-clause vector's capacity in clause objects, separately
+from graph capacity and the literal buffers.
+
+`proof_expanded_literals` is a cumulative work counter: the sum of clause
+lengths for all appended originals, resolutions, and weakenings. On identical
+events it equals the old representation's stored literal count; it is not
+current allocation. `proof_temporary_literal_bytes_peak` counts the largest
+combined capacity of the old and new rolling resolvent buffers while checking
+a chain. It excludes the candidate clause, normalization scratch structures,
+and unrelated solver allocations. RSS and allocator measurements include them.
 
 `proof_ancestry` records how many stored nodes are ancestors of the empty
 clause, plus original-node and original-literal counts. An unused ancestor

@@ -48,6 +48,13 @@ is represented by a separate weakening node. Deletions invalidate antecedent
 IDs but preserve DAG nodes; restoration preserves the previous origin or
 derivation. Only an empty clause can conclude a refutation.
 
+The later [clause-storage milestone](benchmarks/interpolation-clause-storage.md)
+keeps full clauses only for originals and named derivation endpoints. Intermediate
+resolvents use rolling buffers; graph nodes retain their parents and signed
+pivots. Deleted endpoints still retain exact restoration data. The independent
+test checker reconstructs every intermediate clause from the graph, and roots
+without a retained clause are rejected rather than treated as empty clauses.
+
 The probe uses `plain`, `factor=0`, `lucky=0`, `walk=0`, and `seed=7`, and requests
 antecedents from the tracer. This conservative configuration is the tested
 starting point for interpolation, not a change to production SAT defaults.
