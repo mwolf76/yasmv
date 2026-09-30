@@ -83,7 +83,7 @@ def run(command, output, memory_bytes, wall_seconds, environment, identity):
             '--property=StandardError=file:' + str(output / 'stderr.log')]
     for key, value in environment.items(): args.append('--setenv=' + key + '=' + str(value))
     # Avoid inheriting diagnostic settings from the user manager.
-    unset = set(('YASMV_IMC_DIAGNOSTICS', 'YASMV_IMC_CAPTURE', 'YASMV_IMC_IMAGES')) - environment.keys()
+    unset = set(('YASMV_IMC_DIAGNOSTICS', 'YASMV_IMC_CAPTURE', 'YASMV_IMC_IMAGES', 'YASMV_IMC_HEAP_RELEASE')) - environment.keys()
     if unset: args.append('--property=UnsetEnvironment=' + ' '.join(sorted(unset)))
     subprocess.run([*args, *map(str, command)], check=True)
     last_print = 0
@@ -124,6 +124,7 @@ def main():
         cmd.add_argument('--output', type=Path, required=True)
         cmd.add_argument('--memory-gb', type=int, default=8, help='Decimal GB cgroup cap')
         cmd.add_argument('--wall-seconds', type=int, default=600)
+        cmd.add_argument('--heap-release', choices=('auto','off'), default='auto')
     capture = sub.choices['capture']
     capture.add_argument('--model', type=Path, required=True)
     capture.add_argument('--target', default='GOAL')
@@ -136,7 +137,8 @@ def main():
     if args.memory_gb < 1 or args.wall_seconds < 1: parser.error('Budgets must be positive')
     if args.operation == 'capture' and args.images < 1: parser.error('--images must be positive')
     output = args.output.resolve(); output.mkdir(parents=True, exist_ok=False)
-    environment = dict(YASMV_HOME=str(ROOT), YASMV_IMC_DIAGNOSTICS=str(output / 'diagnostics'))
+    environment = dict(YASMV_HOME=str(ROOT), YASMV_IMC_DIAGNOSTICS=str(output / 'diagnostics'),
+                       YASMV_IMC_HEAP_RELEASE=args.heap_release)
     if args.operation == 'capture':
         model = args.model.resolve()
         request = dict(version=1, model=str(model), query=dict(operation='reach', strategy='interpolation',

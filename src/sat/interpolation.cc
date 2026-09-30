@@ -1,4 +1,5 @@
 #include <sat/interpolation.hh>
+#include <sat/interpolation_memory.hh>
 #include <sat/interpolation_diagnostics.hh>
 #include <jsoncpp/json/json.h>
 #include <fstream>
@@ -194,6 +195,7 @@ InterpolationResult compute_interpolant(const PartitionedCnf& input, Interpolati
 {
     diagnostics::Run diagnostic;
     InterpolationResult result;
+    status_t status;
     {
         Engine engine("interpolation-proof", Engine::Mode::proof, limits.proof_nodes);
         const auto vars = allocate(engine, input.variables());
@@ -223,20 +225,23 @@ InterpolationResult compute_interpolant(const PartitionedCnf& input, Interpolati
             checkpoint(); engine.add_proof_clause(convert(clause.literals, vars), clause.partition);
         }
         diagnostic.phase("proof_solve_begin");
-        const auto status = engine.solve();
-        if (status != STATUS_UNSAT) {
-            diagnostic.complete(false);
-            result.status = status; return result;
+        status = engine.solve();
+        if (status == STATUS_UNSAT) {
+            diagnostic.phase("proof_solve_end", &engine.resolution_proof());
+            result.circuit = Circuit(checkpoint, limits.circuit_nodes);
+            std::map<int, Circuit::Atom> shared;
+            for (auto [atom, variable] : input.interface()) shared.emplace(engine.proof_variable(vars.at(variable)), atom);
+            result.root = interpolate(engine.resolution_proof(), engine.proof_root(), shared, result.circuit, checkpoint);
+            result.proof_nodes = engine.resolution_proof().nodes().size();
+            diagnostic.phase("interpolant_complete", &engine.resolution_proof(), &result.circuit, result.root);
         }
-        diagnostic.phase("proof_solve_end", &engine.resolution_proof());
-        result.circuit = Circuit(checkpoint, limits.circuit_nodes);
-        std::map<int, Circuit::Atom> shared;
-        for (auto [atom, variable] : input.interface()) shared.emplace(engine.proof_variable(vars.at(variable)), atom);
-        result.root = interpolate(engine.resolution_proof(), engine.proof_root(), shared, result.circuit, checkpoint);
-        result.proof_nodes = engine.resolution_proof().nodes().size();
-        diagnostic.phase("interpolant_complete", &engine.resolution_proof(), &result.circuit, result.root);
     } // Release the solver, proof graph and variable maps before fresh checks.
     diagnostic.phase("proof_engine_destroyed", nullptr, &result.circuit, result.root);
+    release_interpolation_heap("proof");
+    if (status != STATUS_UNSAT) {
+        diagnostic.complete(false);
+        result.status = status; return result;
+    }
     diagnostic.phase("craig_verification_begin", nullptr, &result.circuit, result.root);
     const auto verification = input.verify(result.circuit, result.root);
     diagnostic.phase("craig_verification_end", nullptr, &result.circuit, result.root);

@@ -62,7 +62,7 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 bin_PROGRAMS = yasmv
 EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests yasmv_interpolation_tests yasmv_interpolation_search_tests sat_literal_tests cadical_proof_tests
 EXTRA_PROGRAMS += interpolation_replay
-interpolation_replay_SOURCES = tools/interpolation-replay.cc src/sat/proof.cc src/sat/circuit.cc src/sat/interpolation_diagnostics.cc
+interpolation_replay_SOURCES = tools/interpolation-replay.cc src/sat/proof.cc src/sat/circuit.cc src/sat/interpolation_diagnostics.cc src/sat/interpolation_memory.cc
 interpolation_replay_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS) $(LIBJSONCPP_CPPFLAGS)
 interpolation_replay_LDADD = $(CADICAL_LIBS) $(LIBJSONCPP_LIBS)
 interpolation-memory-test: yasmv interpolation_replay
@@ -73,6 +73,7 @@ EXTRA_DIST += docs/benchmarks/interpolation-memory-baseline.json docs/benchmarks
 EXTRA_DIST += docs/benchmarks/interpolation-clause-storage.json docs/benchmarks/interpolation-clause-storage.md
 EXTRA_DIST += docs/benchmarks/interpolation-lifetimes.json docs/benchmarks/interpolation-lifetimes.md
 EXTRA_DIST += docs/benchmarks/interpolation-traversal.json docs/benchmarks/interpolation-traversal.md
+EXTRA_DIST += docs/benchmarks/interpolation-allocator.json docs/benchmarks/interpolation-allocator.md
 
 cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh src/sat/proof_tracer.hh src/sat/circuit.cc src/sat/circuit.hh src/sat/interpolation_diagnostics.cc src/sat/interpolation_diagnostics.hh
 cadical_proof_tests_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS)
