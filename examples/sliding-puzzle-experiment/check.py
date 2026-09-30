@@ -78,7 +78,7 @@ def main():
                     assert observed==successor,(board,direction,observed,successor)
                     checked+=1
     finally: session.close()
-    for rows, columns in ((8,8), (4,8)):
+    for rows, columns in ((8,8), (4,8), (4,4)):
         initial, goal = map(tuple, boards(rows,columns))
         assert parity(initial,rows,columns)!=parity(goal,rows,columns)
         for k in (1,2,3,4,8,16,63,64,127,1024):
@@ -89,44 +89,46 @@ def main():
                 assert b in [slide(a,rows,d,columns) for d in ('UP','DOWN','LEFT','RIGHT')]
         assert (HERE/f'puzzle-{rows*columns-1}.smv').read_text()==source(rows,columns)
     print('PASS: 24 small boards, 96 action checks, 48 exact legal successors; BFS component has 12 boards.')
-    print('PASS: 63- and 31-puzzle generation and parity; constructive induction-step witnesses through k=1024.')
-    # Check every blank location and action on the rectangle against the native
+    print('PASS: 63-, 31-, and 15-puzzle generation and parity; constructive induction-step witnesses through k=1024.')
+    # Check every blank location and action against the native
     # transition relation, using a representative permutation at each location.
-    generic='\n'.join(line for line in source(4,8).splitlines() if not line.startswith('INIT '))+'\n'
-    session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=generic,root='',inputs={}),threading.Event(),time.monotonic()+180)
-    legal=illegal=0
-    try:
-        for blank in range(32):
-            board=list(range(1,32))+[0]
-            board[blank],board[-1]=board[-1],board[blank]
-            for direction in ('UP','DOWN','LEFT','RIGHT'):
-                condition=' && '.join(f'cell_{i} = {v}' for i,v in enumerate(board))+' && move = '+direction
-                picked=query(dict(operation='pick-state',assumptions=[condition]))
-                successor=slide(board,4,direction,8)
-                if successor is None:
-                    assert picked['outcome']=='unsatisfiable',picked
-                    illegal+=1
-                else:
-                    assert picked['trace'],picked
-                    advanced=query(dict(operation='simulate',trace=picked['trace'],limits=dict(depth=1)))
-                    assert advanced['outcome']=='simulated',advanced
-                    observed=tuple(int(advanced['trace']['steps'][-1]['values'][f'cell_{i}']) for i in range(32))
-                    assert observed==successor,(board,direction,observed,successor)
-                    assert parity(board,4,8)==parity(successor,4,8)
-                    legal+=1
-        assert (legal,illegal)==(104,24),(legal,illegal)
-        print('PASS: 4x8 rectangle, 128 action checks, 104 exact legal successors, 24 rejected boundary moves.')
-    finally: session.close()
-    session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=source(4,8),root='',inputs={}),threading.Event(),time.monotonic()+60)
-    try:
-        assert query(dict(operation='check-init'))['outcome']=='satisfiable'
-        successor=slide(boards(4,8)[0],4,'LEFT',8)
-        target=' && '.join(f'cell_{i} = {v}' for i,v in enumerate(successor))
-        result=query(dict(operation='reach',target=target,limits=dict(depth=1)))
-        assert result['outcome']=='reachable',result
-        assert query(dict(operation='validate-trace',trace=result['trace']))['outcome']=='valid'
-        print('PASS: 31-puzzle initial state and one-slide reachability with fresh trace replay.')
-    finally: session.close()
+    for rows, columns, expected in ((4,8,(104,24)), (4,4,(48,16))):
+        count=rows*columns
+        generic='\n'.join(line for line in source(rows,columns).splitlines() if not line.startswith('INIT '))+'\n'
+        session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=generic,root='',inputs={}),threading.Event(),time.monotonic()+180)
+        legal=illegal=0
+        try:
+            for blank in range(count):
+                board=list(range(1,count))+[0]
+                board[blank],board[-1]=board[-1],board[blank]
+                for direction in ('UP','DOWN','LEFT','RIGHT'):
+                    condition=' && '.join(f'cell_{i} = {v}' for i,v in enumerate(board))+' && move = '+direction
+                    picked=query(dict(operation='pick-state',assumptions=[condition]))
+                    successor=slide(board,rows,direction,columns)
+                    if successor is None:
+                        assert picked['outcome']=='unsatisfiable',picked
+                        illegal+=1
+                    else:
+                        assert picked['trace'],picked
+                        advanced=query(dict(operation='simulate',trace=picked['trace'],limits=dict(depth=1)))
+                        assert advanced['outcome']=='simulated',advanced
+                        observed=tuple(int(advanced['trace']['steps'][-1]['values'][f'cell_{i}']) for i in range(count))
+                        assert observed==successor,(board,direction,observed,successor)
+                        assert parity(board,rows,columns)==parity(successor,rows,columns)
+                        legal+=1
+            assert (legal,illegal)==expected,(legal,illegal)
+            print(f'PASS: {rows}x{columns} board, {legal+illegal} action checks, {legal} exact legal successors, {illegal} rejected boundary moves.')
+        finally: session.close()
+        session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=source(rows,columns),root='',inputs={}),threading.Event(),time.monotonic()+60)
+        try:
+            assert query(dict(operation='check-init'))['outcome']=='satisfiable'
+            successor=slide(boards(rows,columns)[0],rows,'LEFT',columns)
+            target=' && '.join(f'cell_{i} = {v}' for i,v in enumerate(successor))
+            result=query(dict(operation='reach',target=target,limits=dict(depth=1)))
+            assert result['outcome']=='reachable',result
+            assert query(dict(operation='validate-trace',trace=result['trace']))['outcome']=='valid'
+            print(f'PASS: {count-1}-puzzle initial state and one-slide reachability with fresh trace replay.')
+        finally: session.close()
     session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=source(2),root='',inputs={}),threading.Event(),time.monotonic()+60)
     try:
         result=query(dict(operation='reach',strategy='interpolation',target='GOAL',limits=dict(wall_ms=30000)))

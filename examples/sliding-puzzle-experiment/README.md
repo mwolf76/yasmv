@@ -197,3 +197,47 @@ systemctl --user show yasmv-puzzle31-unlimited-32gb.service \
   -p ActiveState -p SubState -p Result -p MemoryCurrent -p MemoryPeak \
   -p CPUUsageNSec -p ExecMainStatus
 ```
+
+The 31-puzzle run ended on 2026-09-30 at 12:02:05 CEST after 8,671.336 seconds
+(2 hours 24 minutes 31 seconds). Systemd recorded `Result=oom-kill`, signal 9,
+and a peak of exactly 32,000,000,000 bytes. The boot ID was unchanged: the host
+stayed up while the memory cap terminated the checker. Both native output
+files were empty, so this attempt produced no reachability result or proof.
+
+## Halved again: the 15-puzzle
+
+The [15-puzzle model](puzzle-15.smv) halves the cell count again, from 32 to 16,
+on a **4×4 board**. It uses 16 four-bit cells (64 board bits), 120 pairwise
+distinctness constraints, 16 legal-move guards, and 48 directed adjacent slides.
+INIT is `1..15,0`; GOAL exchanges tiles 14 and 15 with the blank unchanged.
+Its reachable board component contains `16! / 2 = 10,461,394,944,000` boards.
+The same parity obstruction and all-k induction-step construction apply,
+and no parity lemma is supplied to interpolation.
+
+```sh
+python3 examples/sliding-puzzle-experiment/generate.py --side 4 \
+  --output examples/sliding-puzzle-experiment/puzzle-15.smv
+python3 examples/sliding-puzzle-experiment/check.py
+```
+
+The independent checks now also cover every blank position and direction
+on representative 4×4 boards: 48 exact legal successors and 16 rejected
+boundary moves. The initial state, a one-slide reachable target, and fresh
+trace replay are checked, as are generation, parity, and induction-step paths
+through k=1024. Checks for the previous board sizes remain in place.
+
+The new run uses seed 0, the same checker binary, and no query limits. Its user
+service is `yasmv-puzzle15-unlimited-32gb.service`, with
+`MemoryMax=32000000000`, `MemorySwapMax=0`, and unlimited wall-clock and CPU time.
+Artifacts are kept separately in `results-puzzle15-unlimited-32gb` using the
+same file layout as the 31-puzzle run. The separate
+`yasmv-puzzle15-monitor.service` saves resource samples every 30 seconds and
+records the eventual exit status. These services persist independently of the
+interactive session, but do not restart the experiment after a reboot.
+No interpolation result is claimed until the checker returns verified output.
+
+```sh
+systemctl --user show yasmv-puzzle15-unlimited-32gb.service \
+  -p ActiveState -p SubState -p Result -p MemoryCurrent -p MemoryPeak \
+  -p CPUUsageNSec -p ExecMainStatus
+```
