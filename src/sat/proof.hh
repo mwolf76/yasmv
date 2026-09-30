@@ -39,6 +39,12 @@ public:
     NodeId conclude(Id) const;
     const std::vector<Node>& nodes() const { return nodes_; }
     NodeId node(Id) const;
+    struct Memory {
+        size_t nodes, node_capacity, literals, literal_capacity, active_ids, archived_ids;
+        size_t node_bytes, literal_bytes, id_payload_bytes;
+    };
+    Memory memory() const;
+    void observe(std::function<void(const ResolutionProof&)> observer) { observer_ = std::move(observer); }
 
 private:
     struct Entry { NodeId node; bool active; };
@@ -46,6 +52,8 @@ private:
     std::map<Id, Entry> clauses_;
     std::function<void()> checkpoint_;
     size_t node_limit_;
+    size_t literals_ = 0, literal_capacity_ = 0, active_ids_ = 0;
+    std::function<void(const ResolutionProof&)> observer_;
     void tick() const { if (checkpoint_) checkpoint_(); }
     void append(Node);
     void fresh(Id) const;

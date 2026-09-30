@@ -61,8 +61,17 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 
 bin_PROGRAMS = yasmv
 EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests yasmv_interpolation_tests yasmv_interpolation_search_tests sat_literal_tests cadical_proof_tests
+EXTRA_PROGRAMS += interpolation_replay
+interpolation_replay_SOURCES = tools/interpolation-replay.cc src/sat/proof.cc src/sat/circuit.cc src/sat/interpolation_diagnostics.cc
+interpolation_replay_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS) $(LIBJSONCPP_CPPFLAGS)
+interpolation_replay_LDADD = $(CADICAL_LIBS) $(LIBJSONCPP_LIBS)
+interpolation-memory-test: yasmv interpolation_replay
+	YASMV_HOME="$(abs_top_srcdir)" python3 tests/test_interpolation_memory.py
+.PHONY: interpolation-memory-test
+EXTRA_DIST += tools/benchmark-interpolation-memory.py tests/test_interpolation_memory.py docs/INTERPOLATION_MEMORY_BENCHMARK.md
+EXTRA_DIST += docs/benchmarks/interpolation-memory-baseline.json docs/benchmarks/interpolation-memory-baseline.md
 
-cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh src/sat/proof_tracer.hh src/sat/circuit.cc src/sat/circuit.hh
+cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh src/sat/proof_tracer.hh src/sat/circuit.cc src/sat/circuit.hh src/sat/interpolation_diagnostics.cc src/sat/interpolation_diagnostics.hh
 cadical_proof_tests_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS)
 cadical_proof_tests_LDADD = $(CADICAL_LIBS)
 
@@ -134,7 +143,7 @@ cli-test: yasmv
 progress-test: yasmv
 	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
 
-test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test cadical-proof-test interpolation-test sat-types-test setup-test cadical-configure-test
+test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test cadical-proof-test interpolation-test interpolation-memory-test sat-types-test setup-test cadical-configure-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: llvm-test

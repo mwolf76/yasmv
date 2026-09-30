@@ -150,6 +150,7 @@ void interpolation_reach(const QuerySpec& spec, QueryResult& r, QueryContext& co
     data["spurious_sat"] = Json::UInt64(stats.spurious_sat);
     data["proof_nodes"] = Json::UInt64(stats.proof_nodes);
     data["circuit_nodes"] = Json::UInt64(stats.circuit_nodes);
+    data["image_limit_reached"] = result.stop == imc::Stop::image_limit;
     if (result.outcome == imc::Outcome::unknown) {
         if (result.stop == imc::Stop::horizon_limit && spec.operation == Operation::prove_property &&
             r.checked_depths.size() == static_cast<uint64_t>(spec.limits.depth) + 1 &&
