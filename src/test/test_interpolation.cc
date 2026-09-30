@@ -77,17 +77,19 @@ BOOST_AUTO_TEST_CASE(exhaustive_partition_projection_oracle)
     // All 16 Boolean relations between shared x and one private variable,
     // independently on each side (256 pairs). Oracle projects private bits.
     for (unsigned mask_a = 0; mask_a < 16; ++mask_a) for (unsigned mask_b = 0; mask_b < 16; ++mask_b) {
-        Engine a("oracle-a", Engine::Mode::record), b("oracle-b", Engine::Mode::record);
-        auto relation = [&](Engine& engine, unsigned mask) {
-            const auto x = engine.tcbi_to_var(bit("x", 1)), local = engine.new_sat_var();
-            for (unsigned row = 0; row < 4; ++row)
-                if (!(mask & (1u << row))) engine.add_clause({mkLit(x, row & 1), mkLit(local, row & 2)});
-        };
-        relation(a, mask_a); relation(b, mask_b);
+        const auto cnf = [&] {
+            Engine a("oracle-a", Engine::Mode::record), b("oracle-b", Engine::Mode::record);
+            auto relation = [&](Engine& engine, unsigned mask) {
+                const auto x = engine.tcbi_to_var(bit("x", 1)), local = engine.new_sat_var();
+                for (unsigned row = 0; row < 4; ++row)
+                    if (!(mask & (1u << row))) engine.add_clause({mkLit(x, row & 1), mkLit(local, row & 2)});
+            };
+            relation(a, mask_a); relation(b, mask_b);
+            return PartitionedCnf(a, b, 1);
+        }(); // Exercise all 256 pairs after both recording engines are gone.
         const auto project = [](unsigned mask, unsigned x) { return bool(mask & ((1u << x) | (1u << (x + 2)))); };
         bool expected_sat = false;
         for (unsigned x = 0; x < 2; ++x) expected_sat |= project(mask_a, x) && project(mask_b, x);
-        PartitionedCnf cnf(a, b, 1);
         auto result = compute_interpolant(cnf);
         BOOST_REQUIRE(result.status == (expected_sat ? STATUS_SAT : STATUS_UNSAT));
         if (expected_sat) { ++sat; BOOST_CHECK(!result.verified); continue; }
@@ -112,9 +114,11 @@ BOOST_AUTO_TEST_CASE(partition_isolation_arithmetic_mux_arrays_and_enums)
                              "bits[x ? 1 : 0]", "mode = GREEN"};
     for (auto formula : formulas) {
         auto p = predicate(algorithm, formula);
-        Engine a("compiled-a", Engine::Mode::record), b("compiled-b", Engine::Mode::record);
-        p.emit(a, 1); p.emit(b, 1, false);
-        PartitionedCnf cnf(a, b, 1);
+        const auto cnf = [&] {
+            Engine a("compiled-a", Engine::Mode::record), b("compiled-b", Engine::Mode::record);
+            p.emit(a, 1); p.emit(b, 1, false);
+            return PartitionedCnf(a, b, 1);
+        }();
         auto result = compute_interpolant(cnf);
         BOOST_REQUIRE(result.status == STATUS_UNSAT && result.verified);
         for (const auto& [atom, semantic] : result.state_bits) {

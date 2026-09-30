@@ -132,51 +132,54 @@ int main(int argc,char** argv) {
         Json::Value result; Circuit circuit; Circuit::Ref root;
         {
             diagnostics::Run diagnostic;
-            proof::ResolutionProof proof;
-            std::unique_ptr<CaDiCaL::Solver> owned_solver;
-            proof.observe([&](const proof::ResolutionProof& p) { diagnostic.progress(p); });
-            proof::NodeId conclusion;
-            if (std::string(argv[2])=="events") {
-                diagnostic.phase("replay_events_begin");
-                conclusion=replay(directory,input,proof);
-            } else {
-                proof::ProofTracer tracer;
-                owned_solver=std::make_unique<CaDiCaL::Solver>();
-                auto& solver=*owned_solver;
-                require(solver.configure("plain") && solver.set("quiet",1) && solver.set("seed",0) &&
-                        solver.set("factor",0) && solver.set("lucky",0) && solver.set("walk",0) && solver.set("inprobing",0),"Solver setup failed");
-                solver.connect_proof_tracer(&tracer,true);
-                // The solver outlives the tracer so it can remain allocated
-                // during Craig verification. Detach even if checking throws.
-                struct Disconnect {
-                    CaDiCaL::Solver& solver;
-                    proof::ProofTracer& tracer;
-                    ~Disconnect() { solver.disconnect_proof_tracer(&tracer); }
-                } disconnect{solver,tracer};
-                for (int i=0;i<input.variables;++i) solver.declare_one_more_variable();
-                for (const auto& c:input.originals) {
-                    tracer.submitted=c.literals; tracer.submitting=c.side;
-                    for (int lit:c.literals) solver.add(lit);
-                    solver.add(0); tracer.check();
-                    require(!tracer.submitting,"Missing original callback");
+            {
+                proof::ResolutionProof proof;
+                std::unique_ptr<CaDiCaL::Solver> owned_solver;
+                proof.observe([&](const proof::ResolutionProof& p) { diagnostic.progress(p); });
+                proof::NodeId conclusion;
+                if (std::string(argv[2])=="events") {
+                    diagnostic.phase("replay_events_begin");
+                    conclusion=replay(directory,input,proof);
+                } else {
+                    proof::ProofTracer tracer;
+                    owned_solver=std::make_unique<CaDiCaL::Solver>();
+                    auto& solver=*owned_solver;
+                    require(solver.configure("plain") && solver.set("quiet",1) && solver.set("seed",0) &&
+                            solver.set("factor",0) && solver.set("lucky",0) && solver.set("walk",0) && solver.set("inprobing",0),"Solver setup failed");
+                    solver.connect_proof_tracer(&tracer,true);
+                    // Detach before the tracer is destroyed, including on failure.
+                    struct Disconnect {
+                        CaDiCaL::Solver& solver;
+                        proof::ProofTracer& tracer;
+                        ~Disconnect() { solver.disconnect_proof_tracer(&tracer); }
+                    } disconnect{solver,tracer};
+                    for (int i=0;i<input.variables;++i) solver.declare_one_more_variable();
+                    for (const auto& c:input.originals) {
+                        tracer.submitted=c.literals; tracer.submitting=c.side;
+                        for (int lit:c.literals) solver.add(lit);
+                        solver.add(0); tracer.check();
+                        require(!tracer.submitting,"Missing original callback");
+                    }
+                    diagnostic.phase("replay_solve_begin");
+                    const int status=solver.solve(); tracer.check();
+                    if (status==20) solver.conclude();
+                    tracer.check();
+                    require(status==20 && tracer.conclusion.has_value(),"Captured formula did not refute");
+                    conclusion=*tracer.conclusion; proof=std::move(tracer.proof);
                 }
-                diagnostic.phase("replay_solve_begin");
-                const int status=solver.solve(); tracer.check();
-                if (status==20) solver.conclude();
-                tracer.check();
-                require(status==20 && tracer.conclusion.has_value(),"Captured formula did not refute");
-                conclusion=*tracer.conclusion; proof=std::move(tracer.proof);
+                diagnostic.phase("replay_proof_complete",&proof);
+                root=interpolate(proof,conclusion,input.shared,circuit);
+                diagnostic.phase("interpolant_complete",&proof,&circuit,root);
+                // Historical work counters survive; the large proof does not.
+                for (const auto& [key,value]:diagnostics::proof_memory(proof)) result[key]=Json::UInt64(value);
             }
-            diagnostic.phase("replay_proof_complete",&proof);
-            root=interpolate(proof,conclusion,input.shared,circuit);
-            diagnostic.phase("craig_verification_begin",&proof,&circuit,root);
+            diagnostic.phase("replay_proof_destroyed",nullptr,&circuit,root);
+            diagnostic.phase("craig_verification_begin",nullptr,&circuit,root);
             require(input.verify(circuit,root),"Fresh Craig verification failed");
-            diagnostic.phase("craig_verification_end",&proof,&circuit,root);
-            for (const auto& [key,value]:diagnostics::proof_memory(proof)) result[key]=Json::UInt64(value);
+            diagnostic.phase("craig_verification_end",nullptr,&circuit,root);
             for (const auto& [key,value]:diagnostics::circuit_memory(circuit,root)) result[key]=Json::UInt64(value);
             diagnostic.complete(true);
         }
-        diagnostics::sample("replay_proof_destroyed",diagnostics::circuit_memory(circuit,root));
         result["status"]="completed"; result["verified"]=true;
         result["mode"]=argv[2]; result["scope"]="single-interpolation-obligation";
         result["obligations"]["A_implies_J"]="unsatisfiable";

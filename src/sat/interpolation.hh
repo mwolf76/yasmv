@@ -32,6 +32,8 @@ public:
     struct Clause { proof::Clause literals; proof::Partition partition; };
     // Both engines must be distinct recording instances for this model.
     // Shared semantic bits must lie on cut_frame, or be frozen parameters.
+    // Owns the copied clauses and interface; neither engine must stay alive.
+    // Semantic expressions still belong to the loaded model.
     PartitionedCnf(const Engine& a, const Engine& b, step_t cut_frame);
     const std::vector<Clause>& clauses() const { return clauses_; }
     int variables() const { return variables_; }

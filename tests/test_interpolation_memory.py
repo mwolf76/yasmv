@@ -44,6 +44,21 @@ class MemoryBenchmark(unittest.TestCase):
         self.assertEqual(set(result['obligations'].values()),{'unsatisfiable'})
         return result
 
+    def assert_verification_lifetime(self, samples, destroyed):
+        phases=[x['phase'] for x in samples]
+        ordered=['interpolant_complete',destroyed,'craig_verification_begin',
+                 'craig_verification_end','query_verified','query_temporaries_destroyed']
+        positions=[phases.index(phase) for phase in ordered]
+        self.assertEqual(positions,sorted(positions))
+        before=samples[positions[0]]
+        self.assertGreater(before['proof_nodes'],0)
+        for sample in samples[positions[1]:positions[3]+1]:
+            self.assertFalse(any(key.startswith('proof_') for key in sample),sample)
+        for position in positions[1:4]:
+            sample=samples[position]
+            self.assertEqual(sample['circuit_allocated_nodes'],before['circuit_allocated_nodes'])
+            self.assertEqual(sample['circuit_reachable_nodes'],before['circuit_reachable_nodes'])
+
     def test_replay_and_counters_and_destruction_sample(self):
         artifact=self.fixture(); diagnostics=self.path/'telemetry'
         r=self.replay(artifact,diagnostics=diagnostics)
@@ -57,13 +72,17 @@ class MemoryBenchmark(unittest.TestCase):
         self.assertEqual(r['proof_active_ids'],3)
         self.assertEqual(r['proof_archived_ids'],3)
         samples=[json.loads(line) for line in (diagnostics/'telemetry.jsonl').read_text().splitlines()]
-        self.assertIn('replay_proof_destroyed',[x['phase'] for x in samples])
+        self.assert_verification_lifetime(samples,'replay_proof_destroyed')
         ancestry=next(x for x in samples if x['phase']=='proof_ancestry')
         self.assertEqual(ancestry['needed_proof_nodes'],3)
         self.assertEqual(ancestry['original_nodes'],2)
         self.assertTrue(all(x['rss_bytes']>0 for x in samples))
         self.assertLessEqual(r['circuit_reachable_nodes'],r['circuit_allocated_nodes'])
-        self.replay(artifact,'solve')
+        solve_diagnostics=self.path/'solve-telemetry'
+        self.replay(artifact,'solve',diagnostics=solve_diagnostics)
+        self.assert_verification_lifetime(
+            [json.loads(line) for line in (solve_diagnostics/'telemetry.jsonl').read_text().splitlines()],
+            'replay_proof_destroyed')
 
     def test_reject_corrupt_proof_and_partial_capture(self):
         artifact=self.fixture()
@@ -137,7 +156,18 @@ class MemoryBenchmark(unittest.TestCase):
         self.assertTrue(result['proof']['verified'])
         artifacts=[p for p in diagnostics.glob('query-*') if (p/'complete').read_text()=='verified-unsat\n']
         self.assertGreater(len(artifacts),1)
-        for artifact in artifacts: self.replay(artifact)
+        samples=[json.loads(line) for line in (diagnostics/'telemetry.jsonl').read_text().splitlines()]
+        for index,sample in enumerate(samples):
+            if sample['phase']=='query_begin':
+                expected='initial_engines_destroyed' if sample['query_index']==0 else 'image_engines_destroyed'
+                self.assertEqual(samples[index-1]['phase'],expected)
+        for artifact in artifacts:
+            self.replay(artifact)
+            query=int(artifact.name.removeprefix('query-'))
+            self.assert_verification_lifetime(
+                [x for x in samples if x.get('query_index')==query], 'proof_engine_destroyed')
+        phases=[x['phase'] for x in samples]
+        self.assertEqual(phases.count('image_engines_destroyed'),phases.count('image_cnf_destroyed'))
         _,limited=self.capture('prefix',1)
         self.assertEqual(limited['status'],'unknown')
         self.assertTrue(limited['statistics']['interpolation']['image_limit_reached'])

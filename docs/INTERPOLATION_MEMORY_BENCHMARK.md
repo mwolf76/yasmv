@@ -86,8 +86,9 @@ must use the same artifact hashes.
 
 `--mode solve` instead runs the pinned proof-producing solver on the same CNF
 and then checks the interpolant. It measures SAT search plus proof generation,
-but may produce a different proof. Its solver remains alive through Craig
-verification, as it does on the native interpolation path. The replay tool
+but may produce a different proof. Both replay modes release the proof graph
+before fresh Craig verification; solve mode also releases its solver, matching
+the native interpolation path. The replay tool
 excludes model compilation, A/B recording engines and reached-set storage;
 compare replay against replay, not its absolute RSS against a whole search.
 
@@ -154,15 +155,23 @@ from RSS; proof capture can add substantial file cache.
 Circuit samples distinguish allocated nodes from nodes reachable from the
 reported root. Reachability is measured at stable phase boundaries, not for
 an incomplete interpolant. Periodic construction samples report allocation
-only. Native `image_engines_destroyed` and `reached_growth` circuit fields
+only. Native `image_cnf_destroyed` and `reached_growth` circuit fields
 refer to the reached-set circuit; Craig phases refer to the image interpolant.
 
 Destruction samples deliberately do not call `malloc_trim`: they show what
 the current implementation returns to its allocator and what RSS retains.
-`query_temporaries_destroyed` occurs after the proof engine is destroyed but
-before the caller destroys its A/B recording engines. `image_engines_destroyed`
-occurs after those engines are gone; the image and reached circuits remain.
-Replay additionally reports `replay_proof_destroyed` with its surviving circuit.
+Native `initial_engines_destroyed` and `image_engines_destroyed` now occur
+before `query_begin`: the partitioned CNF owns the clauses and interface, so
+its A/B recording engines can be released before proof construction.
+`interpolant_complete` records the proof and circuit before destruction.
+`proof_engine_destroyed` (native) and `replay_proof_destroyed` (replay) occur
+before `craig_verification_begin`, with only the surviving circuit reported.
+Craig phases contain no live proof counters. Replay's final proof counters
+are snapshots taken at `interpolant_complete`, not retained proof allocations.
+`query_temporaries_destroyed` occurs at query exit, after proof and verification
+solvers are gone. Native `image_cnf_destroyed` follows release of the owned CNF;
+the image and reached circuits remain. These phase semantics supersede the
+older baseline reports, whose proof and recording engines survived longer.
 Reachability counting itself uses temporary traversal storage; the diagnostic
 build is the baseline for subsequent instrumented comparisons.
 
@@ -186,3 +195,6 @@ The diagnostic environment variables are opt-in developer instrumentation:
 `YASMV_IMC_DIAGNOSTICS`, `YASMV_IMC_CAPTURE`, `YASMV_IMC_IMAGES`. Existing telemetry
 files and selected capture directories are rejected to prevent mixing runs.
 No variable enables a memory optimization or disables proof checking.
+
+Measured optimization reports: [clause storage](benchmarks/interpolation-clause-storage.md)
+and [shorter object lifetimes](benchmarks/interpolation-lifetimes.md).
