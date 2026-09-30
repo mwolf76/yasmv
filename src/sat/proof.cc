@@ -57,6 +57,7 @@ void ResolutionProof::original(Id id, const Clause& clause, Partition partition)
     auto normalized = normalize(clause, [this] { tick(); });
     append({std::move(normalized), Rule::original, partition});
     clauses_.emplace(id, Entry{nodes_.size() - 1, true});
+    ++active_ids_;
 }
 
 void ResolutionProof::restore(Id id, const Clause& clause)
@@ -66,12 +67,14 @@ void ResolutionProof::restore(Id id, const Clause& clause)
     require(nodes_[found->second.node].clause == normalize(clause, [this] { tick(); }), "changed restored clause");
     // Keep the previous derivation/partition, even for a restored derived clause.
     found->second.active = true;
+    ++active_ids_;
 }
 
 void ResolutionProof::erase(Id id, const Clause& clause)
 {
     require(nodes_[node(id)].clause == normalize(clause, [this] { tick(); }), "changed deleted clause");
     clauses_.at(id).active = false;
+    --active_ids_;
 }
 
 void ResolutionProof::derive(Id id, const Clause& clause,
@@ -132,6 +135,7 @@ void ResolutionProof::derive(Id id, const Clause& clause,
         conflict = nodes_.size() - 1;
     }
     clauses_.emplace(id, Entry{conflict, true});
+    ++active_ids_;
 }
 
 NodeId ResolutionProof::conclude(Id id) const
@@ -144,6 +148,15 @@ void ResolutionProof::append(Node node)
 {
     tick();
     if (nodes_.size() >= node_limit_) throw std::length_error("Resolution proof node limit exceeded");
+    literals_ += node.clause.size();
+    literal_capacity_ += node.clause.capacity();
     nodes_.push_back(std::move(node));
+    if (observer_ && nodes_.size() % 4096 == 0) observer_(*this);
+}
+ResolutionProof::Memory ResolutionProof::memory() const
+{
+    return {nodes_.size(), nodes_.capacity(), literals_, literal_capacity_, active_ids_, clauses_.size(),
+            nodes_.capacity() * sizeof(Node), literal_capacity_ * sizeof(int),
+            clauses_.size() * sizeof(decltype(clauses_)::value_type)};
 }
 } // namespace sat::proof

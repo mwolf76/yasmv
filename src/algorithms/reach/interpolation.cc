@@ -1,4 +1,5 @@
 #include <algorithms/reach/interpolation.hh>
+#include <sat/interpolation_diagnostics.hh>
 
 #include <algorithm>
 #include <stdexcept>
@@ -190,6 +191,9 @@ sat::status_t verify_path(const System& system, const Path& path, const Observer
 
 Result search(const System& system, Limits limits, const Observer& observer)
 {
+    const auto diagnostic_images = sat::diagnostics::image_limit();
+    if (diagnostic_images >= 0 && (limits.images < 0 || diagnostic_images < limits.images))
+        limits.images = diagnostic_images;
     if (limits.horizon < -1 || limits.images < -1 || limits.horizon >= LAST_POSITIVE_TIME)
         throw std::invalid_argument("Invalid interpolation search limits");
     Result result;
@@ -267,6 +271,7 @@ Result search(const System& system, Limits limits, const Observer& observer)
                     throw Stopped{Stop::image_limit};
                 notify(observer, Event::image);
                 ++stats.images;
+                diagnostics::sample("image_begin", {{"horizon",horizon},{"image",stats.images}});
                 sat::InterpolationResult image;
                 {
                     sat::Engine a("interpolation-image-a", sat::Engine::Mode::record);
@@ -277,6 +282,11 @@ Result search(const System& system, Limits limits, const Observer& observer)
                     system.transition(a, 0);
                     emit_suffix(system, b, 1, horizon);
                     image = sat::compute_interpolant(sat::PartitionedCnf(a, b, 1), limits.interpolation);
+                }
+                if (diagnostics::enabled()) {
+                    auto memory = diagnostics::circuit_memory(reached.circuit, reached.root);
+                    memory["image"] = stats.images; memory["horizon"] = horizon;
+                    diagnostics::sample("image_engines_destroyed", std::move(memory));
                 }
                 completed(image.status);
                 stats.proof_nodes += image.proof_nodes;
@@ -314,6 +324,8 @@ Result search(const System& system, Limits limits, const Observer& observer)
                 }
                 notify(observer, Event::growth);
                 reached.root = reached.circuit.disjunction(reached.root, next);
+                if (diagnostics::enabled())
+                    diagnostics::sample("reached_growth", diagnostics::circuit_memory(reached.circuit, reached.root));
                 stats.circuit_nodes = std::max(stats.circuit_nodes, reached.circuit.size());
                 ++stats.enlargements;
                 first = false;

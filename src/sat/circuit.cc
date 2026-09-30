@@ -1,4 +1,5 @@
 #include <sat/circuit.hh>
+#include <sat/interpolation_diagnostics.hh>
 
 #include <algorithm>
 #include <climits>
@@ -125,13 +126,17 @@ Circuit::Ref interpolate(const proof::ResolutionProof& proof, proof::NodeId root
 {
     const auto tick = [&] { if (checkpoint) checkpoint(); };
     const auto& nodes = proof.nodes();
+    auto* diagnostic = diagnostics::enabled() ? diagnostics::current() : nullptr;
+    if (diagnostic) diagnostic->phase("interpolant_ancestry_begin", &proof);
     if (root >= nodes.size() || !nodes[root].clause.empty())
         throw std::invalid_argument("Interpolation requires a checked empty clause");
     std::map<int, unsigned> ownership;
+    size_t original_nodes = 0, original_literals = 0;
     // Classify against all originals, including those absent from the refutation.
     for (const auto& n : nodes) {
         tick();
         if (n.rule != proof::Rule::original) continue;
+        ++original_nodes; original_literals += n.clause.size();
         for (int lit : n.clause) { tick(); ownership[std::abs(lit)] |= n.partition == proof::Partition::a ? 1 : 2; }
     }
     std::set<Circuit::Atom> authorized_atoms;
@@ -147,6 +152,7 @@ Circuit::Ref interpolate(const proof::ResolutionProof& proof, proof::NodeId root
     while (!todo.empty()) {
         tick(); const auto id = todo.back(); todo.pop_back();
         if (!needed.insert(id).second) continue;
+        if (diagnostic && needed.size() % 4096 == 0) diagnostic->progress(proof);
         const auto& n = nodes[id];
         if (n.rule != proof::Rule::original) {
             if (n.left >= id) throw std::invalid_argument("Invalid proof DAG order");
@@ -158,6 +164,9 @@ Circuit::Ref interpolate(const proof::ResolutionProof& proof, proof::NodeId root
         }
     }
     std::map<size_t, Circuit::Ref> labels;
+    if (diagnostic) diagnostic->counters("proof_ancestry", {{"needed_proof_nodes",needed.size()},
+        {"stored_proof_nodes",nodes.size()},{"original_nodes",original_nodes},{"original_literals",original_literals}});
+    if (diagnostic) diagnostic->phase("interpolant_labels_begin", &proof);
     for (auto id : needed) {
         tick(); const auto& n = nodes[id];
         auto label = Circuit::True;
@@ -176,6 +185,7 @@ Circuit::Ref interpolate(const proof::ResolutionProof& proof, proof::NodeId root
                 ? circuit.disjunction(a, b) : circuit.conjunction(a, b);
         }
         labels.emplace(id, label);
+        if (diagnostic && labels.size() % 4096 == 0) diagnostic->progress(proof, &circuit);
     }
     return labels.at(root);
 }

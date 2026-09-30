@@ -33,6 +33,11 @@ public:
     // the low bit for complementation; 0 and 1 are false and true.
     void visit(Ref, const std::function<void(Ref, Atom, Ref, Ref)>&) const;
     size_t size() const { return nodes_.size() - 1; }
+    size_t reachable_size(Ref root) const { return order(root).size(); }
+    size_t storage_payload_bytes() const {
+        return nodes_.capacity() * sizeof(Node) + atoms_.size() * sizeof(decltype(atoms_)::value_type)
+            + ands_.size() * sizeof(decltype(ands_)::value_type);
+    }
 
 private:
     struct Node { Atom atom; Ref left, right; };

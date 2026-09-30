@@ -402,6 +402,9 @@
                   "circuit_nodes": {
                     "type": "integer",
                     "minimum": 0
+                  },
+                  "image_limit_reached": {
+                    "type": "boolean"
                   }
                 }
               }
