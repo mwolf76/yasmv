@@ -1,0 +1,241 @@
+-- 15-puzzle: 4 by 4; swap the last two numbered tiles.
+-- Source: Johnson and Story, Notes on the 15 Puzzle, 1879.
+-- Guarded adjacent swaps on scalar cells. No parity lemma.
+#word-width 4
+MODULE main
+#inertial
+VAR cell_0 : uint4;
+#inertial
+VAR cell_1 : uint4;
+#inertial
+VAR cell_2 : uint4;
+#inertial
+VAR cell_3 : uint4;
+#inertial
+VAR cell_4 : uint4;
+#inertial
+VAR cell_5 : uint4;
+#inertial
+VAR cell_6 : uint4;
+#inertial
+VAR cell_7 : uint4;
+#inertial
+VAR cell_8 : uint4;
+#inertial
+VAR cell_9 : uint4;
+#inertial
+VAR cell_10 : uint4;
+#inertial
+VAR cell_11 : uint4;
+#inertial
+VAR cell_12 : uint4;
+#inertial
+VAR cell_13 : uint4;
+#inertial
+VAR cell_14 : uint4;
+#inertial
+VAR cell_15 : uint4;
+VAR move : { UP, RIGHT, DOWN, LEFT };
+INIT cell_0 = 1;
+INIT cell_1 = 2;
+INIT cell_2 = 3;
+INIT cell_3 = 4;
+INIT cell_4 = 5;
+INIT cell_5 = 6;
+INIT cell_6 = 7;
+INIT cell_7 = 8;
+INIT cell_8 = 9;
+INIT cell_9 = 10;
+INIT cell_10 = 11;
+INIT cell_11 = 12;
+INIT cell_12 = 13;
+INIT cell_13 = 14;
+INIT cell_14 = 15;
+INIT cell_15 = 0;
+DEFINE GOAL := cell_0 = 1 && cell_1 = 2 && cell_2 = 3 && cell_3 = 4 && cell_4 = 5 && cell_5 = 6 && cell_6 = 7 && cell_7 = 8 && cell_8 = 9 && cell_9 = 10 && cell_10 = 11 && cell_11 = 12 && cell_12 = 13 && cell_13 = 15 && cell_14 = 14 && cell_15 = 0;
+-- Well-formed boards: the fixed-width labels form a permutation.
+INVAR cell_0 != cell_1;
+INVAR cell_0 != cell_2;
+INVAR cell_0 != cell_3;
+INVAR cell_0 != cell_4;
+INVAR cell_0 != cell_5;
+INVAR cell_0 != cell_6;
+INVAR cell_0 != cell_7;
+INVAR cell_0 != cell_8;
+INVAR cell_0 != cell_9;
+INVAR cell_0 != cell_10;
+INVAR cell_0 != cell_11;
+INVAR cell_0 != cell_12;
+INVAR cell_0 != cell_13;
+INVAR cell_0 != cell_14;
+INVAR cell_0 != cell_15;
+INVAR cell_1 != cell_2;
+INVAR cell_1 != cell_3;
+INVAR cell_1 != cell_4;
+INVAR cell_1 != cell_5;
+INVAR cell_1 != cell_6;
+INVAR cell_1 != cell_7;
+INVAR cell_1 != cell_8;
+INVAR cell_1 != cell_9;
+INVAR cell_1 != cell_10;
+INVAR cell_1 != cell_11;
+INVAR cell_1 != cell_12;
+INVAR cell_1 != cell_13;
+INVAR cell_1 != cell_14;
+INVAR cell_1 != cell_15;
+INVAR cell_2 != cell_3;
+INVAR cell_2 != cell_4;
+INVAR cell_2 != cell_5;
+INVAR cell_2 != cell_6;
+INVAR cell_2 != cell_7;
+INVAR cell_2 != cell_8;
+INVAR cell_2 != cell_9;
+INVAR cell_2 != cell_10;
+INVAR cell_2 != cell_11;
+INVAR cell_2 != cell_12;
+INVAR cell_2 != cell_13;
+INVAR cell_2 != cell_14;
+INVAR cell_2 != cell_15;
+INVAR cell_3 != cell_4;
+INVAR cell_3 != cell_5;
+INVAR cell_3 != cell_6;
+INVAR cell_3 != cell_7;
+INVAR cell_3 != cell_8;
+INVAR cell_3 != cell_9;
+INVAR cell_3 != cell_10;
+INVAR cell_3 != cell_11;
+INVAR cell_3 != cell_12;
+INVAR cell_3 != cell_13;
+INVAR cell_3 != cell_14;
+INVAR cell_3 != cell_15;
+INVAR cell_4 != cell_5;
+INVAR cell_4 != cell_6;
+INVAR cell_4 != cell_7;
+INVAR cell_4 != cell_8;
+INVAR cell_4 != cell_9;
+INVAR cell_4 != cell_10;
+INVAR cell_4 != cell_11;
+INVAR cell_4 != cell_12;
+INVAR cell_4 != cell_13;
+INVAR cell_4 != cell_14;
+INVAR cell_4 != cell_15;
+INVAR cell_5 != cell_6;
+INVAR cell_5 != cell_7;
+INVAR cell_5 != cell_8;
+INVAR cell_5 != cell_9;
+INVAR cell_5 != cell_10;
+INVAR cell_5 != cell_11;
+INVAR cell_5 != cell_12;
+INVAR cell_5 != cell_13;
+INVAR cell_5 != cell_14;
+INVAR cell_5 != cell_15;
+INVAR cell_6 != cell_7;
+INVAR cell_6 != cell_8;
+INVAR cell_6 != cell_9;
+INVAR cell_6 != cell_10;
+INVAR cell_6 != cell_11;
+INVAR cell_6 != cell_12;
+INVAR cell_6 != cell_13;
+INVAR cell_6 != cell_14;
+INVAR cell_6 != cell_15;
+INVAR cell_7 != cell_8;
+INVAR cell_7 != cell_9;
+INVAR cell_7 != cell_10;
+INVAR cell_7 != cell_11;
+INVAR cell_7 != cell_12;
+INVAR cell_7 != cell_13;
+INVAR cell_7 != cell_14;
+INVAR cell_7 != cell_15;
+INVAR cell_8 != cell_9;
+INVAR cell_8 != cell_10;
+INVAR cell_8 != cell_11;
+INVAR cell_8 != cell_12;
+INVAR cell_8 != cell_13;
+INVAR cell_8 != cell_14;
+INVAR cell_8 != cell_15;
+INVAR cell_9 != cell_10;
+INVAR cell_9 != cell_11;
+INVAR cell_9 != cell_12;
+INVAR cell_9 != cell_13;
+INVAR cell_9 != cell_14;
+INVAR cell_9 != cell_15;
+INVAR cell_10 != cell_11;
+INVAR cell_10 != cell_12;
+INVAR cell_10 != cell_13;
+INVAR cell_10 != cell_14;
+INVAR cell_10 != cell_15;
+INVAR cell_11 != cell_12;
+INVAR cell_11 != cell_13;
+INVAR cell_11 != cell_14;
+INVAR cell_11 != cell_15;
+INVAR cell_12 != cell_13;
+INVAR cell_12 != cell_14;
+INVAR cell_12 != cell_15;
+INVAR cell_13 != cell_14;
+INVAR cell_13 != cell_15;
+INVAR cell_14 != cell_15;
+-- Exactly one legal adjacent slide per transition; no idle move.
+INVAR cell_0 = 0 -> (move = RIGHT || move = DOWN);
+INVAR cell_1 = 0 -> (move = RIGHT || move = DOWN || move = LEFT);
+INVAR cell_2 = 0 -> (move = RIGHT || move = DOWN || move = LEFT);
+INVAR cell_3 = 0 -> (move = DOWN || move = LEFT);
+INVAR cell_4 = 0 -> (move = UP || move = RIGHT || move = DOWN);
+INVAR cell_5 = 0 -> (move = UP || move = RIGHT || move = DOWN || move = LEFT);
+INVAR cell_6 = 0 -> (move = UP || move = RIGHT || move = DOWN || move = LEFT);
+INVAR cell_7 = 0 -> (move = UP || move = DOWN || move = LEFT);
+INVAR cell_8 = 0 -> (move = UP || move = RIGHT || move = DOWN);
+INVAR cell_9 = 0 -> (move = UP || move = RIGHT || move = DOWN || move = LEFT);
+INVAR cell_10 = 0 -> (move = UP || move = RIGHT || move = DOWN || move = LEFT);
+INVAR cell_11 = 0 -> (move = UP || move = DOWN || move = LEFT);
+INVAR cell_12 = 0 -> (move = UP || move = RIGHT);
+INVAR cell_13 = 0 -> (move = UP || move = RIGHT || move = LEFT);
+INVAR cell_14 = 0 -> (move = UP || move = RIGHT || move = LEFT);
+INVAR cell_15 = 0 -> (move = UP || move = LEFT);
+TRANS cell_0 = 0 && cell_1 != 0 && move = RIGHT ?: cell_0 := cell_1, cell_1 := 0;
+TRANS cell_0 = 0 && cell_4 != 0 && move = DOWN ?: cell_0 := cell_4, cell_4 := 0;
+TRANS cell_1 = 0 && cell_2 != 0 && move = RIGHT ?: cell_1 := cell_2, cell_2 := 0;
+TRANS cell_1 = 0 && cell_5 != 0 && move = DOWN ?: cell_1 := cell_5, cell_5 := 0;
+TRANS cell_1 = 0 && cell_0 != 0 && move = LEFT ?: cell_1 := cell_0, cell_0 := 0;
+TRANS cell_2 = 0 && cell_3 != 0 && move = RIGHT ?: cell_2 := cell_3, cell_3 := 0;
+TRANS cell_2 = 0 && cell_6 != 0 && move = DOWN ?: cell_2 := cell_6, cell_6 := 0;
+TRANS cell_2 = 0 && cell_1 != 0 && move = LEFT ?: cell_2 := cell_1, cell_1 := 0;
+TRANS cell_3 = 0 && cell_7 != 0 && move = DOWN ?: cell_3 := cell_7, cell_7 := 0;
+TRANS cell_3 = 0 && cell_2 != 0 && move = LEFT ?: cell_3 := cell_2, cell_2 := 0;
+TRANS cell_4 = 0 && cell_0 != 0 && move = UP ?: cell_4 := cell_0, cell_0 := 0;
+TRANS cell_4 = 0 && cell_5 != 0 && move = RIGHT ?: cell_4 := cell_5, cell_5 := 0;
+TRANS cell_4 = 0 && cell_8 != 0 && move = DOWN ?: cell_4 := cell_8, cell_8 := 0;
+TRANS cell_5 = 0 && cell_1 != 0 && move = UP ?: cell_5 := cell_1, cell_1 := 0;
+TRANS cell_5 = 0 && cell_6 != 0 && move = RIGHT ?: cell_5 := cell_6, cell_6 := 0;
+TRANS cell_5 = 0 && cell_9 != 0 && move = DOWN ?: cell_5 := cell_9, cell_9 := 0;
+TRANS cell_5 = 0 && cell_4 != 0 && move = LEFT ?: cell_5 := cell_4, cell_4 := 0;
+TRANS cell_6 = 0 && cell_2 != 0 && move = UP ?: cell_6 := cell_2, cell_2 := 0;
+TRANS cell_6 = 0 && cell_7 != 0 && move = RIGHT ?: cell_6 := cell_7, cell_7 := 0;
+TRANS cell_6 = 0 && cell_10 != 0 && move = DOWN ?: cell_6 := cell_10, cell_10 := 0;
+TRANS cell_6 = 0 && cell_5 != 0 && move = LEFT ?: cell_6 := cell_5, cell_5 := 0;
+TRANS cell_7 = 0 && cell_3 != 0 && move = UP ?: cell_7 := cell_3, cell_3 := 0;
+TRANS cell_7 = 0 && cell_11 != 0 && move = DOWN ?: cell_7 := cell_11, cell_11 := 0;
+TRANS cell_7 = 0 && cell_6 != 0 && move = LEFT ?: cell_7 := cell_6, cell_6 := 0;
+TRANS cell_8 = 0 && cell_4 != 0 && move = UP ?: cell_8 := cell_4, cell_4 := 0;
+TRANS cell_8 = 0 && cell_9 != 0 && move = RIGHT ?: cell_8 := cell_9, cell_9 := 0;
+TRANS cell_8 = 0 && cell_12 != 0 && move = DOWN ?: cell_8 := cell_12, cell_12 := 0;
+TRANS cell_9 = 0 && cell_5 != 0 && move = UP ?: cell_9 := cell_5, cell_5 := 0;
+TRANS cell_9 = 0 && cell_10 != 0 && move = RIGHT ?: cell_9 := cell_10, cell_10 := 0;
+TRANS cell_9 = 0 && cell_13 != 0 && move = DOWN ?: cell_9 := cell_13, cell_13 := 0;
+TRANS cell_9 = 0 && cell_8 != 0 && move = LEFT ?: cell_9 := cell_8, cell_8 := 0;
+TRANS cell_10 = 0 && cell_6 != 0 && move = UP ?: cell_10 := cell_6, cell_6 := 0;
+TRANS cell_10 = 0 && cell_11 != 0 && move = RIGHT ?: cell_10 := cell_11, cell_11 := 0;
+TRANS cell_10 = 0 && cell_14 != 0 && move = DOWN ?: cell_10 := cell_14, cell_14 := 0;
+TRANS cell_10 = 0 && cell_9 != 0 && move = LEFT ?: cell_10 := cell_9, cell_9 := 0;
+TRANS cell_11 = 0 && cell_7 != 0 && move = UP ?: cell_11 := cell_7, cell_7 := 0;
+TRANS cell_11 = 0 && cell_15 != 0 && move = DOWN ?: cell_11 := cell_15, cell_15 := 0;
+TRANS cell_11 = 0 && cell_10 != 0 && move = LEFT ?: cell_11 := cell_10, cell_10 := 0;
+TRANS cell_12 = 0 && cell_8 != 0 && move = UP ?: cell_12 := cell_8, cell_8 := 0;
+TRANS cell_12 = 0 && cell_13 != 0 && move = RIGHT ?: cell_12 := cell_13, cell_13 := 0;
+TRANS cell_13 = 0 && cell_9 != 0 && move = UP ?: cell_13 := cell_9, cell_9 := 0;
+TRANS cell_13 = 0 && cell_14 != 0 && move = RIGHT ?: cell_13 := cell_14, cell_14 := 0;
+TRANS cell_13 = 0 && cell_12 != 0 && move = LEFT ?: cell_13 := cell_12, cell_12 := 0;
+TRANS cell_14 = 0 && cell_10 != 0 && move = UP ?: cell_14 := cell_10, cell_10 := 0;
+TRANS cell_14 = 0 && cell_15 != 0 && move = RIGHT ?: cell_14 := cell_15, cell_15 := 0;
+TRANS cell_14 = 0 && cell_13 != 0 && move = LEFT ?: cell_14 := cell_13, cell_13 := 0;
+TRANS cell_15 = 0 && cell_11 != 0 && move = UP ?: cell_15 := cell_11, cell_11 := 0;
+TRANS cell_15 = 0 && cell_14 != 0 && move = LEFT ?: cell_15 := cell_14, cell_14 := 0;
