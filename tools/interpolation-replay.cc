@@ -1,5 +1,6 @@
 // Replay a captured, checked interpolation obligation without model compilation.
 #include <sat/proof_tracer.hh>
+#include <sat/interpolation_memory.hh>
 #include <sat/interpolation_diagnostics.hh>
 #include <cadical.hpp>
 #include <jsoncpp/json/json.h>
@@ -174,9 +175,11 @@ int main(int argc,char** argv) {
                 for (const auto& [key,value]:diagnostics::proof_memory(proof)) result[key]=Json::UInt64(value);
             }
             diagnostic.phase("replay_proof_destroyed",nullptr,&circuit,root);
+            release_interpolation_heap("proof");
             diagnostic.phase("craig_verification_begin",nullptr,&circuit,root);
             require(input.verify(circuit,root),"Fresh Craig verification failed");
             diagnostic.phase("craig_verification_end",nullptr,&circuit,root);
+            release_interpolation_heap("verification");
             for (const auto& [key,value]:diagnostics::circuit_memory(circuit,root)) result[key]=Json::UInt64(value);
             diagnostic.complete(true);
         }

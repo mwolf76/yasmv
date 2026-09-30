@@ -1,3 +1,4 @@
+#include <sat/interpolation_memory.hh>
 #include <algorithms/reach/interpolation.hh>
 #include <sat/interpolation_diagnostics.hh>
 
@@ -253,6 +254,7 @@ Result search(const System& system, Limits limits, const Observer& observer)
             diagnostics::sample("initial_engines_destroyed");
             initial = sat::compute_interpolant(input, limits.interpolation);
         }
+        sat::release_interpolation_heap("initial");
         if (completed(initial.status) != sat::STATUS_UNSAT)
             throw std::logic_error("Initial predicate and its semantic complement overlap");
         StateFormula seed(system.bits(), limits.invariant_nodes);
@@ -296,6 +298,7 @@ Result search(const System& system, Limits limits, const Observer& observer)
                     memory["image"] = stats.images; memory["horizon"] = horizon;
                     diagnostics::sample("image_cnf_destroyed", std::move(memory));
                 }
+                sat::release_interpolation_heap("image");
                 completed(image.status);
                 stats.proof_nodes += image.proof_nodes;
                 if (first) {

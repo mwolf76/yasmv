@@ -29,9 +29,10 @@ class MemoryBenchmark(unittest.TestCase):
         (artifact/'complete').write_text('verified-unsat\n')
         return artifact
 
-    def replay(self, artifact, mode='events', ok=True, diagnostics=None):
+    def replay(self, artifact, mode='events', ok=True, diagnostics=None, heap_release=None):
         env = {k:v for k,v in os.environ.items() if not k.startswith('YASMV_IMC_')}
         if diagnostics: env['YASMV_IMC_DIAGNOSTICS'] = str(diagnostics)
+        if heap_release is not None: env['YASMV_IMC_HEAP_RELEASE'] = heap_release
         p = subprocess.run([str(ROOT/'interpolation_replay'),str(artifact),mode],env=env,
                            text=True,capture_output=True,timeout=30)
         if not ok:
@@ -84,6 +85,59 @@ class MemoryBenchmark(unittest.TestCase):
             [json.loads(line) for line in (solve_diagnostics/'telemetry.jsonl').read_text().splitlines()],
             'replay_proof_destroyed')
 
+    def test_heap_release_policy_preserves_verification_and_boundaries(self):
+        artifact=self.fixture()
+        for mode in ('events','solve'):
+            results=[]
+            for policy in ('auto','off'):
+                diagnostics=self.path/(mode+'-'+policy)
+                results.append(self.replay(artifact,mode,diagnostics=diagnostics,heap_release=policy))
+                samples=[json.loads(line) for line in (diagnostics/'telemetry.jsonl').read_text().splitlines()]
+                phases=[x['phase'] for x in samples]
+                ordered=['replay_proof_destroyed','proof_heap_release_begin','proof_heap_release_end',
+                         'craig_verification_begin','craig_verification_end',
+                         'verification_heap_release_begin','verification_heap_release_end','query_verified']
+                positions=[phases.index(phase) for phase in ordered]
+                self.assertEqual(positions,sorted(positions))
+                for sample in samples:
+                    if not sample['phase'].endswith('_heap_release_end'): continue
+                    self.assertEqual(sample['heap_release_enabled'],policy=='auto')
+                    # The tiny control stays below the release threshold.
+                    self.assertFalse(sample['heap_release_attempted'])
+                    self.assertFalse(sample['heap_release_released'])
+            self.assertEqual(results[0],results[1])
+            self.assertTrue(self.replay(artifact,mode,heap_release='off')['verified'])
+            # Reject invalid policy even when diagnostic logging is disabled.
+            self.replay(artifact,mode,heap_release='invalid',ok=False)
+
+    def test_native_heap_release_controls_preserve_outcomes(self):
+        for policy in ('auto','off'):
+            for target,outcome in (('GOAL','unreachable'),('x','reachable')):
+                diagnostics,result=self.capture(policy+'-'+target,target=target,heap_release=policy)
+                self.assertEqual(result['outcome'],outcome)
+                if outcome=='unreachable': self.assertTrue(result['proof']['verified'])
+                else: self.assertIsNotNone(result['trace'])
+                samples=[json.loads(line) for line in (diagnostics/'telemetry.jsonl').read_text().splitlines()]
+                for index,sample in enumerate(samples):
+                    if sample['phase'] in ('proof_engine_destroyed','image_cnf_destroyed'):
+                        boundary='proof' if sample['phase']=='proof_engine_destroyed' else 'image'
+                        self.assertEqual(samples[index+1]['phase'],boundary+'_heap_release_begin')
+                        self.assertEqual(samples[index+2]['phase'],boundary+'_heap_release_end')
+                        self.assertEqual(samples[index+2]['heap_release_enabled'],policy=='auto')
+                        if policy=='off': self.assertFalse(samples[index+2]['heap_release_attempted'])
+                if outcome=='reachable':
+                    sat=[x for x in samples if x['phase']=='proof_sat']
+                    self.assertTrue(sat)
+                    for sample in sat:
+                        query=[x['phase'] for x in samples if x.get('query_index')==sample['query_index']]
+                        self.assertIn('proof_heap_release_end',query)
+                        self.assertNotIn('query_verified',query)
+            _,limited=self.capture(policy+'-prefix',1,heap_release=policy)
+            self.assertEqual(limited['status'],'unknown')
+            self.assertTrue(limited['statistics']['interpolation']['image_limit_reached'])
+            self.assertIsNone(limited['proof'])
+            self.assertIsNone(limited['trace'])
+
     def test_reject_corrupt_proof_and_partial_capture(self):
         artifact=self.fixture()
         original=(artifact/'proof.events').read_text()
@@ -135,7 +189,7 @@ class MemoryBenchmark(unittest.TestCase):
         self.assertTrue(summary['queries']['0']['verified'])
         self.assertNotIn('verified',summary['queries']['1'])
 
-    def capture(self, name, images=None, target='GOAL'):
+    def capture(self, name, images=None, target='GOAL', heap_release=None):
         model=self.path/'model.smv'
         model.write_text('MODULE main\n#inertial VAR x : boolean;\n#inertial VAR y : boolean;\n'
                          'INIT !x && !y;\nTRANS x := !x;\nTRANS y := !y;\nDEFINE GOAL := x != y;\n')
@@ -145,6 +199,7 @@ class MemoryBenchmark(unittest.TestCase):
         env={k:v for k,v in os.environ.items() if not k.startswith('YASMV_IMC_')}
         env.update(YASMV_HOME=str(ROOT),YASMV_IMC_DIAGNOSTICS=str(diagnostics),YASMV_IMC_CAPTURE='all')
         if images is not None: env['YASMV_IMC_IMAGES']=str(images)
+        if heap_release is not None: env['YASMV_IMC_HEAP_RELEASE']=heap_release
         p=subprocess.run([str(ROOT/'yasmv'),'--quiet','--query-file',str(request)],env=env,
                          text=True,capture_output=True,timeout=60)
         self.assertIn(p.returncode,(0,3),p.stderr+p.stdout)

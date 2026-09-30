@@ -169,8 +169,8 @@ an incomplete interpolant. Periodic construction samples report allocation
 only. Native `image_cnf_destroyed` and `reached_growth` circuit fields
 refer to the reached-set circuit; Craig phases refer to the image interpolant.
 
-Destruction samples deliberately do not call `malloc_trim`: they show what
-the current implementation returns to its allocator and what RSS retains.
+Destruction samples precede any explicit allocator release: they show what
+object destruction returns to the allocator and what RSS retains.
 Native `initial_engines_destroyed` and `image_engines_destroyed` now occur
 before `query_begin`: the partitioned CNF owns the clauses and interface, so
 its A/B recording engines can be released before proof construction.
@@ -205,8 +205,36 @@ controls and require both Craig checks for every successful sample.
 The diagnostic environment variables are opt-in developer instrumentation:
 `YASMV_IMC_DIAGNOSTICS`, `YASMV_IMC_CAPTURE`, `YASMV_IMC_IMAGES`. Existing telemetry
 files and selected capture directories are rejected to prevent mixing runs.
-No variable enables a memory optimization or disables proof checking.
+Allocator release is controlled separately by `YASMV_IMC_HEAP_RELEASE=auto|off`
+(default `auto`), and works without instrumentation. The runner's
+`--heap-release auto|off` option sets and records it explicitly. Invalid values
+are errors. Neither policy disables proof checking.
+
+On glibc, `auto` attempts `malloc_trim(0)` when `mallinfo2().fordblks` reports
+at least 64 MiB of free arena storage. Calls occur after the proof solver and
+graph are destroyed (including SAT/UNKNOWN returns), after the native initial
+or image CNF is destroyed, and after replay's Craig verification solvers are
+destroyed. The threshold avoids scans for small obligations; it is not an
+estimate of reclaimable resident memory. Non-glibc builds make no release
+attempt. Interposed allocators may not implement these glibc operations.
+
+The operation is process-wide and best effort; it changes no allocator tuning
+parameters. Only normally completed boundaries trigger it: cancellation or
+exceptions still destroy objects but need not perform an explicit release.
+`off` retains the same destruction lifetimes without requesting page release.
+Use matched runs of the same binary with `auto` and `off` to isolate this policy.
+Peak RSS may stay unchanged when the peak precedes destruction, even if retained
+RSS drops substantially. Reusing released pages can also cost runtime.
+
+Paired `*_heap_release_begin` / `*_heap_release_end` samples identify the
+boundary (`proof`, `initial`, `image`, or replay `verification`). Fields report
+whether release is enabled, supported, attempted, and whether `malloc_trim`
+reported success, plus free arena bytes before the call, the threshold, and
+call duration in microseconds. The success field is a boolean, not a byte
+count. Compare paired `rss_bytes` to measure the immediate resident change;
+free arena bytes can remain high after pages are discarded.
 
 Measured optimization reports: [clause storage](benchmarks/interpolation-clause-storage.md),
-[shorter object lifetimes](benchmarks/interpolation-lifetimes.md), and
-[metadata and traversal](benchmarks/interpolation-traversal.md).
+[shorter object lifetimes](benchmarks/interpolation-lifetimes.md),
+[metadata and traversal](benchmarks/interpolation-traversal.md), and
+[allocator retention](benchmarks/interpolation-allocator.md).
