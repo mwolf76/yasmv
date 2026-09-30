@@ -26,14 +26,31 @@ Clause normalize(const Clause& clause, const std::function<void()>& tick)
     return Clause(literals.begin(), literals.end());
 }
 
-Clause resolve(const Clause& left, const Clause& right, int pivot, const std::function<void()>& tick)
+void resolve(const Clause& left, const Clause& right, int pivot, Clause& output, const std::function<void()>& tick)
 {
     require(std::binary_search(left.begin(), left.end(), pivot) &&
             std::binary_search(right.begin(), right.end(), -pivot), "missing pivot");
-    Clause result;
-    for (int lit : left) { tick(); if (lit != pivot) result.push_back(lit); }
-    for (int lit : right) { tick(); if (lit != -pivot) result.push_back(lit); }
-    return normalize(result, tick);
+    // Both parents are normalized. Merge into the reusable next buffer rather
+    // than allocating a tree and a new literal buffer at every resolution.
+    output.clear();
+    auto a = left.begin(), b = right.begin();
+    while (a != left.end() || b != right.end()) {
+        tick();
+        if (a != left.end() && *a == pivot) { ++a; continue; }
+        if (b != right.end() && *b == -pivot) { ++b; continue; }
+        if (b == right.end() || (a != left.end() && *a < *b)) output.push_back(*a++);
+        else if (a == left.end() || *b < *a) output.push_back(*b++);
+        else { output.push_back(*a++); ++b; }
+    }
+    // Compare negative and positive literals by decreasing magnitude. Parents
+    // exclude zero and INT_MIN, so negation is safe; reject complementary pairs.
+    size_t low = 0, high = output.size();
+    while (low < high && output[low] < 0 && output[high-1] > 0) {
+        tick();
+        const auto negative = -output[low], positive = output[high-1];
+        require(negative != positive, "tautological clause unsupported");
+        if (negative > positive) ++low; else --high;
+    }
 }
 } // namespace
 
@@ -51,11 +68,37 @@ NodeId ResolutionProof::node(Id id) const
     return found->second.node;
 }
 
+const Clause& ResolutionProof::clause(NodeId id) const
+{
+    require(id < nodes_.size() && nodes_[id].clause_index != Node::no_clause,
+            "node has no retained clause");
+    return retained_.at(nodes_[id].clause_index);
+}
+
+void ResolutionProof::retain(NodeId id, Clause clause)
+{
+    auto& n = nodes_.at(id);
+    // Different solver IDs can name the same already checked derivation.
+    if (n.clause_index != Node::no_clause) {
+        require(retained_.at(n.clause_index) == clause, "changed named clause");
+        return;
+    }
+    const auto index = retained_.size();
+    retained_.push_back(std::move(clause));
+    n.clause_index = index;
+    auto& memory = n.rule == Rule::original ? original_ : derived_;
+    ++memory.clauses;
+    memory.literals += retained_.back().size();
+    memory.capacity += retained_.back().capacity();
+}
+
 void ResolutionProof::original(Id id, const Clause& clause, Partition partition)
 {
     fresh(id);
     auto normalized = normalize(clause, [this] { tick(); });
-    append({std::move(normalized), Rule::original, partition});
+    append({Rule::original, partition});
+    expanded_literals_ += normalized.size();
+    retain(nodes_.size() - 1, std::move(normalized));
     clauses_.emplace(id, Entry{nodes_.size() - 1, true});
     ++active_ids_;
 }
@@ -64,7 +107,7 @@ void ResolutionProof::restore(Id id, const Clause& clause)
 {
     const auto found = clauses_.find(id);
     require(found != clauses_.end() && !found->second.active, "invalid restoration");
-    require(nodes_[found->second.node].clause == normalize(clause, [this] { tick(); }), "changed restored clause");
+    require(this->clause(found->second.node) == normalize(clause, [this] { tick(); }), "changed restored clause");
     // Keep the previous derivation/partition, even for a restored derived clause.
     found->second.active = true;
     ++active_ids_;
@@ -72,7 +115,7 @@ void ResolutionProof::restore(Id id, const Clause& clause)
 
 void ResolutionProof::erase(Id id, const Clause& clause)
 {
-    require(nodes_[node(id)].clause == normalize(clause, [this] { tick(); }), "changed deleted clause");
+    require(this->clause(node(id)) == normalize(clause, [this] { tick(); }), "changed deleted clause");
     clauses_.at(id).active = false;
     --active_ids_;
 }
@@ -82,7 +125,7 @@ void ResolutionProof::derive(Id id, const Clause& clause,
 {
     fresh(id);
     require(witness == 0, "RAT/extension step unsupported");
-    const auto target = normalize(clause, [this] { tick(); });
+    auto target = normalize(clause, [this] { tick(); });
     require(!hints.empty(), "missing RUP antecedents");
     // Assume the negated candidate clause, then replay ordered unit propagation.
     std::set<int> assigned;
@@ -95,7 +138,7 @@ void ResolutionProof::derive(Id id, const Clause& clause,
         require(hints[i] > 0, "RAT hint unsupported");
         const auto antecedent = node(hints[i]);
         int unit = 0;
-        for (int lit : nodes_[antecedent].clause) {
+        for (int lit : this->clause(antecedent)) {
             tick();
             require(!assigned.count(lit), "satisfied RUP antecedent");
             if (!assigned.count(-lit)) {
@@ -116,24 +159,32 @@ void ResolutionProof::derive(Id id, const Clause& clause,
 
     // Resolve the conflict backwards through relevant reasons. Unused unit
     // propagations do not participate in the resolution derivation.
+    // Intermediate clauses live only in these rolling buffers. The graph
+    // retains the same checked resolution steps and pivot orientation.
+    Clause rolling, next;
+    const Clause* current = &this->clause(conflict);
     for (auto it = reasons.rbegin(); it != reasons.rend(); ++it) {
         tick();
         const int pivot = -it->first;
-        const auto& current = nodes_[conflict].clause;
-        if (!std::binary_search(current.begin(), current.end(), pivot)) continue;
-        auto resolvent = resolve(current, nodes_[it->second].clause, pivot, [this] { tick(); });
-        append({std::move(resolvent), Rule::resolution, Partition::a,
-                          conflict, it->second, pivot});
+        if (!std::binary_search(current->begin(), current->end(), pivot)) continue;
+        resolve(*current, this->clause(it->second), pivot, next, [this] { tick(); });
+        temporary_capacity_peak_ = std::max(temporary_capacity_peak_, rolling.capacity() + next.capacity());
+        rolling.swap(next);
+        current = &rolling;
+        append({Rule::resolution, Partition::a, conflict, it->second, pivot});
+        expanded_literals_ += rolling.size();
         conflict = nodes_.size() - 1;
     }
-    const auto& result = nodes_[conflict].clause;
+    const auto& result = *current;
     require(std::includes(target.begin(), target.end(), result.begin(), result.end()),
             "resolvent is not a subclause of candidate");
     if (result != target) {
         // Explicit weakening preserves the antecedent's interpolation label.
-        append({target, Rule::weakening, Partition::a, conflict});
+        append({Rule::weakening, Partition::a, conflict});
+        expanded_literals_ += target.size();
         conflict = nodes_.size() - 1;
     }
+    retain(conflict, std::move(target));
     clauses_.emplace(id, Entry{conflict, true});
     ++active_ids_;
 }
@@ -141,22 +192,24 @@ void ResolutionProof::derive(Id id, const Clause& clause,
 NodeId ResolutionProof::conclude(Id id) const
 {
     const auto root = node(id);
-    require(nodes_[root].clause.empty(), "conclusion is not the empty clause");
+    require(clause(root).empty(), "conclusion is not the empty clause");
     return root;
 }
 void ResolutionProof::append(Node node)
 {
     tick();
     if (nodes_.size() >= node_limit_) throw std::length_error("Resolution proof node limit exceeded");
-    literals_ += node.clause.size();
-    literal_capacity_ += node.clause.capacity();
     nodes_.push_back(std::move(node));
     if (observer_ && nodes_.size() % 4096 == 0) observer_(*this);
 }
 ResolutionProof::Memory ResolutionProof::memory() const
 {
-    return {nodes_.size(), nodes_.capacity(), literals_, literal_capacity_, active_ids_, clauses_.size(),
-            nodes_.capacity() * sizeof(Node), literal_capacity_ * sizeof(int),
-            clauses_.size() * sizeof(decltype(clauses_)::value_type)};
+    const auto literals = original_.literals + derived_.literals;
+    const auto capacity = original_.capacity + derived_.capacity;
+    return {nodes_.size(), nodes_.capacity(), literals, capacity, active_ids_, clauses_.size(),
+            nodes_.capacity() * sizeof(Node), capacity * sizeof(int),
+            clauses_.size() * sizeof(decltype(clauses_)::value_type),
+            retained_.capacity() * sizeof(Clause), expanded_literals_, temporary_capacity_peak_ * sizeof(int),
+            original_, derived_};
 }
 } // namespace sat::proof

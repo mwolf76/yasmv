@@ -58,28 +58,40 @@ struct SolverProbe {
     }
 };
 
-// A second checker for the resulting explicit DAG, independent of RUP replay.
+// Independently reconstruct every graph clause, including intermediates that
+// production deliberately does not retain. This is test-only materialization.
 void check_dag(const ResolutionProof& proof)
 {
     const auto& nodes = proof.nodes();
+    std::vector<std::set<int>> clauses;
     for (size_t i = 0; i < nodes.size(); ++i) {
         const auto& n = nodes[i];
-        if (n.rule == Rule::original) continue;
+        if (n.rule == Rule::original) {
+            const auto& c = proof.clause(i);
+            clauses.emplace_back(c.begin(), c.end());
+            continue;
+        }
         CHECK(n.left < i);
-        std::set<int> expected(nodes[n.left].clause.begin(), nodes[n.left].clause.end());
+        auto expected = clauses[n.left];
         if (n.rule == Rule::weakening) {
-            for (int lit : expected) CHECK(std::count(n.clause.begin(), n.clause.end(), lit));
+            const auto& c = proof.clause(i);
+            for (int lit : expected) CHECK(std::count(c.begin(), c.end(), lit));
+            expected = {c.begin(), c.end()};
         } else {
             CHECK(n.right < i && expected.erase(n.pivot) == 1);
             bool pivot_seen = false;
-            for (int lit : nodes[n.right].clause) {
+            for (int lit : clauses[n.right]) {
                 if (lit == -n.pivot) pivot_seen = true;
                 else expected.insert(lit);
             }
             CHECK(pivot_seen);
-            CHECK(expected == std::set<int>(n.clause.begin(), n.clause.end()));
             for (int lit : expected) CHECK(!expected.count(-lit));
         }
+        if (n.clause_index != Node::no_clause) {
+            const auto& c = proof.clause(i);
+            CHECK(expected == std::set<int>(c.begin(), c.end()));
+        }
+        clauses.push_back(std::move(expected));
     }
 }
 
@@ -87,8 +99,9 @@ void check_craig(const Probe& probe, unsigned variables)
 {
     CHECK(probe.conclusion.has_value());
     std::map<int, unsigned> ownership;
-    for (const auto& node : probe.proof.nodes()) if (node.rule == Rule::original)
-        for (int lit : node.clause) ownership[std::abs(lit)] |= node.partition == Partition::a ? 1 : 2;
+    const auto& nodes = probe.proof.nodes();
+    for (size_t i = 0; i < nodes.size(); ++i) if (nodes[i].rule == Rule::original)
+        for (int lit : probe.proof.clause(i)) ownership[std::abs(lit)] |= nodes[i].partition == Partition::a ? 1 : 2;
     std::map<int, sat::Circuit::Atom> shared;
     for (auto [var, sides] : ownership) if (sides == 3) shared[var] = var;
     sat::Circuit circuit;
@@ -97,10 +110,10 @@ void check_craig(const Probe& probe, unsigned variables)
     for (unsigned row = 0; row < (1u << variables); ++row) {
         bool a = true, b = true;
         auto bit = [&](sat::Circuit::Atom var) { CHECK(var >= 1 && var <= variables); return bool(row & (1u << (var - 1))); };
-        for (const auto& node : probe.proof.nodes()) if (node.rule == Rule::original) {
+        for (size_t i = 0; i < nodes.size(); ++i) if (nodes[i].rule == Rule::original) {
             bool value = false;
-            for (int lit : node.clause) value |= bit(std::abs(lit)) == (lit > 0);
-            (node.partition == Partition::a ? a : b) &= value;
+            for (int lit : probe.proof.clause(i)) value |= bit(std::abs(lit)) == (lit > 0);
+            (nodes[i].partition == Partition::a ? a : b) &= value;
         }
         const bool j = circuit.evaluate(root, bit);
         CHECK(!a || j);
@@ -232,6 +245,63 @@ void rejects(const std::function<void()>& operation)
     throw std::runtime_error("Invalid proof accepted");
 }
 
+void retained_clauses_and_intermediate_graph()
+{
+    // A long chain must keep its proof topology without retaining its unit
+    // intermediate clauses. Reconstruct it independently with check_dag.
+    constexpr int length = 256;
+    ResolutionProof chain;
+    chain.original(1, {1}, Partition::a);
+    for (int v = 2; v <= length; ++v) chain.original(v, {1-v, v}, Partition::a);
+    chain.original(length+1, {-length}, Partition::b);
+    std::vector<Id> hints;
+    for (int v = 1; v <= length+1; ++v) hints.push_back(v);
+    chain.derive(length+2, {}, hints);
+    const auto root = chain.conclude(length+2);
+    check_dag(chain);
+    const auto m = chain.memory();
+    CHECK(m.nodes == 2*length+1);
+    CHECK(m.original.clauses == length+1 && m.original.literals == 2*length);
+    CHECK(m.derived.clauses == 1 && m.derived.literals == 0);
+    CHECK(m.literals == 2*length && m.expanded_literals == 3*length-1);
+    CHECK(m.temporary_literal_bytes_peak == 2*sizeof(int));
+    CHECK(chain.clause(root).empty());
+    CHECK(chain.nodes()[length+1].clause_index == Node::no_clause);
+    rejects([&] { (void)chain.clause(length+1); });
+    sat::Circuit circuit;
+    rejects([&] { sat::interpolate(chain, length+1, {{length,length}}, circuit); });
+    const auto label = sat::interpolate(chain, root, {{length,length}}, circuit);
+    CHECK(!circuit.evaluate(label, [](auto) { return false; }));
+    CHECK(circuit.evaluate(label, [](auto) { return true; }));
+
+    Probe probe;
+    auto& p = probe.proof;
+    p.original(1, {1}, Partition::a);
+    p.original(2, {-1,2}, Partition::a);
+    p.original(3, {-2,3}, Partition::a);
+    p.original(4, {-3,4}, Partition::a);
+    p.derive(5, {4}, {1,2,3,4});
+    const auto endpoint = p.node(5);
+    p.erase(5, {4});
+    rejects([&] { p.restore(5, {3}); });
+    rejects([&] { p.derive(6, {4}, {5}); });
+    p.restore(5, {4});
+    CHECK(p.node(5) == endpoint);
+    p.derive(6, {4}, {5}); // another ID aliases the same proof endpoint
+    CHECK(p.node(6) == endpoint && p.memory().derived.clauses == 1);
+    p.erase(5, {4}); // alias 6 is still active
+    p.derive(7, {4,5}, {6});
+    p.erase(7, {5,4});
+    rejects([&] { p.restore(7, {4}); });
+    p.restore(7, {4,5});
+    p.original(8, {-4}, Partition::b);
+    p.derive(9, {}, {6,8});
+    probe.conclusion = p.conclude(9);
+    check_dag(p);
+    check_craig(probe, 5);
+    CHECK(p.memory().derived.clauses == 3 && p.memory().derived.literals == 3);
+}
+
 void malformed_proofs()
 {
     ResolutionProof p;
@@ -356,6 +426,7 @@ int main()
                  {"search refutations", pigeonholes},
                  {"exhaustive and random truth-table oracles", truth_table_oracle},
                  {"weakening, deletion and restoration", weakening_and_lifecycle},
+                 {"retained clauses and intermediate graph", retained_clauses_and_intermediate_graph},
                  {"malformed proofs", malformed_proofs},
                  {"materialized assumptions", materialized_assumptions},
                  {"circuits, renaming and CNF polarities", circuits_and_polarities},

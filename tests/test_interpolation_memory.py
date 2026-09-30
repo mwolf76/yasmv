@@ -49,6 +49,11 @@ class MemoryBenchmark(unittest.TestCase):
         r=self.replay(artifact,diagnostics=diagnostics)
         self.assertEqual(r['proof_nodes'],3)
         self.assertEqual(r['proof_literals'],2)
+        self.assertEqual(r['proof_original_literals'],2)
+        self.assertEqual(r['proof_derived_literals'],0)
+        self.assertEqual(r['proof_original_clauses'],2)
+        self.assertEqual(r['proof_derived_clauses'],1)
+        self.assertEqual(r['proof_expanded_literals'],2)
         self.assertEqual(r['proof_active_ids'],3)
         self.assertEqual(r['proof_archived_ids'],3)
         samples=[json.loads(line) for line in (diagnostics/'telemetry.jsonl').read_text().splitlines()]

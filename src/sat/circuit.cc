@@ -128,16 +128,18 @@ Circuit::Ref interpolate(const proof::ResolutionProof& proof, proof::NodeId root
     const auto& nodes = proof.nodes();
     auto* diagnostic = diagnostics::enabled() ? diagnostics::current() : nullptr;
     if (diagnostic) diagnostic->phase("interpolant_ancestry_begin", &proof);
-    if (root >= nodes.size() || !nodes[root].clause.empty())
+    if (root >= nodes.size() || !proof.clause(root).empty())
         throw std::invalid_argument("Interpolation requires a checked empty clause");
     std::map<int, unsigned> ownership;
     size_t original_nodes = 0, original_literals = 0;
     // Classify against all originals, including those absent from the refutation.
-    for (const auto& n : nodes) {
+    for (size_t id = 0; id < nodes.size(); ++id) {
         tick();
+        const auto& n = nodes[id];
         if (n.rule != proof::Rule::original) continue;
-        ++original_nodes; original_literals += n.clause.size();
-        for (int lit : n.clause) { tick(); ownership[std::abs(lit)] |= n.partition == proof::Partition::a ? 1 : 2; }
+        const auto& clause = proof.clause(id);
+        ++original_nodes; original_literals += clause.size();
+        for (int lit : clause) { tick(); ownership[std::abs(lit)] |= n.partition == proof::Partition::a ? 1 : 2; }
     }
     std::set<Circuit::Atom> authorized_atoms;
     for (auto [var, sides] : ownership) {
@@ -172,7 +174,7 @@ Circuit::Ref interpolate(const proof::ResolutionProof& proof, proof::NodeId root
         auto label = Circuit::True;
         if (n.rule == proof::Rule::original && n.partition == proof::Partition::a) {
             label = Circuit::False;
-            for (int lit : n.clause) {
+            for (int lit : proof.clause(id)) {
                 tick();
                 if (ownership.at(std::abs(lit)) != 3) continue;
                 auto leaf = circuit.atom(shared.at(std::abs(lit)));

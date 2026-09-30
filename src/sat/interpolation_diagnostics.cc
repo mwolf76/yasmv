@@ -86,7 +86,13 @@ Fields proof_memory(const proof::ResolutionProof& p) {
     const auto m = p.memory();
     return {{"proof_nodes",m.nodes},{"proof_node_capacity",m.node_capacity},{"proof_literals",m.literals},
         {"proof_literal_capacity",m.literal_capacity},{"proof_active_ids",m.active_ids},{"proof_archived_ids",m.archived_ids},
-        {"proof_node_bytes",m.node_bytes},{"proof_literal_bytes",m.literal_bytes},{"proof_id_payload_bytes",m.id_payload_bytes}};
+        {"proof_node_bytes",m.node_bytes},{"proof_literal_bytes",m.literal_bytes},{"proof_id_payload_bytes",m.id_payload_bytes},
+        {"proof_clause_slot_bytes",m.clause_slot_bytes},{"proof_expanded_literals",m.expanded_literals},
+        {"proof_temporary_literal_bytes_peak",m.temporary_literal_bytes_peak},
+        {"proof_original_clauses",m.original.clauses},{"proof_original_literals",m.original.literals},
+        {"proof_original_literal_bytes",m.original.capacity*sizeof(int)},
+        {"proof_derived_clauses",m.derived.clauses},{"proof_derived_literals",m.derived.literals},
+        {"proof_derived_literal_bytes",m.derived.capacity*sizeof(int)}};
 }
 Fields circuit_memory(const Circuit& c, Circuit::Ref root) {
     return {{"circuit_allocated_nodes",c.size()},{"circuit_reachable_nodes",c.reachable_size(root)},

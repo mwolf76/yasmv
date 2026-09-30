@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(proof_engine_lifecycle_and_result_contracts)
     e.add_proof_clause({mkLit(x), mkLit(x)}, proof::Partition::a);
     e.add_proof_clause({mkLit(x, true)}, proof::Partition::b);
     BOOST_REQUIRE(e.solve() == STATUS_UNSAT);
-    BOOST_CHECK(e.resolution_proof().nodes().at(e.proof_root()).clause.empty());
+    BOOST_CHECK(e.resolution_proof().clause(e.proof_root()).empty());
     BOOST_CHECK_THROW(e.new_sat_var(), std::logic_error);
     BOOST_CHECK_THROW(e.solve(), std::logic_error);
     BOOST_CHECK_THROW(e.resolution_proof(), std::logic_error);
