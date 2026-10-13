@@ -14,7 +14,8 @@ DESCRIPTION
 .fi
 .in 3
 Save a named Boolean target for bounded and shortest reachability searches.
-A matching saved name takes precedence when reach uses -depth.
+Use check reachable -name NAME or check progress -name NAME to resolve a saved
+goal explicitly. Positional operands always refer to model expressions.
 
 Requires a loaded model. set saves a new immutable revision; reusing a name
 replaces its expression in that revision. list displays the saved expressions.
@@ -27,11 +28,11 @@ EXAMPLES
 .nf
 .in 3
 >> goal set duplicate DUPLICATE
->> reach duplicate -shortest -depth 12
+>> check reachable -name duplicate -method bmc -shortest -depth 12
 
 .ti 0
 SEE ALSO
 
 .fi
 .in 3
-help workspace, help reach.
+help workspace, help check.

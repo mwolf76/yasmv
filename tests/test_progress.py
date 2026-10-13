@@ -47,7 +47,7 @@ class ProgressTests(unittest.TestCase):
         return s
 
     def query(self, s, target='x = 2', **kwargs):
-        q = dict(request_id='progress', operation='check-progress', target=target, limits=dict(states=1000, wall_ms=WALL_MS))
+        q = dict(request_id='progress', operation='check', variant='progress', target=target, limits=dict(states=1000, wall_ms=WALL_MS))
         q.update(kwargs)
         return s.query(q, threading.Event(), time.monotonic() + QUERY_TIMEOUT)
 
@@ -217,7 +217,7 @@ class ProgressTests(unittest.TestCase):
             kind='proof' if r['progress']['kind']=='proof' else 'counterexample'
             validate(f'progress-{kind}-v1.schema.json',r['progress'])
             validate('analysis-v1.schema.json',r)
-            q=dict(operation='check-progress',target=target,limits=dict(states=1000,wall_ms=WALL_MS))
+            q=dict(operation='check', variant='progress',target=target,limits=dict(states=1000,wall_ms=WALL_MS))
             validate('query-v1.schema.json',dict(version=1,model='model.smv',query=q))
             validate('workbench-v1.schema.json',dict(version=1,request_id='schema',revision='a'*64,query=q))
         from tools.workbench.client import OPERATIONS
@@ -233,7 +233,7 @@ class ProgressTests(unittest.TestCase):
                 for bit,name in enumerate(('tautology-removal','duplicate-removal','subsumption')):
                     options += ['--cnf-'+name, 'yes' if mask & (1<<bit) else 'no']
                 for target,expected in (('x = 2','proven'),('FALSE','violated')):
-                    request.write_text(json.dumps(dict(version=1,model=str(model),query=dict(operation='check-progress',target=target,limits=dict(states=100,wall_ms=WALL_MS)))))
+                    request.write_text(json.dumps(dict(version=1,model=str(model),query=dict(operation='check', variant='progress',target=target,limits=dict(states=100,wall_ms=WALL_MS)))))
                     run=subprocess.run([str(ROOT/'yasmv'),'--quiet','--query-file',str(request),*options],env=dict(os.environ,YASMV_HOME=str(ROOT)),capture_output=True,text=True,timeout=QUERY_TIMEOUT)
                     self.assertEqual(run.returncode,0,run.stdout+run.stderr)
                     result=json.loads(run.stdout)
@@ -246,7 +246,7 @@ class ProgressTests(unittest.TestCase):
             example=ROOT/'examples/retry-protocol'
             loaded=client.dispatch('model.load',dict(file=str(example/'faulty.smv'),metadata=str(example/'scenario.json')))
             revision=loaded['revision']
-            found=client.query(dict(revision=revision,query=dict(operation='check-progress',target='SUCCEEDED',limits=dict(states=1000,wall_ms=WALL_MS))))
+            found=client.query(dict(revision=revision,query=dict(operation='check', variant='progress',target='SUCCEEDED',limits=dict(states=1000,wall_ms=WALL_MS))))
             self.assertEqual(found['outcome'],'violated',found)
             blocked=client.dispatch('scenario.export',dict(revision=revision,trace_id=found['trace_id']))
             self.assertEqual(blocked['status'],'error',blocked)
@@ -260,7 +260,7 @@ class ProgressTests(unittest.TestCase):
     def test_cli_agent_persistence(self):
         with tempfile.TemporaryDirectory() as d:
             store=Path(d)/'store'; artifact=Path(d)/'progress.json'
-            commands=f'workspace open "{store}"\nread-model "examples/progress/retry-forever.smv"\ncheck-progress FINISHED\nexport-progress "{artifact}"\nvalidate-progress "{artifact}"\ndump-trace\n'
+            commands=f'workspace open "{store}"\nread-model "examples/progress/retry-forever.smv"\ncheck progress FINISHED\nexport-progress "{artifact}"\nvalidate-progress "{artifact}"\ndump-trace\n'
             p=subprocess.run([str(ROOT/'yasmv'),'--quiet'],input=commands,text=True,capture_output=True,cwd=ROOT,env=dict(os.environ,YASMV_HOME=str(ROOT)),timeout=60)
             self.assertEqual(p.returncode,0,p.stdout+p.stderr)
             self.assertIn('Guaranteed progress violated',p.stdout)

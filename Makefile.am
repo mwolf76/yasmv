@@ -38,9 +38,10 @@ EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/ve
     docs/formats/explanation-v1.schema.json docs/formats/executable-scenario-v1.schema.json \
     tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py tools/workbench/sessions.py tests/test_analysis.py tests/test_sessions.py \
     docs/STRONGER_ANALYSIS.md docs/formats/analysis-v1.schema.json tools/benchmark-sessions.py \
-    docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tests/test_cli.py docs/CLI_WORKBENCH.md docs/formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
+    docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tools/workbench/settings.py tests/test_cli.py tests/test_functional_check.py docs/CLI_WORKBENCH.md docs/COMMAND_INTERFACE.md docs/formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
 EXTRA_DIST += README.md setup.sh tests/test_setup.py
 EXTRA_DIST += tests/test_cadical_configure.py
+EXTRA_DIST += docs/INTERPOLATION_PLAN.md docs/INTERPOLATION_PROOF_VALIDATION.md
 
 AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"$(pkgdatadir)\" \
 -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
@@ -59,7 +60,35 @@ AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"
 -I$(top_srcdir)/src/dd/cudd-2.5.0/obj
 
 bin_PROGRAMS = yasmv
-EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests sat_literal_tests
+EXTRA_PROGRAMS = yasmv_tests yasmv_reliability_tests yasmv_query_tests yasmv_interpolation_tests yasmv_interpolation_search_tests sat_literal_tests cadical_proof_tests
+EXTRA_PROGRAMS += interpolation_replay
+interpolation_replay_SOURCES = tools/interpolation-replay.cc src/sat/proof.cc src/sat/circuit.cc src/sat/interpolation_diagnostics.cc src/sat/interpolation_memory.cc
+interpolation_replay_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS) $(LIBJSONCPP_CPPFLAGS)
+interpolation_replay_LDADD = $(CADICAL_LIBS) $(LIBJSONCPP_LIBS)
+interpolation-memory-test: yasmv interpolation_replay
+	YASMV_HOME="$(abs_top_srcdir)" python3 tests/test_interpolation_memory.py
+.PHONY: interpolation-memory-test
+EXTRA_DIST += tools/benchmark-interpolation-memory.py tests/test_interpolation_memory.py docs/INTERPOLATION_MEMORY_BENCHMARK.md
+EXTRA_DIST += docs/benchmarks/interpolation-memory-baseline.json docs/benchmarks/interpolation-memory-baseline.md
+EXTRA_DIST += docs/benchmarks/interpolation-clause-storage.json docs/benchmarks/interpolation-clause-storage.md
+EXTRA_DIST += docs/benchmarks/interpolation-lifetimes.json docs/benchmarks/interpolation-lifetimes.md
+EXTRA_DIST += docs/benchmarks/interpolation-traversal.json docs/benchmarks/interpolation-traversal.md
+EXTRA_DIST += docs/benchmarks/interpolation-allocator.json docs/benchmarks/interpolation-allocator.md
+
+cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh src/sat/proof_tracer.hh src/sat/circuit.cc src/sat/circuit.hh src/sat/interpolation_diagnostics.cc src/sat/interpolation_diagnostics.hh
+cadical_proof_tests_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS)
+cadical_proof_tests_LDADD = $(CADICAL_LIBS)
+
+cadical-proof-test: cadical_proof_tests
+	./cadical_proof_tests
+
+.PHONY: cadical-proof-test
+
+interpolation-test: yasmv_interpolation_tests yasmv_interpolation_search_tests
+	YASMV_HOME="$(abs_top_srcdir)" ./yasmv_interpolation_tests --log_level=error
+	YASMV_HOME="$(abs_top_srcdir)" ./yasmv_interpolation_search_tests --log_level=error
+
+.PHONY: interpolation-test
 
 sat_literal_tests_SOURCES = tests/test_sat_literals.cc
 sat_literal_tests_CPPFLAGS = -I$(top_srcdir)/src
@@ -108,6 +137,8 @@ developer-workflow-test: yasmv
 
 analysis-test: yasmv
 	@YASMV_HOME=`pwd` python3 tests/test_analysis.py
+	@YASMV_HOME=`pwd` python3 tests/test_interpolation_query.py
+	@YASMV_HOME=`pwd` python3 tests/test_interpolation_benchmark.py
 	@YASMV_HOME=`pwd` python3 tests/test_sessions.py
 
 cli-test: yasmv
@@ -116,7 +147,7 @@ cli-test: yasmv
 progress-test: yasmv
 	YASMV_HOME="$(abs_top_srcdir)" python3 $(srcdir)/tests/test_progress.py
 
-test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test sat-types-test setup-test cadical-configure-test
+test: llvm-test progress-test cli-test short-test unit-test functional-test reliability-test query-test workbench-test developer-workflow-test analysis-test cadical-runner-test cadical-proof-test interpolation-test interpolation-memory-test sat-types-test setup-test cadical-configure-test
 	@echo -e "\033[1;32m*** All tests passed Ok\033[0m"
 
 .PHONY: llvm-test
@@ -138,7 +169,7 @@ cadical-runner-test:
 
 cadical-api-test: cadical-runner-test
 	@test -n "$(CADICAL_SOURCE)" || { echo 'Set CADICAL_SOURCE to the pinned CaDiCaL checkout.' >&2; exit 1; }
-	python3 $(srcdir)/tools/test-cadical-api.py --source "$(CADICAL_SOURCE)" --cxx "$(CXX)" --cxxflags="$(CXXFLAGS)"
+	python3 $(srcdir)/tools/test-cadical-api.py --source "$(CADICAL_SOURCE)" --suite all --cxx "$(CXX)" --cxxflags="$(CXXFLAGS)"
 
 .PHONY: cadical-api-test cadical-runner-test
 
@@ -150,7 +181,7 @@ microcode:
 tags:
 	@find $(top_srcdir) -name "*.hh" -o -name "*.cc" | xargs etags
 
-query_sources = src/workbench.cc src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/progress.cc src/query/session.cc
+query_sources = src/workbench.cc src/query/runtime.cc src/query/source.cc src/query/query.cc src/query/trace.cc src/query/io.cc src/query/explain.cc src/query/property.cc src/query/interpolation.cc src/query/progress.cc src/query/session.cc
 yasmv_SOURCES = src/main.cc src/debug.cc src/parse.cc $(query_sources)
 
 yasmv_LDADD = $(top_builddir)/src/parser/libparser.la				\
@@ -241,3 +272,22 @@ pkgconf_DATA = yasmv.pc
 yasmv_query_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_query.cc
 yasmv_query_tests_LDADD = $(yasmv_tests_LDADD)
 yasmv_query_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
+
+yasmv_interpolation_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_interpolation.cc
+yasmv_interpolation_tests_LDADD = $(yasmv_tests_LDADD)
+yasmv_interpolation_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
+
+EXTRA_DIST += tests/models/interpolation.smv
+
+yasmv_interpolation_search_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_interpolation_search.cc
+yasmv_interpolation_search_tests_LDADD = $(yasmv_tests_LDADD)
+yasmv_interpolation_search_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
+EXTRA_DIST += tests/models/interpolation-search.smv
+
+EXTRA_DIST += docs/formats/invariant-v1.schema.json
+
+EXTRA_DIST += tests/test_interpolation_query.py
+EXTRA_DIST += tools/benchmark-interpolation.py tests/test_interpolation_benchmark.py \
+    tests/benchmarks/interpolation/cases.json tests/benchmarks/interpolation/*.smv \
+    tests/benchmarks/interpolation/*.ll docs/INTERPOLATION_BENCHMARKS.md \
+    docs/benchmarks/interpolation-m5.json

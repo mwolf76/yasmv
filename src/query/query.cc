@@ -5,6 +5,7 @@
 #include <cmath>
 #include <env/environment.hh>
 #include <expr/time/analyzer/analyzer.hh>
+#include <expr/time/expander/expander.hh>
 #include <filesystem>
 #include <fstream>
 #include <opts/opts_mgr.hh>
@@ -147,11 +148,76 @@ namespace query {
     {
         if (l.depth < -1 || l.depth >= UINT_MAX || l.states < -1 || l.states == 0 || l.wall_ms < -1 || l.conflicts < -1 || l.propagations < -1) throw std::invalid_argument("Invalid query limits");
     }
+    static expr::Expr_ptr guided_at(expr::Expr_ptr e, unsigned depth)
+    {
+        auto& em = expr::ExprMgr::INSTANCE();
+        if (em.is_and(e)) return em.make_and(guided_at(e->lhs(), depth), guided_at(e->rhs(), depth));
+        if (!em.is_at(e) || !em.is_instant(e->lhs())) throw std::invalid_argument("Unsupported timed constraint");
+        const uint64_t raw = e->lhs()->value();
+        const int64_t point = raw > INT_MAX ? int64_t(depth) - int64_t(UINT_MAX - raw) : raw;
+        if (point < 0 || point > depth) return em.make_false();
+        return em.make_at(em.make_instant(point), e->rhs());
+    }
+    static void guided_bmc(const QuerySpec& spec, QueryResult& r)
+    {
+        auto& em = expr::ExprMgr::INSTANCE();
+        algorithms::Algorithm a(model::ModelMgr::INSTANCE().model());
+        const auto empty = em.make_empty();
+        const auto goal = a.compiler().process(empty, spec.target);
+        r.scope = "through_depth";
+        r.strategy = "bounded-guided";
+        for (unsigned depth = 0; depth <= static_cast<unsigned>(spec.limits.depth); ++depth) {
+            sat::Engine engine("guided-bmc");
+            a.assert_fsm_init(engine, 0);
+            for (unsigned k = 0; k <= depth; ++k) {
+                checkpoint(Phase::encoding);
+                a.assert_fsm_invar(engine, k);
+                trace::allocate_state(engine, k);
+                if (k < depth) a.assert_fsm_trans(engine, k);
+            }
+            for (auto e : spec.assumptions) {
+                expr::time::Analyzer times(em);
+                times.process(e);
+                if (times.has_forward_time() || times.has_backward_time()) {
+                    expr::time::Expander expand(em);
+                    a.assert_formula(engine, 0, a.compiler().process(empty, guided_at(expand.process(e), depth)));
+                } else {
+                    const auto unit = a.compiler().process(empty, e);
+                    for (unsigned k = 0; k <= depth; ++k) a.assert_formula(engine, k, unit);
+                }
+            }
+            a.assert_formula(engine, depth, goal);
+            const auto status = engine.solve();
+            if (status == sat::STATUS_UNKNOWN) return;
+            r.checked_depths.push_back(depth);
+            if (status == sat::STATUS_SAT) {
+                r.witness = trace::decode(engine, depth);
+                r.status = ExecutionStatus::completed;
+                r.outcome = Outcome::reachable;
+                r.complete = true;
+                r.optimality["criterion"] = "transitions";
+                r.optimality["certified"] = true;
+                r.optimality["depth"] = depth;
+                r.optimality["unsat_depths"] = Json::arrayValue;
+                for (unsigned k = 0; k < depth; ++k) r.optimality["unsat_depths"].append(k);
+                r.optimality["method"] = "increasing-depth-exhaustion";
+                return;
+            }
+        }
+        r.status = ExecutionStatus::completed;
+        r.outcome = Outcome::unreachable;
+        r.reason = StopReason::depth_limit;
+        r.complete = true;
+    }
     void bounded_reach(const QuerySpec& spec, QueryResult& r)
     {
         if (!state_expression(spec.target)) throw std::invalid_argument("Bounded reachability requires a state target");
-        for (auto e : spec.assumptions)
-            if (!state_expression(e)) throw std::invalid_argument("Bounded reachability requires untimed state assumptions");
+        bool guided = false;
+        for (auto e : spec.assumptions) {
+            if (!state_expression(e, spec.operation == Operation::reach)) throw std::invalid_argument("Unsupported BMC assumption");
+            if (!state_expression(e)) guided = true;
+        }
+        if (guided) { guided_bmc(spec, r); return; }
         auto& mm = model::ModelMgr::INSTANCE();
         algorithms::Algorithm a(mm.model());
         auto empty = expr::ExprMgr::INSTANCE().make_empty();
@@ -299,13 +365,17 @@ namespace query {
             const bool reaching = spec.operation == Operation::reach || spec.operation == Operation::shortest_reach;
             const bool property = spec.operation == Operation::check_property || spec.operation == Operation::prove_property;
             if (property != !spec.property.isNull()) throw std::invalid_argument("Named property requires check-property or prove-property");
-            if ((property || spec.operation == Operation::shortest_reach) && spec.limits.depth < 0) throw std::invalid_argument("An explicit depth is required");
+            if (((property && spec.strategy != "interpolation") || spec.operation == Operation::shortest_reach) && spec.limits.depth < 0) throw std::invalid_argument("An explicit depth is required");
             const bool explaining = spec.operation == Operation::explain_init || spec.operation == Operation::explain_step || spec.operation == Operation::explain_reach;
             if (!explaining && !spec.explanation.isNull()) throw std::invalid_argument("Explanation options require an explanation operation");
             if (spec.prefix_length != -1 && ((spec.operation != Operation::simulate && spec.operation != Operation::explain_step) || spec.prefix_length <= 0)) throw std::invalid_argument("Prefix length applies only to continuation");
             for (const auto& [name, e] : spec.watches)
                 if (name.empty() || !state_expression(e) || !mm.type(e)->is_boolean()) throw std::invalid_argument("Watches require named Boolean state expressions");
-            if (!reaching && spec.strategy != "auto") throw std::invalid_argument("Strategy selection applies only to reachability");
+            const bool interpolating = spec.strategy == "interpolation";
+            if (interpolating && !((spec.operation == Operation::reach && spec.limits.depth < 0) || spec.operation == Operation::prove_property))
+                throw std::invalid_argument("Interpolation requires unbounded reach or prove-property");
+            if (!reaching && spec.strategy != "auto" && !(spec.operation == Operation::prove_property && interpolating))
+                throw std::invalid_argument("Strategy selection requires reachability or interpolation proof");
             if (spec.target && ((!reaching && spec.operation != Operation::check_progress && spec.operation != Operation::explain_reach) || !state_expression(spec.target))) throw std::invalid_argument("Reachability target must be a state expression");
             if (spec.until && spec.operation != Operation::simulate) throw std::invalid_argument("Until condition applies only to simulation");
             if (spec.operation != Operation::pick_state && (spec.enumerate || spec.count)) throw std::invalid_argument("Enumeration/counting applies only to pick-state");
@@ -316,16 +386,20 @@ namespace query {
             if (spec.limits.depth >= 0 && (spec.operation == Operation::check_init || spec.operation == Operation::pick_state || spec.operation == Operation::validate_trace || spec.operation == Operation::validate_model)) throw std::invalid_argument("Depth limit is unsupported for this operation");
             if (reaching)
                 for (auto e : spec.assumptions)
-                    if (!state_expression(e, spec.limits.depth < 0)) throw std::invalid_argument("Incompatible timed assumption");
+                    if (!state_expression(e, spec.strategy != "interpolation")) throw std::invalid_argument("Incompatible timed assumption");
             context.requested_strategy = spec.strategy;
             context.check(Phase::compilation);
             r.identity = identity();
-            if (spec.strategy != "auto" && spec.strategy != "forward" && spec.strategy != "backward") throw std::invalid_argument("Unknown or empty strategy configuration");
+            if (spec.strategy != "auto" && spec.strategy != "forward" && spec.strategy != "backward" && !interpolating) throw std::invalid_argument("Unknown or empty strategy configuration");
             if (reaching && !spec.target) throw std::invalid_argument("Reachability requires a target");
             if (progress) {
                 analyze_progress(spec, r, context);
             } else if (property) {
                 analyze_property(spec, r, context);
+                if (spec.check_variant == "reachable" && r.status == ExecutionStatus::completed) {
+                    if (r.outcome == Outcome::violated) r.outcome = Outcome::reachable;
+                    else if (r.outcome == Outcome::proven || r.outcome == Outcome::holds_bounded) r.outcome = Outcome::unreachable;
+                }
             } else if (explaining) {
                 explain(spec, r, context);
             } else if (spec.operation == Operation::validate_model) {
@@ -373,7 +447,9 @@ namespace query {
                 for (auto w : witness::WitnessMgr::INSTANCE().witnesses())
                     if (index++ >= previous) w->artifact = trace::export_trace(*w, spec, r.identity);
             } else if (reaching) {
-                if (spec.limits.depth >= 0) {
+                if (interpolating) {
+                    interpolation_reach(spec, r, context);
+                } else if (spec.limits.depth >= 0) {
                     if (spec.strategy == "backward") throw std::invalid_argument("Bounded queries currently support the forward strategy");
                     bounded_reach(spec, r);
                 } else {
@@ -418,7 +494,7 @@ namespace query {
                 r.watches = trace::evaluate_watches(*r.witness, spec.watches);
             if (context.stop != StopReason::none) throw Cancelled();
             if (r.witness && r.status == ExecutionStatus::completed &&
-                (spec.operation == Operation::simulate || (reaching && spec.limits.depth >= 0))) {
+                (spec.operation == Operation::simulate || (reaching && (spec.limits.depth >= 0 || interpolating)))) {
                 auto& wm = witness::WitnessMgr::INSTANCE();
                 wm.record(*r.witness);
                 wm.set_current(*r.witness);
@@ -434,6 +510,7 @@ namespace query {
             r.explanation = Json::Value();
             r.optimality = Json::Value();
             r.proof = Json::Value();
+            r.proof_method.clear();
             r.progress = Json::Value();
             r.witness = nullptr;
         } catch (const Exception& e) {
@@ -465,9 +542,11 @@ namespace query {
             r.explanation = Json::Value();
             r.optimality = Json::Value();
             r.proof = Json::Value();
+            r.proof_method.clear();
             r.progress = Json::Value();
             r.witness = nullptr;
         }
+        if (!spec.check_variant.empty()) r.statistics["check"] = spec_json(spec);
         r.statistics["compile_ms"] = context.compile_ms;
         r.statistics["encode_ms"] = context.encode_ms;
         r.statistics["solve_ms"] = context.solve_ms;
@@ -475,6 +554,7 @@ namespace query {
         r.statistics["elapsed_ms"] = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - started).count();
         r.statistics["variables"] = Json::UInt64(context.variables);
         r.statistics["clauses"] = Json::UInt64(context.clauses);
+        r.statistics["solver_calls"] = Json::UInt64(context.solver_calls.load());
         r.statistics["conflicts"] = Json::UInt64(context.conflicts_used);
         r.statistics["propagations"] = Json::UInt64(context.propagations_used);
         return r;

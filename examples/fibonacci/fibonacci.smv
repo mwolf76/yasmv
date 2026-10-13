@@ -3,7 +3,7 @@
 --
 
 -- To generate the sequence of the first n fibonacci numbers issue the
--- command: >> set n 10; reach GOAL; dump-trace
+-- command: >> set n 10; check reachable GOAL; dump-trace
 
 #word-width 64
 MODULE fibonacci

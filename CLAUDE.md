@@ -52,8 +52,7 @@ make functional-test   # Full functional tests
 YASMV_HOME=`pwd` ./yasmv_tests --run_test=tests/expressions
 
 # Run a specific functional test
-YASMV_HOME=`pwd` ./yasmv --quiet examples/maze/solvable8x8.smv < examples/maze/commands > out
-diff -wB examples/maze/solvable8x8.out out
+YASMV_HOME=`pwd` python3 tests/test_functional_check.py
 
 # Test llvm2smv (if enabled)
 make -C llvm2smv test

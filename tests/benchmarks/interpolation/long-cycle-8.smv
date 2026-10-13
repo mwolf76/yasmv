@@ -1,0 +1,8 @@
+#word-width 8
+MODULE main
+#inertial VAR counter : uint8;
+#inertial VAR bad : boolean;
+INIT counter = 0;
+INIT !bad;
+TRANS counter := counter + 1;
+TRANS bad := bad;

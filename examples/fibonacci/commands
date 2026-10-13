@@ -1,5 +1,5 @@
 set n 50
-reach GOAL
+check reachable GOAL -method bmc -depth 100
 on success dump-trace -f json
 time
 quit

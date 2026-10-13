@@ -44,7 +44,7 @@ class AnalysisTests(unittest.TestCase):
                 state = edges[state]
             for goal in range(4):
                 with self.subTest(edges=edges, goal=goal):
-                    result = self.run_query(session, dict(operation='shortest-reach', target=f'x = {goal}', limits={'depth': 4}))
+                    result = self.run_query(session, dict(operation='check', variant='reachable', method='bmc', shortest=True, target=f'x = {goal}', limits={'depth': 4}))
                     if goal in distances:
                         depth = distances[goal]
                         self.assertEqual(result['outcome'], 'reachable')
@@ -68,7 +68,7 @@ class AnalysisTests(unittest.TestCase):
                 reachable.add(state); state = edges[state]
             for forbidden in range(4):
                 for depth in (1, 3):
-                    result = self.run_query(session, dict(operation='prove-property', property={'name': 'safe', 'expression': f'x != {forbidden}'}, limits={'depth': depth}))
+                    result = self.run_query(session, dict(operation='check', variant='invariant', method='induction', target=f'x != {forbidden}', limits={'depth': depth}))
                     if result['outcome'] == 'proven':
                         self.assertNotIn(forbidden, reachable)
                         self.assertEqual(result['scope'], 'unbounded')
@@ -91,7 +91,7 @@ class AnalysisTests(unittest.TestCase):
 
     def test_unreachable_step_assignment_then_three_induction(self):
         session = self.session(model([0, 2, 3, 3]))
-        q = dict(operation='prove-property', property={'name': 'safe', 'expression': 'x != 3'}, limits={'depth': 1})
+        q = dict(operation='check', variant='invariant', method='induction', target='x != 3', limits={'depth': 1})
         result = self.run_query(session, q)
         self.assertEqual(result['outcome'], 'holds_bounded')
         step = result['proof']['induction_counterexample']['trace']
@@ -101,43 +101,43 @@ class AnalysisTests(unittest.TestCase):
 
     def test_assumptions_dead_ends_and_zero_step_refutation(self):
         session = self.session(model([1, 2, 3, 0]))
-        q = dict(operation='check-property', property={'name': 'safe', 'expression': 'x != 0'}, limits={'depth': 0})
+        q = dict(operation='check', variant='invariant', method='bmc', target='x != 0', limits={'depth': 0})
         result = self.run_query(session, q)
         self.assertEqual(result['outcome'], 'violated')
         self.assertEqual(result['optimality']['unsat_depths'], [])
         tampered = deepcopy(result['trace'])
-        tampered['query']['property']['expression'] = 'TRUE'
+        tampered['query']['target'] = 'TRUE'
         replay = session.query(dict(request_id='tampered', operation='validate-trace', trace=tampered), threading.Event(), time.monotonic() + 90)
         self.assertEqual(replay['status'], 'error')
-        q.update(operation='prove-property', property={'name': 'safe', 'expression': 'x != 3'}, assumptions=['x < 2'], limits={'depth': 1})
+        q.update(operation='check', variant='invariant', method='induction', target='x != 3', assumptions=['x < 2'], limits={'depth': 1})
         result = self.run_query(session, q)
         self.assertEqual(result['outcome'], 'proven')
         self.assertEqual(result['proof']['assumptions'], ['(x < 2)'])
         dead = self.session('MODULE main\n#inertial\nVAR x : boolean;\nINIT x;\nINVAR x;\nTRANS x := !x;\n')
-        result = self.run_query(dead, dict(operation='prove-property', property={'name': 'safe', 'expression': 'x'}, limits={'depth': 2}))
+        result = self.run_query(dead, dict(operation='check', variant='invariant', method='induction', target='x', limits={'depth': 2}))
         self.assertEqual(result['outcome'], 'proven')
 
     def test_unknown_and_bad_properties_do_not_create_certificates(self):
         session = self.session(model([0, 1, 2, 3]))
         for limit in ('wall_ms', 'conflicts', 'propagations'):
-            for op in ('shortest-reach', 'prove-property'):
-                q = dict(operation=op, limits={'depth': 3, limit: 0})
-                q.update(target='x = 3') if op == 'shortest-reach' else q.update(property={'name': 'safe', 'expression': 'x != 3'})
+            for variant in ('reachable', 'invariant'):
+                q = dict(operation='check', variant=variant, method='induction', limits={'depth': 3, limit: 0})
+                q.update(target='x = 3' if variant == 'reachable' else 'x != 3')
                 result = self.run_query(session, q)
                 self.assertEqual(result['status'], 'unknown')
                 self.assertIsNone(result['trace'])
                 self.assertIsNone(result['optimality'])
                 self.assertFalse((result.get('proof') or {}).get('verified'))
         for expression in ('next(x) = 0', 'x + 1', 'missing'):
-            result = session.query(dict(request_id='bad', operation='prove-property', property={'name': 'bad', 'expression': expression}, limits={'depth': 1}), threading.Event(), time.monotonic() + 90)
+            result = session.query(dict(request_id='bad', operation='check', variant='invariant', method='induction', target=expression, limits={'depth': 1}), threading.Event(), time.monotonic() + 90)
             self.assertEqual(result['status'], 'error', result)
-        result = self.run_query(session, dict(operation='shortest-reach', target='x = 0', limits={'depth': 0}))
+        result = self.run_query(session, dict(operation='check', variant='reachable', method='bmc', shortest=True, target='x = 0', limits={'depth': 0}))
         self.assertTrue(result['optimality']['certified'])
 
     def test_retry_protocol_counterexample_and_proof(self):
         for receiver in ('faulty', 'deduplicating'):
             session = self.session((ROOT / f'examples/retry-protocol/{receiver}.smv').read_text())
-            q = dict(operation='prove-property', property={'name': 'at most once', 'expression': '!DUPLICATE'}, limits={'depth': 12})
+            q = dict(operation='check', variant='invariant', method='induction', target='!DUPLICATE', limits={'depth': 12})
             result = self.run_query(session, q)
             if receiver == 'faulty':
                 self.assertEqual(result['outcome'], 'violated')

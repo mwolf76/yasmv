@@ -7,8 +7,8 @@ AM_CPPFLAGS=@AM_CPPFLAGS@ -I$(top_srcdir)/src	\
 
 AM_CXXFLAGS=@AM_CXXFLAGS@
 
-PKG_HH = reach.hh typedefs.hh witness.hh
-PKG_CC = reach.cc forward.cc backward.cc fast_forward.cc fast_backward.cc witness.cc
+PKG_HH = reach.hh typedefs.hh witness.hh interpolation.hh
+PKG_CC = reach.cc forward.cc backward.cc fast_forward.cc fast_backward.cc witness.cc interpolation.cc interpolation_model.cc
 
 # -------------------------------------------------------
 

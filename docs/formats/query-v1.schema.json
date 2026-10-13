@@ -14,32 +14,19 @@
         "operation": {
           "enum": [
             "validate-model",
-            "check-init",
-            "check-trans",
             "pick-state",
-            "reach",
             "simulate",
             "diameter",
             "validate-trace",
             "explain-init",
             "explain-step",
             "explain-reach",
-            "shortest-reach",
-            "check-property",
-            "prove-property",
-            "check-progress",
-            "validate-progress"
+            "validate-progress",
+            "check"
           ]
         },
         "request_id": {
           "type": "string"
-        },
-        "strategy": {
-          "enum": [
-            "auto",
-            "forward",
-            "backward"
-          ]
         },
         "target": {
           "type": "string"
@@ -58,11 +45,12 @@
           "properties": {
             "depth": {
               "type": "integer",
-              "minimum": -1
+              "minimum": 0,
+              "maximum": 10000
             },
             "states": {
               "type": "integer",
-              "minimum": -1
+              "minimum": 1
             },
             "wall_ms": {
               "type": "integer",
@@ -134,24 +122,6 @@
             }
           }
         },
-        "property": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "name",
-            "expression"
-          ],
-          "properties": {
-            "name": {
-              "type": "string",
-              "minLength": 1
-            },
-            "expression": {
-              "type": "string",
-              "minLength": 1
-            }
-          }
-        },
         "progress": {
           "oneOf": [
             {
@@ -161,6 +131,25 @@
               "$ref": "progress-counterexample-v1.schema.json"
             }
           ]
+        },
+        "variant": {
+          "enum": [
+            "init",
+            "trans",
+            "reachable",
+            "invariant",
+            "progress"
+          ]
+        },
+        "method": {
+          "enum": [
+            "bmc",
+            "induction",
+            "interpolation"
+          ]
+        },
+        "shortest": {
+          "type": "boolean"
         }
       },
       "required": [
@@ -173,34 +162,42 @@
             "properties": {
               "operation": {
                 "enum": [
-                  "check-property",
-                  "prove-property"
+                  "check"
                 ]
               }
-            }
+            },
+            "required": [
+              "operation"
+            ]
           },
           "then": {
             "required": [
-              "property",
-              "limits"
-            ],
-            "properties": {
-              "limits": {
-                "required": [
-                  "depth"
-                ],
-                "properties": {
-                  "depth": {
-                    "minimum": 0
-                  }
-                }
-              }
-            }
+              "variant"
+            ]
           },
           "else": {
             "not": {
-              "required": [
-                "property"
+              "anyOf": [
+                {
+                  "required": [
+                    "variant"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "shortest"
+                  ]
+                },
+                {
+                  "required": [
+                    "name"
+                  ]
+                }
               ]
             }
           }
@@ -209,18 +206,105 @@
           "if": {
             "properties": {
               "operation": {
-                "const": "prove-property"
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "init",
+                  "trans"
+                ]
               }
-            }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
           },
           "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "target"
+                  ]
+                },
+                {
+                  "required": [
+                    "name"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "shortest"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "reachable",
+                  "invariant",
+                  "progress"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "method": {
+                "enum": [
+                  "bmc",
+                  "induction"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "method"
+            ]
+          },
+          "then": {
+            "required": [
+              "limits"
+            ],
             "properties": {
               "limits": {
-                "properties": {
-                  "depth": {
-                    "minimum": 1
-                  }
-                }
+                "required": [
+                  "depth"
+                ]
               }
             }
           }
@@ -229,23 +313,27 @@
           "if": {
             "properties": {
               "operation": {
-                "const": "shortest-reach"
+                "enum": [
+                  "check"
+                ]
+              },
+              "method": {
+                "enum": [
+                  "induction"
+                ]
               }
-            }
+            },
+            "required": [
+              "operation",
+              "method"
+            ]
           },
           "then": {
-            "required": [
-              "target",
-              "limits"
-            ],
             "properties": {
               "limits": {
-                "required": [
-                  "depth"
-                ],
                 "properties": {
                   "depth": {
-                    "minimum": 0
+                    "minimum": 1
                   }
                 }
               }
@@ -257,31 +345,132 @@
             "properties": {
               "operation": {
                 "enum": [
-                  "check-progress",
-                  "validate-progress"
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "reachable",
+                  "invariant"
                 ]
               }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "if": {
+              "anyOf": [
+                {
+                  "not": {
+                    "required": [
+                      "method"
+                    ]
+                  }
+                },
+                {
+                  "properties": {
+                    "method": {
+                      "enum": [
+                        "interpolation"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "method"
+                  ]
+                }
+              ]
+            },
+            "then": {
+              "properties": {
+                "limits": {
+                  "not": {
+                    "required": [
+                      "depth"
+                    ]
+                  }
+                }
+              }
             }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "shortest"
+            ]
           },
           "then": {
             "required": [
-              "limits"
+              "method"
             ],
             "properties": {
+              "method": {
+                "const": "bmc"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "init",
+                  "progress"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "properties": {
               "limits": {
-                "required": [
-                  "states",
-                  "wall_ms"
-                ],
+                "not": {
+                  "required": [
+                    "depth"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "trans"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "properties": {
+              "limits": {
                 "properties": {
-                  "states": {
-                    "minimum": 1
-                  },
-                  "wall_ms": {
-                    "minimum": 0
-                  },
                   "depth": {
-                    "const": -1
+                    "minimum": 1
                   }
                 }
               }
@@ -292,14 +481,70 @@
           "if": {
             "properties": {
               "operation": {
-                "const": "check-progress"
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "init",
+                  "trans",
+                  "reachable",
+                  "invariant"
+                ]
               }
-            }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
           },
           "then": {
+            "properties": {
+              "limits": {
+                "not": {
+                  "required": [
+                    "states"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "progress"
+                ]
+              }
+            },
             "required": [
-              "target"
+              "operation",
+              "variant"
             ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "shortest"
+                  ]
+                }
+              ]
+            }
           }
         },
         {
@@ -325,6 +570,99 @@
               "required": [
                 "progress"
               ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "check"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "until"
+                  ]
+                },
+                {
+                  "required": [
+                    "trace"
+                  ]
+                },
+                {
+                  "required": [
+                    "trace_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "parent_trace"
+                  ]
+                },
+                {
+                  "required": [
+                    "prefix_length"
+                  ]
+                },
+                {
+                  "required": [
+                    "explanation"
+                  ]
+                },
+                {
+                  "required": [
+                    "progress"
+                  ]
+                },
+                {
+                  "required": [
+                    "count"
+                  ]
+                },
+                {
+                  "required": [
+                    "enumerate"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "validate-progress"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "required": [
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "states",
+                  "wall_ms"
+                ],
+                "not": {
+                  "required": [
+                    "depth"
+                  ]
+                }
+              }
             }
           }
         }

@@ -5,7 +5,12 @@
 #include <query/query.hh>
 #include <query/trace.hh>
 namespace query {
-    static const std::map<std::string, Operation> operations = { { "check-progress", Operation::check_progress }, { "validate-progress", Operation::validate_progress }, { "shortest-reach", Operation::shortest_reach }, { "check-property", Operation::check_property }, { "prove-property", Operation::prove_property }, { "explain-init", Operation::explain_init }, { "explain-step", Operation::explain_step }, { "explain-reach", Operation::explain_reach }, { "validate-model", Operation::validate_model }, { "check-init", Operation::check_init }, { "check-trans", Operation::check_trans }, { "pick-state", Operation::pick_state }, { "reach", Operation::reach }, { "simulate", Operation::simulate }, { "diameter", Operation::diameter }, { "validate-trace", Operation::validate_trace } };
+    static const std::map<std::string, Operation> operations = {
+        {"validate-progress", Operation::validate_progress}, {"explain-init", Operation::explain_init},
+        {"explain-step", Operation::explain_step}, {"explain-reach", Operation::explain_reach},
+        {"validate-model", Operation::validate_model}, {"pick-state", Operation::pick_state},
+        {"simulate", Operation::simulate}, {"diameter", Operation::diameter}, {"validate-trace", Operation::validate_trace}};
+
     static void require(bool c, const std::string& message)
     {
         if (!c) throw std::invalid_argument(message);
@@ -32,17 +37,35 @@ namespace query {
         for (const auto& [n, o] : operations)
             if (o == s.operation) v["operation"] = n;
         v["request_id"] = s.request_id;
-        v["strategy"] = s.strategy;
+        std::string variant = s.check_variant, method = s.method;
+        if (variant.empty()) {
+            if (s.operation == Operation::check_init) variant = "init";
+            if (s.operation == Operation::check_trans) variant = "trans";
+            if (s.operation == Operation::check_progress) variant = "progress";
+            if (s.operation == Operation::reach || s.operation == Operation::shortest_reach) variant = "reachable";
+            if (s.operation == Operation::check_property || s.operation == Operation::prove_property) variant = "invariant";
+        }
+        if (!variant.empty()) {
+            v["operation"] = "check";
+            v["variant"] = variant;
+            if (variant == "reachable" || variant == "invariant") {
+                if (method.empty()) method = s.strategy == "interpolation" || s.limits.depth < 0 ? "interpolation" :
+                    s.operation == Operation::prove_property ? "induction" : "bmc";
+                v["method"] = method;
+                if (s.shortest || s.operation == Operation::shortest_reach) v["shortest"] = true;
+            }
+        }
         v["assumptions"] = Json::arrayValue;
         for (auto e : s.assumptions)
             v["assumptions"].append(source::print(e));
         if (s.target) v["target"] = source::print(s.target);
         if (s.until) v["until"] = source::print(s.until);
-        v["enumerate"] = s.enumerate;
-        v["count"] = s.count;
-        v["trace_id"] = s.trace_id;
+        if (s.enumerate) v["enumerate"] = true;
+        if (s.count) v["count"] = true;
+        if (!s.trace_id.empty()) v["trace_id"] = s.trace_id;
         if (!s.progress.isNull()) v["progress"] = s.progress;
-        if (!s.property.isNull()) v["property"] = s.property;
+        if (s.check_target) v["target"] = source::print(s.check_target);
+        else if (!s.property.isNull()) v["target"] = s.property["expression"];
         if (!s.explanation.isNull()) v["explanation"] = s.explanation;
         if (s.prefix_length >= 0) v["prefix_length"] = Json::Int64(s.prefix_length);
         if (!s.watches.empty()) {
@@ -50,24 +73,50 @@ namespace query {
             for (const auto& [name, e] : s.watches)
                 v["watches"][name] = source::print(e);
         }
-        v["limits"]["depth"] = Json::Int64(s.limits.depth);
-        v["limits"]["states"] = Json::Int64(s.limits.states);
-        v["limits"]["wall_ms"] = Json::Int64(s.limits.wall_ms);
-        v["limits"]["conflicts"] = Json::Int64(s.limits.conflicts);
-        v["limits"]["propagations"] = Json::Int64(s.limits.propagations);
+        if (s.limits.depth >= 0) v["limits"]["depth"] = Json::Int64(s.limits.depth);
+        if (s.limits.states >= 0) v["limits"]["states"] = Json::Int64(s.limits.states);
+        if (s.limits.wall_ms >= 0 || !variant.empty()) v["limits"]["wall_ms"] = Json::Int64(s.limits.wall_ms);
+        if (s.limits.conflicts >= 0) v["limits"]["conflicts"] = Json::Int64(s.limits.conflicts);
+        if (s.limits.propagations >= 0) v["limits"]["propagations"] = Json::Int64(s.limits.propagations);
         if (!s.parent_trace.isNull()) v["parent_trace"] = s.parent_trace;
         return v;
     }
     QuerySpec spec_from_json(const Json::Value& v)
     {
-        allowed(v, { "operation", "request_id", "strategy", "target", "until", "assumptions", "limits", "enumerate", "count", "trace_id", "trace", "parent_trace", "prefix_length", "watches", "explanation", "property", "progress" });
-        require(v["operation"].isString() && operations.count(v["operation"].asString()), "Unsupported query operation");
+        allowed(v, { "operation", "variant", "method", "shortest", "request_id", "target", "until", "assumptions", "limits", "enumerate", "count", "trace_id", "trace", "parent_trace", "prefix_length", "watches", "explanation", "progress" });
+        require(v["operation"].isString(), "Expected query operation");
         QuerySpec s;
-        s.operation = operations.at(v["operation"].asString());
-        for (auto n : { "request_id", "strategy", "trace_id" })
+        const bool checking = v["operation"] == "check";
+        if (checking) {
+            require(v["variant"].isString(), "Check requires a variant");
+            s.check_variant = v["variant"].asString();
+            const auto& variant = s.check_variant;
+            require(variant == "init" || variant == "trans" || variant == "reachable" || variant == "invariant" || variant == "progress", "Unknown check variant");
+            const bool search = variant == "reachable" || variant == "invariant";
+            require(v.isMember("target") == (search || variant == "progress"), "This check requires exactly its target expression");
+            require(!v.isMember("method") || (search && v["method"].isString()), "Method applies only to reachable and invariant checks");
+            require(!v.isMember("shortest") || (search && v["shortest"].isBool()), "Invalid shortest option");
+            s.method = search ? v.get("method", "interpolation").asString() : "";
+            s.shortest = v.get("shortest", false).asBool();
+            require(!search || s.method == "bmc" || s.method == "induction" || s.method == "interpolation", "Unknown check method");
+            require(!v.isMember("shortest") || s.method == "bmc", "Shortest requires BMC");
+            s.operation = variant == "init" ? Operation::check_init : variant == "trans" ? Operation::check_trans :
+                variant == "progress" ? Operation::check_progress : variant == "reachable" && s.method != "induction" ? Operation::reach :
+                s.method == "bmc" ? Operation::check_property : Operation::prove_property;
+            if (s.method == "interpolation") s.strategy = "interpolation";
+            if (variant == "trans") s.limits.depth = 1;
+            if (variant == "progress") s.limits.states = 10000;
+            s.limits.wall_ms = 30000;
+            for (auto key : {"until", "trace", "trace_id", "parent_trace", "prefix_length", "explanation", "progress", "enumerate", "count"})
+                require(!v.isMember(key), std::string("Check does not accept ") + key);
+        } else {
+            require(operations.count(v["operation"].asString()), "Unsupported query operation");
+            s.operation = operations.at(v["operation"].asString());
+            require(!v.isMember("variant") && !v.isMember("method") && !v.isMember("shortest"), "Check options require operation check");
+        }
+        for (auto n : {"request_id", "trace_id"})
             if (v.isMember(n)) require(v[n].isString(), std::string("Expected string: ") + n);
         s.request_id = v.get("request_id", "").asString();
-        s.strategy = v.get("strategy", "auto").asString();
         s.trace_id = v.get("trace_id", "").asString();
         if (v.isMember("target")) s.target = expression(v["target"]);
         if (v.isMember("until")) s.until = expression(v["until"]);
@@ -112,11 +161,21 @@ namespace query {
             }
             s.explanation = options;
         }
-        if (v.isMember("property")) {
-            allowed(v["property"], { "name", "expression" });
-            require(v["property"]["name"].isString() && !v["property"]["name"].asString().empty(), "Property requires a name");
-            expression(v["property"]["expression"]);
-            s.property = v["property"];
+        if (checking) {
+            const bool bounded = s.method == "bmc" || s.method == "induction";
+            require(!bounded || (v["limits"].isMember("depth") && s.limits.depth >= (s.method == "induction" ? 1 : 0)), "BMC and induction require an explicit depth");
+            require(s.limits.depth <= 10000, "Depth exceeds 10000");
+            require(bounded || s.check_variant == "trans" || !v["limits"].isMember("depth"), "Depth is unsupported for this check method");
+            require(s.check_variant != "trans" || s.limits.depth > 0, "Transition depth must be positive");
+            require(!v["limits"].isMember("states") || s.check_variant == "progress", "States applies only to progress");
+            if (s.check_variant == "progress") require(s.limits.states > 0 && s.limits.states <= 1000000, "Invalid progress state limit");
+            s.check_target = s.target;
+            if (s.check_variant == "invariant" || (s.check_variant == "reachable" && s.method == "induction")) {
+                auto property = s.check_variant == "invariant" ? s.target : expr::ExprMgr::INSTANCE().make_not(s.target);
+                s.property["name"] = "checked property";
+                s.property["expression"] = source::print(property);
+                s.target = nullptr;
+            }
         }
         s.progress = v["progress"];
         s.trace = v["trace"];

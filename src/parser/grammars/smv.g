@@ -971,13 +971,7 @@ commands [cmd::CommandVector_ptr cmds]
 
 command_topic returns [cmd::CommandTopic_ptr res]
 @init { $res = nullptr; }
-    :  c=check_init_command_topic
-       { $res = c; }
-
-    |  c=check_trans_command_topic
-       { $res = c; }
-
-    |  c=diameter_command_topic
+    :  c=diameter_command_topic
        { $res = c; }
 
     |  c=clear_command_topic
@@ -1025,8 +1019,6 @@ command_topic returns [cmd::CommandTopic_ptr res]
     |  c=quit_command_topic
        { $res = c; }
 
-    |  c=reach_command_topic
-       { $res = c; }
 
     | c=select_trace_topic
       { $res = c; }
@@ -1039,7 +1031,7 @@ command_topic returns [cmd::CommandTopic_ptr res]
 
     |  c=time_command_topic
        { $res = c; }
-    | keyword=('workspace' | 'goal' | 'property' | 'watch' | 'show-symbols' | 'capabilities' | 'job' | 'scenario' | 'explain-init' | 'explain-step' | 'explain-reach' | 'check-property' | 'prove-property' | 'compare-traces' | 'check-progress' | 'validate-progress' | 'export-progress')
+    | keyword=('workspace' | 'goal' | 'property' | 'watch' | 'show-symbols' | 'capabilities' | 'job' | 'scenario' | 'explain-init' | 'explain-step' | 'explain-reach' | 'check' | 'settings' | 'compare-traces' | 'validate-progress' | 'export-progress')
        { $res = cm.topic_named((const char*)$keyword.text->chars); }
     |  name=pcchar_identifier
        { $res = cm.topic_named(name); }
@@ -1050,11 +1042,7 @@ command returns [cmd::Command_ptr res]
     :  c=workspace_command
        { $res = c; }
 
-    |  c=check_init_command
-       { $res = c; }
 
-    |  c=check_trans_command
-       { $res = c; }
 
     |  c=clear_command
        { $res = c; }
@@ -1104,8 +1092,6 @@ command returns [cmd::Command_ptr res]
     |  c=quit_command
        { $res = c; }
 
-    |  c=reach_command
-       { $res = c; }
 
     |  c=select_trace_command
        { $res = c; }
@@ -1131,7 +1117,8 @@ workspace_count returns [Json::Int64 res]
     ;
 
 workspace_query_options[cmd::WorkspaceCommand* command]
-    : ( '-states' st=workspace_count { command->arguments()["query"]["limits"]["states"] = st; }
+    : ( '-strategy' strategy=workspace_name { command->arguments()["query"]["strategy"] = strategy; }
+      | '-states' st=workspace_count { command->arguments()["query"]["limits"]["states"] = st; }
       | '-depth' d=workspace_count { command->arguments()["query"]["limits"]["depth"] = d; }
       | '-wall-ms' ms=workspace_count { command->arguments()["query"]["limits"]["wall_ms"] = ms; }
       | '-conflicts' cf=workspace_count { command->arguments()["query"]["limits"]["conflicts"] = cf; }
@@ -1139,6 +1126,35 @@ workspace_query_options[cmd::WorkspaceCommand* command]
       | '-c' e=toplevel_expression { command->arguments()["query"]["assumptions"].append(source::print(e)); }
       | '-at' at=workspace_count { if (at == INT64_MAX) { throw std::invalid_argument("Trace index is too large"); } command->arguments()["query"]["prefix_length"] = at + 1; }
       | '-minimize' { command->arguments()["query"]["explanation"]["minimize"] = true; }
+      | '-async' { command->arguments()["background"] = true; }
+      )*
+    ;
+
+setting_component returns [std::string res]
+    : i=pcchar_identifier { $res = i; }
+    | keyword=('check' | 'progress') { $res = (const char*)$keyword.text->chars; }
+    ;
+setting_key returns [std::string res]
+    : first=setting_component { $res = first; }
+      ( '.' next=setting_component { $res += "." + next; } )*
+    ;
+setting_value returns [std::string res]
+    : n=DECIMAL_LITERAL { $res = (const char*)$n.text->chars; }
+      (unit=pcchar_identifier { $res += unit; })?
+    | setting_text=workspace_name { $res = setting_text; }
+    | 'unlimited' { $res = "unlimited"; }
+    ;
+check_options[cmd::WorkspaceCommand* command]
+    : ( '-method' method=workspace_name { command->arguments()["query"]["method"] = method; }
+      | '-depth' d=workspace_count { command->arguments()["query"]["limits"]["depth"] = d; }
+      | '-states' st=workspace_count { command->arguments()["query"]["limits"]["states"] = st; }
+      | '-wall-ms' (ms=workspace_count { command->arguments()["query"]["limits"]["wall_ms"] = ms; }
+                   | 'unlimited' { command->arguments()["query"]["limits"]["wall_ms"] = -1; })
+      | '-conflicts' cf=workspace_count { command->arguments()["query"]["limits"]["conflicts"] = cf; }
+      | '-propagations' pr=workspace_count { command->arguments()["query"]["limits"]["propagations"] = pr; }
+      | '-c' e=toplevel_expression { command->arguments()["query"]["assumptions"].append(source::print(e)); }
+      | '-shortest' { command->arguments()["query"]["shortest"] = true; }
+      | '-sync' { command->arguments()["background"] = false; }
       | '-async' { command->arguments()["background"] = true; }
       )*
     ;
@@ -1158,12 +1174,20 @@ workspace_command returns [cmd::Command_ptr res]
       )
     | 'show-symbols' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "model.symbols"); }
     | 'capabilities' { $res = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "capabilities"); }
-    | ('check-property' {kind="check-property";} | 'prove-property' {kind="prove-property";}) name=workspace_name
-      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = kind; w->arguments()["query"]["property"] = name; $res = w; }
-      workspace_query_options[w]
-    | 'check-progress' target=toplevel_expression
-      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "check-progress"; w->arguments()["query"]["target"] = source::print(target); w->arguments()["query"]["limits"]["states"] = 10000; w->arguments()["query"]["limits"]["wall_ms"] = 30000; $res = w; }
-      workspace_query_options[w]
+    | 'check' variant=('init' | 'trans' | 'reachable' | 'invariant' | 'progress')
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "check"; w->arguments()["query"]["variant"] = (const char*)$variant.text->chars; $res = w; }
+      ( '-name' saved=workspace_name { w->arguments()["query"]["name"] = saved; }
+      | predicate=toplevel_expression { w->arguments()["query"]["target"] = source::print(predicate); }
+      )?
+      check_options[w]
+    | 'settings'
+      { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "settings"); $res = w; }
+      ( action=('list' | 'save') { w->arguments()["action"] = (const char*)$action.text->chars; }
+      | action=('show' | 'reset') key=setting_key
+        { w->arguments()["action"] = (const char*)$action.text->chars; w->arguments()["name"] = key; }
+      | 'set' key=setting_key setting_text=setting_value
+        { w->arguments()["action"] = "set"; w->arguments()["name"] = key; w->arguments()["value"] = setting_text; }
+      )
     | 'validate-progress' path=pcchar_quoted_string
       { w = new cmd::WorkspaceCommand(cmd::Interpreter::INSTANCE(), "query.run"); w->arguments()["query"]["operation"] = "validate-progress"; w->arguments()["query"]["progress"] = cmd::read_progress_file(path); w->arguments()["query"]["limits"]["states"] = 10000; w->arguments()["query"]["limits"]["wall_ms"] = 30000; $res = w; }
       workspace_query_options[w]
@@ -1345,20 +1369,7 @@ dump_model_command_topic returns [cmd::CommandTopic_ptr res]
     ;
 
 
-check_init_command returns[cmd::Command_ptr res]
-@init { $res = nullptr; }
-    : 'check-init'
-      { $res = cm.make_check_init(); }
 
-      ( '-c' constraint=toplevel_expression
-      { ((cmd::CheckInit_ptr) $res)->add_constraint(constraint); })*
-    ;
-
-check_init_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = nullptr; }
-    :  'check-init'
-        { $res = cm.topic_check_init(); }
-    ;
 
 diameter_command returns[cmd::Command_ptr res]
 @init { $res = nullptr; }
@@ -1372,28 +1383,7 @@ diameter_command_topic returns [cmd::CommandTopic_ptr res]
         { $res = cm.topic_diameter(); }
     ;
 
-reach_command returns[cmd::Command_ptr res]
-@init { $res = nullptr; }
-    :   'reach'
-        { $res = cm.make_reach(); }
 
-        target=toplevel_expression
-        { ((cmd::Reach_ptr) $res)->set_target(target); }
-
-        ( '-q' { ((cmd::Reach_ptr) $res)->go_quiet(); }
-        | '-c' constraint=toplevel_expression { ((cmd::Reach_ptr) $res)->add_constraint(constraint); }
-        | '-depth' depth=workspace_count { ((cmd::Reach_ptr) $res)->extended_options["limits"]["depth"] = depth; }
-        | '-shortest' { ((cmd::Reach_ptr) $res)->extended_options["operation"] = "shortest-reach"; }
-        | '-async' { ((cmd::Reach_ptr) $res)->extended_options["background"] = true; }
-        | '-wall-ms' wall=workspace_count { ((cmd::Reach_ptr) $res)->extended_options["limits"]["wall_ms"] = wall; }
-        )*
-    ;
-
-reach_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = nullptr; }
-    :  'reach'
-        { $res = cm.topic_reach(); }
-    ;
 
 select_trace_command returns[cmd::Command_ptr res]
 @init { $res = nullptr; }
@@ -1410,23 +1400,7 @@ select_trace_topic returns [cmd::CommandTopic_ptr res]
        { $res = cm.topic_select_trace(); }
     ;
 
-check_trans_command returns[cmd::Command_ptr res]
-@init { $res = nullptr; }
-    : 'check-trans'
-      { $res = cm.make_check_trans(); }
 
-      ( '-l' limit=constant
-      { ((cmd::CheckTrans_ptr) $res)->set_limit(limit->value()); })*
-
-      ( '-c' constraint=toplevel_expression
-      { ((cmd::CheckTrans_ptr) $res)->add_constraint(constraint); })*
-    ;
-
-check_trans_command_topic returns [cmd::CommandTopic_ptr res]
-@init { $res = nullptr; }
-    :  'check-trans'
-        { $res = cm.topic_check_trans(); }
-    ;
 
 list_traces_command returns [cmd::Command_ptr res]
 @init { $res = nullptr; }

@@ -142,8 +142,12 @@ class Engine:
         value = deepcopy(protocol.request(value))
         rev = self.revision(value['revision'])
         q = value['query']
-        if q['operation'] in ('check-property', 'prove-property') and q['property'] not in rev.get('properties', {}):
-            raise ValueError('Unknown safety property in this revision')
+        if q['operation'] == 'check' and 'name' in q:
+            catalog = 'properties' if q['variant'] == 'invariant' else 'goals'
+            name = q.pop('name')
+            if name not in rev.get(catalog, {}):
+                raise ValueError('Unknown saved name in this revision: ' + name)
+            q['target'] = rev[catalog][name]
         if 'trace_id' in q:
             artifact = self.trace(q['trace_id'])
             if artifact['revision'] != rev['id'] or not artifact['validated']:
@@ -329,13 +333,11 @@ class Engine:
         result = None
         try:
             query = deepcopy(request['query'])
-            if query['operation'] in ('check-property', 'prove-property'):
-                name = query['property']
-                query['property'] = dict(name=name, expression=rev['properties'][name])
             if 'trace_id' in query:
                 query['trace'] = self.trace(query.pop('trace_id'))['trace']
             query.setdefault('watches', {} if query['operation'].startswith('explain-') or query['operation'] == 'validate-progress' else rev['watches'])
-            deadline = time.monotonic() + request.get('hard_timeout', 60)
+            timeout = request.get('hard_timeout', 60)
+            deadline = float('inf') if timeout == -1 else time.monotonic() + timeout
             if query['operation'] in ('export-scenario', 'replay-scenario'):
                 result = self.scenario_job(request, rev, query, cancel, deadline)
                 return

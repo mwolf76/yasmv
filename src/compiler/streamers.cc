@@ -234,7 +234,7 @@ std::ostream& operator<<(std::ostream& os, const compiler::BinarySelectionDescri
 
     os << "], (aux = ";
     {
-        const ADD aux { md.aux() };
+        const ADD& aux { md.aux() };
         const DdNode* node { aux.getNode() };
 
         assert(!Cudd_IsConstant(node));

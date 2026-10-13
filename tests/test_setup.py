@@ -35,6 +35,7 @@ clone)
     mkdir -p "$destination/src"
     cp "$TEST_ROOT/upstream-configure" "$destination/configure"
     echo header > "$destination/src/cadical.hpp"
+    echo tracer > "$destination/src/tracer.hpp"
     ;;
 -C)
     case $3 in
@@ -174,6 +175,7 @@ fi
         self.assertIn('--with-cadical-prefix=' + str(prefix), self.arguments())
         self.assertTrue((prefix / 'lib/libcadical.a').is_file())
         self.assertTrue((prefix / 'include/cadical.hpp').is_file())
+        self.assertEqual((prefix / 'include/tracer.hpp').read_text(), 'tracer\n')
         self.assertTrue((prefix / '.yasmv-build-config').is_file())
         result = self.run_setup(bootstrap=True, CLONE_STATUS='99')
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -221,6 +223,16 @@ fi
         self.assertEqual(self.run_setup(bootstrap=True).returncode, 0)
         result = self.run_setup(bootstrap=True, COMPILER_VERSION='2')
         self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.calls().count('clone'), 1)
+        self.assertEqual(self.calls().count('cadical-make'), 2)
+
+    def test_missing_proof_header_repairs_cached_prefix(self):
+        self.assertEqual(self.run_setup(bootstrap=True).returncode, 0)
+        header = self.directory / '.deps' / ('cadical-' + REVISION) / 'prefix/include/tracer.hpp'
+        header.unlink()
+        result = self.run_setup(bootstrap=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(header.read_text(), 'tracer\n')
         self.assertEqual(self.calls().count('clone'), 1)
         self.assertEqual(self.calls().count('cadical-make'), 2)
 

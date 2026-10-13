@@ -1,2 +1,2 @@
-reach GOAL -c @0{carry = MC} -c @2{carry = CC} -c @4{carry = MM} -c @6{carry = MM} -c @8{carry = CC} -c @10{carry = MC}
+check reachable GOAL -c @0{carry = MC} -c @2{carry = CC} -c @4{carry = MM} -c @6{carry = MM} -c @8{carry = CC} -c @10{carry = MC} -method bmc -depth 100
 quit

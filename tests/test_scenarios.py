@@ -25,7 +25,7 @@ class ScenarioTests(unittest.TestCase):
         cls.engine = Engine(Path(cls.temp.name) / 'store')
         cls.mapping = read(ROOT / 'examples/retry-protocol/scenario.json')
         cls.rev = cls.engine.save_revision(dict(source=(ROOT / 'examples/retry-protocol/faulty.smv').read_text(), scenario=cls.mapping))
-        cls.found = cls.job(dict(operation='reach', target='DUPLICATE', limits={'depth': 12}))
+        cls.found = cls.job(dict(operation='check', variant='reachable', method='bmc', target='DUPLICATE', limits={'depth': 12}))
         if cls.found.get('outcome') != 'reachable':
             raise RuntimeError(cls.found)
         cls.exported = cls.job(dict(operation='export-scenario', trace_id=cls.found['trace_id']))

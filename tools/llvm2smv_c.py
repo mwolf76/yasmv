@@ -177,7 +177,7 @@ def check(args, bundle, temporary):
     def ask(request):
         return query(args.checker, snapshot, temporary, args.timeout, request)
     wall = max(1, int(args.timeout * 1000))
-    initial = ask(dict(operation='check-init', limits=dict(wall_ms=wall)))
+    initial = ask(dict(operation='check', variant='init', limits=dict(wall_ms=wall)))
     report = dict(version=1, status='unknown', check=args.check, artifact_id=manifest['artifact_id'],
                   bundle=str(bundle), scope='configured LLVM memory model' if source_map.get('memory') else 'configured LLVM scalar model',
                   assumptions='false verifier assumptions exit to ASSUMED_OUT; no fairness',
@@ -188,10 +188,10 @@ def check(args, bundle, temporary):
     if initial['outcome'] != 'satisfiable':
         raise ArtifactError('Generated model has no initial execution')
     if args.check == 'termination':
-        request = dict(operation='check-progress', target=prop('progress_goal'), limits=dict(states=args.states, wall_ms=wall))
+        request = dict(operation='check', variant='progress', target=prop('progress_goal'), limits=dict(states=args.states, wall_ms=wall))
     else:
-        request = dict(operation='prove-property' if args.prove else 'check-property',
-                       property=dict(name='safety_and_memory_coverage', expression=' && '.join(prop(p) for p in ('safe', 'memory_supported', 'memory_within_bound', 'stack_within_bound', 'stack_allocation_within_bound'))),
+        request = dict(operation='check', variant='invariant', method='induction' if args.prove else 'bmc',
+                       target=' && '.join(prop(p) for p in ('safe', 'memory_supported', 'memory_within_bound', 'stack_within_bound', 'stack_allocation_within_bound')),
                        limits=dict(depth=args.depth, wall_ms=wall))
     result = ask(request)
     report['backend'] = result
@@ -218,7 +218,7 @@ def check(args, bundle, temporary):
             if pc == 'e_7063_' + 'MEMORY_BOUND'.encode().hex(): report['status'] = 'resource_bound_reached'
             if pc == 'e_7063_' + 'UNSUPPORTED_MEMORY'.encode().hex(): report['status'] = 'unsupported'
         # Prove exclusion separately. A bounded absence of normal exit is not vacuity.
-        vacuity = ask(dict(operation='check-progress', target=prop('assumed_out'), limits=dict(states=args.states, wall_ms=wall)))
+        vacuity = ask(dict(operation='check', variant='progress', target=prop('assumed_out'), limits=dict(states=args.states, wall_ms=wall)))
         report['admission_check'] = vacuity
         report['admitted_execution'] = 'unknown'
         if vacuity.get('outcome') == 'proven':

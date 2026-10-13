@@ -1,6 +1,6 @@
 # Guaranteed progress
 
-`check-progress P` asks whether every maximal execution from every legal initial
+`check progress P` asks whether every maximal execution from every legal initial
 state visits the Boolean state condition P at least once. A maximal execution
 is infinite or ends at a state with no legal successor. A goal true initially
 already succeeds; subsequent behavior is irrelevant.
@@ -20,14 +20,15 @@ export YASMV_HOME="$PWD"
 workspace open "/tmp/progress-investigation"
 read-model "examples/progress/retry-forever.smv"
 goal set finished FINISHED
-check-progress finished -states 10000 -wall-ms 30000
+check progress -name finished -states 10000 -wall-ms 30000
 dump-trace
 export-progress "/tmp/progress.json"
 validate-progress "/tmp/progress.json"
 job show -full
 ```
 
-The native defaults are 10,000 non-goal states and 30,000 ms. The commands support
+Built-in defaults are 10,000 non-goal states and 30,000 ms; interactive
+preferences can override them through [settings](COMMAND_INTERFACE.md#interactive-settings). The commands support
 `-conflicts`, `-propagations`, and `-async`; checking also supports `-c EXPR`.
 Validation uses the saved artifact's target and assumptions. Depth is not a
 limit for this backend. Export uses the last completed job with progress evidence.
@@ -42,7 +43,8 @@ Use `--query-file` with:
   "version": 1,
   "model": "examples/progress/complete.smv",
   "query": {
-    "operation": "check-progress",
+    "operation": "check",
+    "variant": "progress",
     "target": "FINISHED",
     "limits": {"states": 10000, "wall_ms": 30000}
   }
@@ -50,7 +52,7 @@ Use `--query-file` with:
 ```
 
 `validate-progress` takes a `progress` artifact and its own `states` and `wall_ms`
-budgets. All verification consumes those budgets. Zero wall/solver-work budgets
+budgets (a wall budget of -1 is unlimited). All verification consumes those budgets. Zero wall/solver-work budgets
 return UNKNOWN. A state budget must be positive. State limits count distinct
 stored non-goal valuations, including hidden and frozen variables. Reaching the
 limit still permits finishing already admitted states; requiring another state

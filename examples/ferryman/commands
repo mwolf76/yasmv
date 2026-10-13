@@ -1,2 +1,2 @@
-reach GOAL -c @3{carry = CABBAGE}
+check reachable GOAL -c @3{carry = CABBAGE} -method bmc -depth 100
 quit

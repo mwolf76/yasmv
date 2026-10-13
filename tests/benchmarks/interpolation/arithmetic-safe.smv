@@ -1,0 +1,8 @@
+#word-width 4
+MODULE main
+#inertial VAR x : uint4;
+#inertial VAR y : uint4;
+INIT x = 0;
+INIT y = 0;
+TRANS x := x + 1;
+TRANS y := y + 3;

@@ -1,5 +1,9 @@
 # Correctness baseline and migration notes
 
+The result-handling history below predates the unified checking interface.
+For current command syntax and defaults, see
+[COMMAND_INTERFACE.md](COMMAND_INTERFACE.md).
+
 This document describes the first implementation milestone from the
 [implementation plan](IMPLEMENTATION_PLAN.md). It changes result handling and
 validation before introducing the query protocol or workbench. The subsequent
@@ -50,6 +54,16 @@ Before committing, run the full regression gate on the normal build:
 ```bash
 YASMV_HOME="$PWD" make test
 ```
+
+Changes to standalone SAT proof sources also require the direct CI runner:
+
+```bash
+make cadical-api-test CADICAL_SOURCE=/path/to/pinned/cadical
+```
+
+The standalone runner compiles its own executable outside the configured build.
+`make test` exercises the Makefile proof target and cannot detect missing link
+dependencies in that separate runner.
 
 Keep the following checks local as well:
 
@@ -153,7 +167,7 @@ uniqueness. Counting and enumeration cover the whole state valuation, including
 unconstrained and frozen variables. A supplied positive limit saves the final
 witness before stopping. Reaching the limit reports an incomplete result;
 exhaustion is claimed only after UNSAT. Zero limits are rejected by both
-`pick-state` and `check-trans`.
+`pick-state` and the former `check-trans` command.
 
 ## Regression coverage
 

@@ -43,4 +43,4 @@ SEE ALSO
 
 .fi
 .in 3
-help workspace, help reach, help select-trace, help dump-trace, help job.
+help workspace, help check, help select-trace, help dump-trace, help job.

@@ -39,6 +39,9 @@ namespace query {
     struct QuerySpec {
         Operation operation = Operation::check_init;
         std::string request_id, strategy = "auto";
+        std::string check_variant, method;
+        expr::Expr_ptr check_target = nullptr;
+        bool shortest = false;
         expr::Expr_ptr target = nullptr, until = nullptr;
         expr::ExprVector assumptions;
         std::map<std::string, expr::Expr_ptr> watches;
@@ -65,6 +68,7 @@ namespace query {
     };
     void analyze_progress(const QuerySpec&, QueryResult&, QueryContext&);
     void analyze_property(const QuerySpec&, QueryResult&, QueryContext&);
+    void interpolation_reach(const QuerySpec&, QueryResult&, QueryContext&);
     void bounded_reach(const QuerySpec&, QueryResult&);
     void explain(const QuerySpec&, QueryResult&, QueryContext&);
     QueryResult execute(const QuerySpec&, QueryContext&);
