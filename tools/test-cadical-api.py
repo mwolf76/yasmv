@@ -54,6 +54,7 @@ def main():
                 if suite == 'proof':
                     sources.append(str(ROOT / 'src/sat/proof.cc'))
                     sources.append(str(ROOT / 'src/sat/circuit.cc'))
+                    sources.append(str(ROOT / 'src/sat/interpolation_diagnostics.cc'))
                 subprocess.run([*compiler, '-std=c++20', '-Wall', '-Wextra', '-Werror',
                                 *shlex.split(args.cxxflags), '-I', str(header.parent),
                                 '-I', str(ROOT / 'src'), *sources, str(library),
