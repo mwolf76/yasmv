@@ -55,6 +55,16 @@ Before committing, run the full regression gate on the normal build:
 YASMV_HOME="$PWD" make test
 ```
 
+Changes to standalone SAT proof sources also require the direct CI runner:
+
+```bash
+make cadical-api-test CADICAL_SOURCE=/path/to/pinned/cadical
+```
+
+The standalone runner compiles its own executable outside the configured build.
+`make test` exercises the Makefile proof target and cannot detect missing link
+dependencies in that separate runner.
+
 Keep the following checks local as well:
 
 - LLVM: configure a normal build with `--enable-llvm2smv`, build it, and run
