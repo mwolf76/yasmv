@@ -52,11 +52,10 @@ class FunctionalChecks(unittest.TestCase):
                     self.assertEqual(answer['trace']['query']['variant'], 'reachable')
                 else:
                     self.assertIsNone(answer['trace'])
-                    if directory in ('maze', 'koenisberg'):
-                        bound = 100 if directory == 'maze' else 8
+                    if directory == 'maze':
                         self.assertEqual(answer['scope'], 'through_depth')
                         self.assertEqual(answer['unbounded_outcome'], 'unknown')
-                        self.assertEqual(answer['checked_depths'], list(range(bound + 1)))
+                        self.assertEqual(answer['checked_depths'], list(range(101)))
                     else:
                         self.assertEqual(answer['scope'], 'unbounded')
                         self.assertTrue(answer['proof']['verified'])

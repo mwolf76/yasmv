@@ -142,6 +142,38 @@ TRANS x := x + 1;
         self.assertEqual([s['values']['flags'] for s in result['trace']['steps']], [[True, False], [False, True], [False, False]])
         self.replay(session, result)
 
+    def test_example_maze_invariant_and_movement(self):
+        session = self.session((ROOT / 'examples/maze/unsolvable8x8.smv').read_text())
+        proof = self.query(session, dict(operation='check', variant='invariant',
+                                        method='interpolation', target='!GOAL'))
+        self.assertEqual(proof['outcome'], 'proven')
+        self.assertEqual(proof['scope'], 'unbounded')
+        self.assertTrue(proof['proof']['verified'])
+        self.assertFalse(proof['proof']['vacuous'])
+        # Reaching (1, 1) requires one horizontal and one vertical move;
+        # a diagonal transition would incorrectly yield depth one.
+        for method in ('interpolation', 'bmc'):
+            query = dict(operation='check', variant='reachable', method=method, target='x = 1 && y = 1')
+            if method == 'bmc':
+                query.update(shortest=True, limits=dict(depth=2))
+            result = self.query(session, query)
+            self.assertEqual(result['outcome'], 'reachable')
+            self.assertEqual(result['optimality']['depth'], 2)
+            self.replay(session, result)
+
+    def test_larger_maze_examples_accept_interpolation(self):
+        # Full route searches can exceed the default wall budget. A depth-zero
+        # target still constructs and validates the entire interpolation model.
+        for name in ('solvable8x8.smv', 'solvable12x12.smv', 'solvable16x16.smv'):
+            with self.subTest(model=name):
+                session = self.session((ROOT / 'examples/maze' / name).read_text())
+                result = self.query(session, dict(operation='check', variant='reachable',
+                                                  method='interpolation', target='TRUE'))
+                self.assertEqual(result['outcome'], 'reachable')
+                self.assertEqual(result['optimality']['depth'], 0)
+                self.replay(session, result)
+                session.close()
+
     def test_strategy_validation_and_budgets_preserve_session(self):
         session = self.session(model([1, 2, 2, 3]))
         for query in (

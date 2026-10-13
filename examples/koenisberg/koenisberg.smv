@@ -20,17 +20,17 @@ DEFINE
 INVAR
   ! GOAL -> choice <= 6;
 
-INVAR
-  location = A -> next(location) = { B, C, D };
+TRANS
+  location = A ?: location := { B, C, D };
 
-INVAR
-  location = B -> next(location) = { B, C };
+TRANS
+  location = B ?: location := { B, C };
 
-INVAR
-  location = C -> next(location) = { A, B, D };
+TRANS
+  location = C ?: location := { A, B, D };
 
-INVAR
-  location = D -> next(location) = { A, C };
+TRANS
+  location = D ?: location := { A, C };
 
 TRANS
   location = A && next(location) = B ||
