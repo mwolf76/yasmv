@@ -72,8 +72,11 @@ Select initial state(s) for analysis
 .B simulate
 Perform step-by-step simulation
 .TP
-.B reach
-Find path to target condition
+.B check init|trans|reachable|invariant|progress
+Check consistency, reachability, safety or universal eventual completion.
+.TP
+.B settings
+Configure timeout, execution mode and progress-state defaults.
 .TP
 .B dump-trace
 Display execution traces
@@ -92,7 +95,7 @@ https://github.com/mwolf76/yasmv
 [Mon Dec 26 14:56:03 2016].256 src/main.cc:177 :: 2176 microcode fragments registered.
 
 << Ok
->> reach GOAL
+>> check reachable GOAL
 
 << Target is reachable, registered witness `reach_1`, 8 steps.
 >> dump-trace

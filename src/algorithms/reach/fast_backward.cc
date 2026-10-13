@@ -32,7 +32,7 @@
 static const char* reach_trace_prfx { "reach_" };
 
 namespace reach {
-    void Reachability::fast_backward_strategy(compiler::Unit& target_cu)
+    void Reachability::fast_backward_strategy(const compiler::Unit& target_cu)
     {
         witness::WitnessMgr& wm(witness::WitnessMgr::INSTANCE());
 
@@ -52,7 +52,7 @@ namespace reach {
                 auto i { f_constraint_cus.find(constraint) };
                 assert(f_constraint_cus.end() != i);
 
-                compiler::Unit cu { i->second };
+                const compiler::Unit& cu { i->second };
                 this->assert_formula(engine, UINT_MAX - k, cu);
             });
 
@@ -154,7 +154,7 @@ namespace reach {
                             auto i { f_constraint_cus.find(constraint) };
                             assert(f_constraint_cus.end() != i);
 
-                            compiler::Unit cu { i->second };
+                            const compiler::Unit& cu { i->second };
                             this->assert_formula(engine, UINT_MAX - k, cu);
                         }
                     });

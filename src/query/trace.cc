@@ -52,7 +52,7 @@ namespace query::trace {
                 engine.tcbi_to_var(enc::TCBI(bm.find_ucbi(bit.getNode()->index), step));
         }
     }
-    witness::Witness_ptr decode(sat::Engine& engine, unsigned depth)
+    witness::Witness_ptr decode(sat::Engine& engine, unsigned depth, bool include_inputs)
     {
         PhaseTimer timer(Phase::decoding);
         auto& bm = enc::EncodingMgr::INSTANCE();
@@ -65,7 +65,7 @@ namespace query::trace {
             for (const auto& s : symbols()) {
                 checkpoint(Phase::decoding);
                 if (s.input) {
-                    tf.set_value(s.key, env::Environment::INSTANCE().get(s.key->rhs()));
+                    if (include_inputs) tf.set_value(s.key, env::Environment::INSTANCE().get(s.key->rhs()));
                     continue;
                 }
                 auto encoding = bm.find_encoding(expr::TimedExpr(s.key, s.frozen ? FROZEN : 0));
@@ -421,7 +421,7 @@ namespace query::trace {
             QuerySpec spec = spec_from_json(v["query"]);
             require(!spec.target || state_expression(spec.target), "Trace goal must be a state expression");
             for (auto e : spec.assumptions)
-                require(state_expression(e, spec.operation == Operation::reach && spec.limits.depth < 0), "Incompatible timed trace assumption");
+                require(state_expression(e, spec.operation == Operation::reach && spec.strategy != "interpolation"), "Incompatible timed trace assumption");
             const Json::Value& resolved_parent = parent.isNull() ? spec.parent_trace : parent;
             const auto& parent = resolved_parent;
             if (!v["branch"].isNull()) {

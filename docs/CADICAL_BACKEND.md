@@ -32,7 +32,8 @@ test "$(git -C "$cadical_work/cadical" rev-parse HEAD)" = \
 (cd "$cadical_work/cadical" && ./configure -fPIC && \
   make -C build -j4 libcadical.a)
 mkdir -p "$cadical_work/prefix/include" "$cadical_work/prefix/lib"
-install -m 644 "$cadical_work/cadical/src/cadical.hpp" "$cadical_work/prefix/include/"
+install -m 644 "$cadical_work/cadical/src/cadical.hpp" \
+  "$cadical_work/cadical/src/tracer.hpp" "$cadical_work/prefix/include/"
 install -m 644 "$cadical_work/cadical/build/libcadical.a" "$cadical_work/prefix/lib/"
 ./setup.sh --with-cadical-prefix="$cadical_work/prefix"
 YASMV_HOME="$PWD" make -j3 test
@@ -44,6 +45,11 @@ and checks runtime version, signature, and the full revision reported by
 `Solver::build()`. It rejects missing libraries, incompatible builds, and
 cross-compilation environments that cannot run the check. Use a prefix without
 spaces, as its path is passed through compiler/linker flags.
+
+Both headers must come from the pinned checkout. The proof probe requires
+`tracer.hpp`; setup repairs cached prefixes that lack it, and configure checks
+the proof callback signatures and attachment API. See the
+[interpolation proof gate](INTERPOLATION_PROOF_VALIDATION.md).
 
 The production archive uses upstream release defaults: `-O3 -DNDEBUG`, plus
 `-fPIC` for linkage into yasmv. API contract checks remain enabled; neither

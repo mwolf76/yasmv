@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Interpolation state invariant v1",
+  "type": "object",
+  "required": [
+    "version",
+    "format",
+    "identity",
+    "target",
+    "assumptions",
+    "bits",
+    "root",
+    "nodes",
+    "symbols"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "format": {
+      "const": "yasmv-state-invariant"
+    },
+    "identity": {
+      "type": "object",
+      "required": [
+        "model_revision",
+        "source_revision",
+        "root",
+        "inputs",
+        "environment_constraints"
+      ]
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "bits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "atom",
+          "symbol",
+          "bit",
+          "frozen"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "atom": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "symbol": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bit": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "frozen": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "root": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 4294967295,
+            "multipleOf": 2
+          },
+          "atom": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "and": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          }
+        },
+        "oneOf": [
+          {
+            "required": [
+              "atom"
+            ]
+          },
+          {
+            "required": [
+              "and"
+            ]
+          }
+        ]
+      }
+    },
+    "symbols": {
+      "type": "object"
+    }
+  }
+}

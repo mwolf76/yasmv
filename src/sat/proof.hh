@@ -1,0 +1,78 @@
+#ifndef YASMV_SAT_PROOF_HH
+#define YASMV_SAT_PROOF_HH
+
+#include <cstddef>
+#include <cstdint>
+#include <map>
+#include <functional>
+#include <limits>
+#include <vector>
+
+namespace sat::proof {
+
+// Proof literals are signed nonzero integers, not yasmv's packed Lit values.
+using Clause = std::vector<int>;
+using Id = int64_t;
+using NodeId = size_t;
+enum class Partition : uint8_t { a, b };
+enum class Rule : uint8_t { original, resolution, weakening };
+
+struct Node {
+    Rule rule;
+    Partition partition = Partition::a; // meaningful only for original nodes
+    int pivot = 0; // signed literal in the left antecedent
+    NodeId left = 0, right = 0;
+    // Only originals and named derivation endpoints own a retained clause.
+    static constexpr size_t no_clause = std::numeric_limits<size_t>::max();
+    size_t clause_index = no_clause;
+    // Pack the small tags beside the pivot, without narrowing graph indices.
+    Node(Rule rule, Partition partition = Partition::a, NodeId left = 0,
+         NodeId right = 0, int pivot = 0)
+        : rule(rule), partition(partition), pivot(pivot), left(left), right(right) {}
+};
+
+// A checked, nonincremental refutation. No solver headers or global managers.
+// Nodes survive deletion of solver clauses; deleted IDs cannot be antecedents.
+class ResolutionProof {
+public:
+    explicit ResolutionProof(std::function<void()> checkpoint = {},
+                             size_t node_limit = std::numeric_limits<size_t>::max())
+        : checkpoint_(std::move(checkpoint)), node_limit_(node_limit) {}
+    void original(Id, const Clause&, Partition);
+    void restore(Id, const Clause&);
+    void erase(Id, const Clause&);
+    void derive(Id, const Clause&, const std::vector<Id>& hints, int witness = 0);
+    NodeId conclude(Id) const;
+    const std::vector<Node>& nodes() const { return nodes_; }
+    NodeId node(Id) const;
+    const Clause& clause(NodeId) const;
+    struct ClauseMemory {
+        size_t clauses = 0, literals = 0, capacity = 0;
+    };
+    struct Memory {
+        size_t nodes, node_capacity, literals, literal_capacity, active_ids, archived_ids;
+        size_t node_bytes, literal_bytes, id_payload_bytes;
+        size_t clause_slot_bytes, expanded_literals, temporary_literal_bytes_peak;
+        ClauseMemory original, derived;
+    };
+    Memory memory() const;
+    void observe(std::function<void(const ResolutionProof&)> observer) { observer_ = std::move(observer); }
+
+private:
+    struct Entry { NodeId node; bool active; };
+    std::vector<Node> nodes_;
+    std::vector<Clause> retained_;
+    std::map<Id, Entry> clauses_;
+    std::function<void()> checkpoint_;
+    size_t node_limit_;
+    ClauseMemory original_, derived_;
+    size_t active_ids_ = 0, expanded_literals_ = 0, temporary_capacity_peak_ = 0;
+    std::function<void(const ResolutionProof&)> observer_;
+    void tick() const { if (checkpoint_) checkpoint_(); }
+    void append(Node);
+    void retain(NodeId, Clause);
+    void fresh(Id) const;
+};
+
+} // namespace sat::proof
+#endif

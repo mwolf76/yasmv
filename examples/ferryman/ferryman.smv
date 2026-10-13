@@ -58,4 +58,4 @@ DEFINE GOAL :=
        cabbage = EAST && goat = EAST && wolf = EAST;
 
 -- To solve the ferryman problem in this model type:
--- >> reach GOAL; on success dump-trace
+-- >> check reachable GOAL; on success dump-trace

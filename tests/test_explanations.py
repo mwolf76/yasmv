@@ -85,7 +85,7 @@ class ExplanationTests(unittest.TestCase):
         self.assertEqual({c['kind'] for c in result['explanation']['cases'][0]['constraints']}, {'invar', 'assumption'})
 
     def test_pinned_prefix_and_conflicting_continuation(self):
-        parent = self.job(TOGGLE, dict(operation='reach', target='x', limits={'depth': 1}))['trace']
+        parent = self.job(TOGGLE, dict(operation='check', variant='reachable', method='bmc', target='x', limits={'depth': 1}))['trace']
         q = dict(operation='explain-step', trace=parent, prefix_length=2, assumptions=['!x'], explanation={'minimize': True})
         result = self.job(TOGGLE, q)
         self.assertEqual((result['scope'], result['explanation']['bound']), ('single_step_continuation', 2))
@@ -135,7 +135,7 @@ class ExplanationTests(unittest.TestCase):
                       dict(operation='explain-reach', target='x'), dict(operation='explain-init', assumptions=['next(x)']),
                       dict(operation='explain-init', explanation={'active_ids': ['missing']})]:
             self.assertEqual(self.job(TOGGLE, query, expected=2)['status'], 'error')
-        parent = self.job(TOGGLE, dict(operation='reach', target='x', limits={'depth': 1}))['trace']
+        parent = self.job(TOGGLE, dict(operation='check', variant='reachable', method='bmc', target='x', limits={'depth': 1}))['trace']
         incomplete = deepcopy(parent); incomplete['steps'][0]['values']['x'] = None
         result = self.job(TOGGLE, dict(operation='explain-step', trace=incomplete), expected=3)
         self.assertEqual(result['stop_reason'], 'solver_unknown')

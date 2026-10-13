@@ -1,4 +1,4 @@
-reach GOAL
+check reachable GOAL -method bmc -depth 100
 dump-trace
 time
 quit

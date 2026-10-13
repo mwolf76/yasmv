@@ -28,7 +28,7 @@ class SessionTests(unittest.TestCase):
 
     def run_query(self, query=None, revision=None, **kwargs):
         return self.pool.run(str(ROOT / 'yasmv'), str(ROOT), revision or self.revision,
-                             query or dict(request_id='q', operation='shortest-reach', target='x', limits={'depth': 3}),
+                             query or dict(request_id='q', operation='check', variant='reachable', method='bmc', shortest=True, target='x', limits={'depth': 3}),
                              kwargs.get('cancel', threading.Event()), kwargs.get('deadline', time.monotonic() + 90))
 
     def test_fresh_equivalence_and_repeated_child_reclamation(self):
@@ -39,7 +39,7 @@ class SessionTests(unittest.TestCase):
         self.assertTrue(self.run_query()['statistics']['session_cache_hit'])
         initial_rss = int(Path(f'/proc/{pid}/statm').read_text().split()[1])
         for i in range(12):
-            result = self.run_query(dict(request_id=str(i), operation='shortest-reach', target='x' if i % 2 else '!x', limits={'depth': 3}))
+            result = self.run_query(dict(request_id=str(i), operation='check', variant='reachable', method='bmc', shortest=True, target='x' if i % 2 else '!x', limits={'depth': 3}))
             self.assertEqual(result['optimality']['depth'], i % 2)
         time.sleep(.05)
         self.assertEqual(Path(f'/proc/{pid}/task/{pid}/children').read_text().strip(), '')
@@ -47,7 +47,7 @@ class SessionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             p = Path(directory)
             (p / 'model.smv').write_text(TOGGLE)
-            (p / 'request.json').write_text(json.dumps(dict(version=1, model=str(p / 'model.smv'), query=dict(operation='shortest-reach', target='x', limits={'depth': 3}))))
+            (p / 'request.json').write_text(json.dumps(dict(version=1, model=str(p / 'model.smv'), query=dict(operation='check', variant='reachable', method='bmc', shortest=True, target='x', limits={'depth': 3}))))
             fresh = subprocess.run([str(ROOT / 'yasmv'), '--quiet', '--query-file', str(p / 'request.json')], env=dict(os.environ, YASMV_HOME=str(ROOT)), capture_output=True, text=True, timeout=90)
             self.assertEqual(fresh.returncode, 0, fresh.stderr)
             value = json.loads(fresh.stdout)
@@ -72,7 +72,7 @@ class SessionTests(unittest.TestCase):
     def test_concurrent_queries_and_revisions_are_isolated(self):
         other = dict(self.revision, source=TOGGLE.replace('INIT !x;', 'INIT x;'))
         def work(i):
-            q = dict(request_id=str(i), operation='shortest-reach', target='x', assumptions=['x'] if i % 3 == 0 else [], limits={'depth': 2})
+            q = dict(request_id=str(i), operation='check', variant='reachable', method='bmc', shortest=True, target='x', assumptions=['x'] if i % 3 == 0 else [], limits={'depth': 2})
             return i, self.run_query(q, other if i % 2 else self.revision)
         with ThreadPoolExecutor(max_workers=4) as executor:
             results = list(executor.map(work, range(12)))
@@ -118,22 +118,34 @@ class SessionTests(unittest.TestCase):
         self.run_query()
         session = next(iter(self.pool.sessions.values()))
         parent = session.process.pid
+        children = Path(f'/proc/{parent}/task/{parent}/children')
+        previous_children = set(children.read_text().split())
         cancel = threading.Event()
-        query = dict(request_id='long', operation='shortest-reach', target='FALSE', limits={'depth': 10000})
-        with ThreadPoolExecutor(max_workers=1) as executor:
+        started = threading.Event()
+        original_query = session.query
+        def active_query(*args, **kwargs):
+            started.set()
+            return original_query(*args, **kwargs)
+        query = dict(request_id='long', operation='check', variant='reachable', method='bmc', shortest=True, target='FALSE', limits={'depth': 10000})
+        with patch.object(session, 'query', side_effect=active_query), ThreadPoolExecutor(max_workers=1) as executor:
             pending = executor.submit(self.run_query, query, cancel=cancel)
-            children = Path(f'/proc/{parent}/task/{parent}/children')
-            end = time.monotonic() + 10
             child = None
-            while time.monotonic() < end:
-                ids = children.read_text().split()
-                if ids:
-                    child = int(ids[0])
-                    os.kill(child, signal.SIGSTOP)
-                    break
-                time.sleep(.01)
-            self.assertIsNotNone(child)
-            cancel.set()
+            try:
+                # A completed query can send its result before its child exits.
+                # Wait for this lease, then stop only its new child: fingerprinting
+                # a large instrumented binary can otherwise expose the old one.
+                self.assertTrue(started.wait(timeout=10))
+                end = time.monotonic() + 10
+                while time.monotonic() < end:
+                    ids = set(children.read_text().split()) - previous_children
+                    if ids:
+                        child = int(next(iter(ids)))
+                        os.kill(child, signal.SIGSTOP)
+                        break
+                    time.sleep(.01)
+                self.assertIsNotNone(child)
+            finally:
+                cancel.set()
             with self.assertRaises(Interrupted): pending.result(timeout=10)
         self.assertFalse(Path(f'/proc/{child}').exists())
         self.assertFalse(Path(f'/proc/{parent}').exists())
@@ -145,7 +157,7 @@ class SessionTests(unittest.TestCase):
         pid = session.process.pid
         for budget in ('conflicts', 'propagations'):
             with self.subTest(budget=budget):
-                result = self.run_query(dict(request_id=f'budget-{budget}', operation='reach', target='x',
+                result = self.run_query(dict(request_id=f'budget-{budget}', operation='check', variant='reachable', method='bmc', target='x',
                                              limits={'depth': 2, budget: 0}))
                 self.assertEqual(result['status'], 'unknown')
                 self.assertEqual(result['stop_reason'], 'conflict_budget' if budget == 'conflicts' else 'propagation_budget')
@@ -187,15 +199,15 @@ class SessionTests(unittest.TestCase):
             engine = Engine(directory, reuse_models=True)
             try:
                 rev = engine.save_revision(dict(source=TOGGLE, properties={'never x': '!x'}))
-                job = dict(version=1, request_id='safety', revision=rev['id'], query=dict(operation='prove-property', property='never x', limits={'depth': 2}))
+                job = dict(version=1, request_id='safety', revision=rev['id'], query=dict(operation='check', variant='invariant', method='induction', name='never x', limits={'depth': 2}))
                 engine.submit(job)
                 while engine.job('safety')['running']:
                     time.sleep(.02)
                 result = engine.job('safety')['result']
                 self.assertEqual(result['outcome'], 'violated', result)
                 self.assertTrue(result['trace_validated'])
-                self.assertEqual(engine.trace(result['trace_id'])['trace']['query']['property']['name'], 'never x')
-                bad = dict(job, request_id='bad', query=dict(job['query'], property='unknown'))
+                self.assertEqual(engine.trace(result['trace_id'])['trace']['query']['target'], '! x')
+                bad = dict(job, request_id='bad', query=dict(job['query'], name='unknown'))
                 with self.assertRaises(ValueError): engine.submit(bad)
             finally:
                 engine.close()

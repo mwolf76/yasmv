@@ -7,7 +7,7 @@
 -- 20.00 EUR for performance.
 --
 -- try this:
--- >> set due-amount 475; set credit 2000; reach GOAL; dump-trace
+-- >> set due-amount 475; set credit 2000; check reachable GOAL; dump-trace
 
 #word-width 20
 MODULE vending

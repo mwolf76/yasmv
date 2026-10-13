@@ -1,0 +1,32 @@
+.nf
+YASMV manual                                                 settings
+
+SYNOPSIS
+  settings list
+  settings show NAME
+  settings set NAME VALUE
+  settings reset NAME
+  settings save
+
+DESCRIPTION
+.fi
+Typed preferences for the interactive shell. Available settings:
+check.timeout (default 30s): duration in ms, s, m, h, or unlimited.
+check.execution (default sync): sync or async.
+check.progress.max_states (default 10000): integer from 1 to 1000000.
+
+set changes the session. reset selects the built-in default in this session.
+save persists the effective overrides to $XDG_CONFIG_HOME/yasmv/settings.json
+(or ~/.config/yasmv/settings.json). Inspection shows values and their sources.
+Unknown settings and invalid values fail without modifying settings.
+
+Precedence: command option, session, saved user preference, built-in default.
+Commands capture their settings when submitted; existing jobs never change.
+Structured APIs do not load interactive preferences. Model input bindings
+continue to use set/get and are unrelated to these settings.
+
+EXAMPLES
+  settings set check.timeout 5m
+  settings set check.execution async
+  settings save
+  check invariant SAFE -sync -wall-ms 60000

@@ -18,7 +18,12 @@ def render(result):
         return
     data = result.get('data')
     if isinstance(data, dict):
-        if 'directory' in data:
+        if 'settings' in data:
+            for setting in data['settings']:
+                print('-- ' + setting['name'] + ' = ' + setting['value'] + ' (' + setting['source'] + ')')
+                print('   ' + setting['description'] + '; default: ' + setting['default'])
+            print('   Configuration: ' + data['file'])
+        elif 'directory' in data:
             print(('-- Workspace cleared: ' if data.get('cleared') else '-- Workspace: ') + data['directory'])
             for key, value in data.get('selections', {}).items():
                 if value: print('   ' + key + ': ' + value)
@@ -52,9 +57,11 @@ def render(result):
         return
     labels = {'reachable': 'Target is reachable', 'unreachable': 'Target is unreachable within the bound',
               'violated': 'Safety property violated', 'holds_bounded': 'Safety holds through the bound; unbounded result is unknown',
-              'proven': 'Safety property proven by verified induction', 'simulated': 'Simulation done', 'deadlocked': 'Simulation deadlocked',
+              'proven': 'Safety property proven', 'simulated': 'Simulation done', 'deadlocked': 'Simulation deadlocked',
               'exported': 'Scenario exported', 'matched': 'Implementation matches the scenario', 'diverged': 'Implementation diverges from the scenario',
               'unsatisfiable': 'Constraints are inconsistent', 'satisfiable': 'Constraints are satisfiable'}
+    if result.get('scope') == 'unbounded':
+        labels['unreachable'] = 'Target is unreachable (proven)'
     progress = result.get('progress_summary') or result.get('progress')
     if progress:
         labels.update(proven='Every execution eventually reaches the goal', violated='Guaranteed progress violated', valid='Progress artifact validated')
@@ -66,7 +73,11 @@ def render(result):
             print('-- VACUOUS: no legal initial states; this does not establish a runnable system')
         assumptions = progress.get('assumptions', progress.get('query', {}).get('assumptions', []))
         if assumptions: print('   Under assumptions: ' + ', '.join(assumptions))
+    assumptions = result.get('statistics', {}).get('check', {}).get('assumptions', [])
+    if assumptions and not progress: print('   Under assumptions/path constraints: ' + ', '.join(assumptions))
     print('-- ' + labels.get(result.get('outcome'), result.get('outcome') or 'Completed'))
+    if result.get('scope') == 'through_depth' and result.get('checked_depths'):
+        print('   Checked through depth ' + str(result['checked_depths'][-1]))
     if result.get('optimality'): print('   Shortest witness: ' + str(result['optimality']['depth']) + ' transitions')
     if result.get('job_id'): print('   Job: ' + result['job_id'])
     if result.get('scenario_id'): print('   Scenario: ' + result['scenario_id'])

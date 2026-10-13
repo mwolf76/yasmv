@@ -104,12 +104,12 @@ namespace compiler {
             return f_z;
         }
 
-        inline ADD cnd() const
+        inline const ADD& cnd() const
         {
             return f_cnd;
         }
 
-        inline ADD aux() const
+        inline const ADD& aux() const
         {
             return f_aux;
         }

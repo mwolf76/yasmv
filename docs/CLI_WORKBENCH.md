@@ -30,7 +30,7 @@ goal set duplicate DUPLICATE
 property set once !DUPLICATE
 watch set duplicate DUPLICATE
 show-symbols
-reach duplicate -shortest -depth 12
+check reachable -name duplicate -method bmc -shortest -depth 12
 list-traces
 dump-trace
 dump-trace -f json -o "/tmp/duplicate-trace.json"
@@ -41,7 +41,7 @@ scenario replay deduplicating
 explain-step -at 0 -c action = ACK -minimize
 job show -full
 simulate -at 0 -c action = ACK -depth 1
-check-property once -depth 12
+check invariant -name once -method bmc -depth 12
 ```
 
 The shortest witness reaches duplicate execution after five transitions. The
@@ -55,7 +55,7 @@ Start a fresh yasmv process to investigate the corrected model:
 workspace open "./investigation"
 read-model "examples/retry-protocol/deduplicating.smv"
 property set once !DUPLICATE
-prove-property once -depth 12
+check invariant -name once -method induction -depth 12
 job show -full
 ```
 
@@ -79,13 +79,15 @@ help job
 | Commands | Purpose |
 | --- | --- |
 | `workspace open "PATH"`, `workspace show`, `workspace clear` | Choose a store, inspect context, or delete saved artifacts |
+| `check init`, `check trans -depth N` | Initial and transition consistency |
+| `settings list`, `settings set NAME VALUE`, `settings save` | Inspect, change, and persist interactive defaults |
 | `read-model`, `set`, `get` | Existing native model loading and input bindings |
 | `goal`, `property`, `watch` with `set NAME EXPR` / `list` | Save named expressions in an immutable revision |
 | `show-symbols` | Inspect resolved symbols, types, and frozen/input flags |
 | `capabilities` | Discover agent operations; use `yasmv --capabilities` for machine-readable schemas |
-| `reach EXPR -depth N`, optionally `-shortest` | Bounded or shortest search, accepting saved goal names |
-| `check-property NAME -depth N`, `prove-property NAME -depth N` | Bounded safety checking and verified induction |
-| `check-progress EXPR -states N -wall-ms N` | Check universal eventual completion; detect loops and dead ends |
+| `check reachable EXPR -method bmc -depth N`, optionally `-shortest` | Bounded or shortest search; use `-name` for saved goals |
+| `check invariant EXPR -method induction -depth N` | Bounded safety checking and verified induction |
+| `check progress EXPR -states N -wall-ms N` | Check universal eventual completion; detect loops and dead ends |
 | `export-progress "FILE"`, `validate-progress "FILE"` | Save and recheck a portable progress proof or failure |
 | `explain-init`, `explain-step`, `explain-reach EXPR -depth N` | Explain inconsistent assumptions and bounded impossibility |
 | `simulate -at K -depth N` | Continue the current trace after preserving states 0 through K |
@@ -94,25 +96,17 @@ help job
 | `job list`, `show`, `wait`, `events`, `cancel` | Inspect and control supervised jobs |
 | `scenario configure "FILE"`, `list`, `show`, `export`, `replay IMPLEMENTATION` | Configure and replay executable scenarios |
 
-A plain `reach EXPR` and ordinary `simulate -k N` retain their native behavior.
-New reach options select the bounded worker path and require `-depth N`.
-Property and bounded explanation commands also require explicit depths.
-A saved goal takes precedence over the same target spelling in a bounded
-search; use an equivalent explicit expression such as `x && TRUE` to avoid
-an ambiguous saved name.
+Checking now uses the [unified check and settings interface](COMMAND_INTERFACE.md).
+The old checking commands are removed. Operands are expressions; saved names
+require `-name`. BMC and induction require `-depth`, while default interpolation
+has no depth cap. All checking variants share budgets and sync/async overrides.
+Settings supply interactive defaults; structured clients use explicit requests.
 
-Property/explanation commands accept `-c EXPR`, `-wall-ms N`, `-conflicts N`,
-`-propagations N`, and `-async`. Explanations additionally accept `-minimize`;
-`explain-step -at K` selects a prefix. Reach accepts `-c`, `-wall-ms`, and
-`-async`. `simulate -at K -depth N` counts N additional transitions; the action
-at K remains part of the preserved prefix. Use `-t NAME` for a different native
-trace. Inputs, root, word width, and solver configuration come from the native
-session. Extra environment constraints are currently rejected by workspace jobs.
-
-Progress queries do not take a depth bound. Native defaults are 10,000 non-goal
-states and 30,000 ms. Agent queries supply both limits explicitly. They report a
-verified unbounded result or UNKNOWN; they do not assume fairness. See
-[guaranteed progress](PROGRESS_CHECKING.md) for semantics and artifacts.
+Property and explanation commands accept assumptions and budgets. Explanations
+also accept `-minimize`; `explain-step -at K` selects a prefix.
+`simulate -at K -depth N` counts N additional transitions and preserves the
+action at K. Use `-t NAME` for another native trace. Extra environment constraints
+are currently rejected by workspace jobs.
 
 Worker traces are replayed against the loaded native model before being
 registered and selected. They work with existing trace commands, `echo`, and
@@ -172,7 +166,7 @@ negative outcomes can drive `on failure` without turning into execution errors.
 Use the agent transport below for structured output.
 
 ```text
-reach FALSE -depth 10000 -async
+check reachable FALSE -method bmc -depth 10000 -async
 job show
 job cancel
 job wait
@@ -181,8 +175,9 @@ job wait
 Omitting a job ID selects the last submitted job. `job wait` registers a completed
 job's trace in the native interpreter; `job show` only inspects it. `job show
 -full` includes full evidence. Ctrl-C cancels a synchronous worker job. Closing
-the shell cancels outstanding jobs and reaps the workers. Isolated jobs retain the engine’s
-60-second default hard deadline; agent requests can set `hard_timeout` explicitly.
+the shell cancels outstanding jobs and reaps the workers. Check jobs derive their watchdog from the resolved timeout plus ten seconds;
+unlimited checks have no watchdog. Other isolated jobs default to 60 seconds.
+Agent requests can override `hard_timeout` explicitly.
 
 The existing `--query-file` and `--session-file` APIs remain supported.
 
@@ -204,7 +199,7 @@ or start a checker. Agent mode accepts one JSON object per line on stdin:
 Use the returned revision ID explicitly:
 
 ```json
-{"version":1,"request_id":"search-1","operation":"query.run","arguments":{"revision":"REVISION_ID","query":{"operation":"shortest-reach","target":"DUPLICATE","limits":{"depth":12}},"hard_timeout":60}}
+{"version":1,"request_id":"search-1","operation":"query.run","arguments":{"revision":"REVISION_ID","query":{"operation":"check","variant":"reachable","method":"bmc","shortest":true,"target":"DUPLICATE","limits":{"depth":12}},"hard_timeout":60}}
 ```
 
 Each command produces zero or more `started`/`progress` events and exactly one

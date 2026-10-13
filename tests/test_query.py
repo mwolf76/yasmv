@@ -21,7 +21,7 @@ class QueryTests(unittest.TestCase):
             path = Path(directory)
             (path / 'model.smv').write_text(model)
             request = {'version': 1, 'model': str(path / 'model.smv'),
-                       'query': query or {'operation': 'check-init'}}
+                       'query': query or {'operation': 'check', 'variant': 'init'}}
             if inputs is not None:
                 request['inputs'] = inputs
             (path / 'request.json').write_text(json.dumps(request))
@@ -33,7 +33,7 @@ class QueryTests(unittest.TestCase):
             return value
 
     def reach(self, depth=1, **extra):
-        return self.job(query=dict(operation='reach', target='x', limits={'depth': depth}, **extra))
+        return self.job(query=dict(operation='check', variant='reachable', method='bmc', target='x', limits={'depth': depth}, **extra))
 
     def replay(self, trace, model=TOGGLE, expected=0, **kwargs):
         return self.job(model, {'operation': 'validate-trace', 'trace': trace, **kwargs}, expected)
@@ -50,32 +50,32 @@ class QueryTests(unittest.TestCase):
 
     def test_initial_and_transition_outcomes(self):
         self.assertEqual(self.job()['outcome'], 'satisfiable')
-        self.assertEqual(self.job(query={'operation': 'check-init', 'assumptions': ['x']})['outcome'], 'unsatisfiable')
-        self.assertEqual(self.job(query={'operation': 'check-trans', 'limits': {'depth': 3}})['checked_depths'], [1, 2, 3])
+        self.assertEqual(self.job(query={'operation': 'check', 'variant': 'init', 'assumptions': ['x']})['outcome'], 'unsatisfiable')
+        self.assertEqual(self.job(query={'operation': 'check', 'variant': 'trans', 'limits': {'depth': 3}})['checked_depths'], [1, 2, 3])
         self.assertEqual(self.job(query={'operation': 'pick-state', 'count': True})['value'], '1')
 
     def test_limits_and_cancellation_are_inconclusive(self):
         for limit in ('wall_ms', 'conflicts', 'propagations'):
             with self.subTest(limit=limit):
-                r = self.job(query={'operation': 'reach', 'target': 'x', 'limits': {'depth': 2, limit: 0}}, expected=3)
+                r = self.job(query={'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x', 'limits': {'depth': 2, limit: 0}}, expected=3)
                 self.assertEqual(r['status'], 'unknown')
                 self.assertIsNone(r['outcome'])
                 self.assertIsNone(r['trace'])
         self.assertEqual(self.reach()['outcome'], 'reachable')
 
     def test_invalid_requests(self):
-        for q in ({'operation': 'reach'}, {'operation': 'reach', 'target': 'x', 'strategy': ''},
-                  {'operation': 'reach', 'target': 'x ignored'},
-                  {'operation': 'reach', 'target': 'next(x)', 'limits': {'depth': 1}},
-                  {'operation': 'reach', 'target': 'x', 'limits': {'depth': -2}},
-                  {'operation': 'reach', 'target': 'x', 'limits': {'depth': 2}, 'assumptions': ['$0{x}']},
-                  {'operation': 'check-init', 'typo': 1}):
+        for q in ({'operation': 'check', 'variant': 'reachable', 'method': 'bmc'}, {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x', 'strategy': ''},
+                  {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x ignored'},
+                  {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'next(x)', 'limits': {'depth': 1}},
+                  {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x', 'limits': {'depth': -2}},
+                  {'operation': 'check', 'variant': 'reachable', 'method': 'interpolation', 'target': 'x', 'assumptions': ['$0{x}']},
+                  {'operation': 'check', 'variant': 'init', 'typo': 1}):
             with self.subTest(q=q):
                 self.assertEqual(self.job(query=q, expected=2)['status'], 'error')
 
     def test_timed_goal_hidden_in_define_is_rejected(self):
         model = TOGGLE + 'DEFINE later := next(x);\n'
-        self.job(model, {'operation': 'reach', 'target': 'later', 'limits': {'depth': 1}}, expected=2)
+        self.job(model, {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'later', 'limits': {'depth': 1}}, expected=2)
 
     def test_distinct_source_occurrences(self):
         records = [c for c in self.job()['constraints'] if c['kind'] == 'invar' and c['span']]
@@ -133,7 +133,7 @@ class QueryTests(unittest.TestCase):
         self.assertEqual(values['e'], 'GREEN')
         self.assertEqual(values['b'], ['0', '18446744073709551615'])
         self.assertEqual(self.replay(t, model)['outcome'], 'valid')
-        goal = self.job(model, {'operation': 'reach', 'target': 's=(int64)-9223372036854775808', 'limits': {'depth': 0}})['trace']
+        goal = self.job(model, {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 's=(int64)-9223372036854775808', 'limits': {'depth': 0}})['trace']
         self.assertEqual(self.replay(goal, model)['outcome'], 'valid')
         for value in ('18446744073709551616', '-1', 9007199254740993):
             bad = copy.deepcopy(t); bad['steps'][0]['values']['u'] = value
@@ -152,14 +152,14 @@ class QueryTests(unittest.TestCase):
         self.assertEqual(self.replay(bad, model)['outcome'], 'invalid')
 
     def test_backward_trace(self):
-        r = self.job(query={'operation': 'reach', 'target': 'x', 'assumptions': ['$0{x}']})
+        r = self.job(query={'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x', 'limits': {'depth': 2}, 'assumptions': ['$0{x}']})
         self.assertEqual(r['outcome'], 'reachable')
-        self.assertEqual(r['trace']['origin']['initial_time'], 4294967294)
+        self.assertEqual(r['trace']['origin']['initial_time'], 0)
         self.assertEqual(self.replay(r['trace'])['outcome'], 'valid')
 
     def test_frozen_values(self):
         model = 'MODULE main\n#frozen\nVAR f:boolean;\n#inertial\nVAR x:boolean;\nINIT f && !x;\nTRANS x:=!x;\n'
-        t = self.job(model, {'operation': 'reach', 'target': 'x', 'limits': {'depth': 1}})['trace']
+        t = self.job(model, {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x', 'limits': {'depth': 1}})['trace']
         self.assertEqual([f['values']['f'] for f in t['steps']], [True, True])
         self.assertEqual(self.replay(t, model)['outcome'], 'valid')
 
@@ -184,7 +184,7 @@ class QueryTests(unittest.TestCase):
         self.assertEqual((r['outcome'], r['value']), ('diameter', '1'))
         r = self.job(query={'operation': 'diameter', 'limits': {'depth': 0}}, expected=3)
         self.assertEqual(r['stop_reason'], 'depth_limit')
-        r = self.job(query={'operation': 'reach', 'target': 'FALSE'})
+        r = self.job(query={'operation': 'check', 'variant': 'reachable', 'method': 'interpolation', 'target': 'FALSE'})
         self.assertEqual((r['outcome'], r['scope']), ('unreachable', 'unbounded'))
         self.assertTrue(r['proof_method'])
 
@@ -252,7 +252,7 @@ class QueryTests(unittest.TestCase):
                 count = self.job(model, {'operation': 'pick-state', 'count': True}, options=options)
                 self.assertEqual(count['value'], '24')  # 2 * 4 * 3, with tick fixed.
                 self.assertTrue(count['complete'])
-                result = self.job(model, {'operation': 'reach', 'target': 'tick', 'limits': {'depth': 1}},
+                result = self.job(model, {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'tick', 'limits': {'depth': 1}},
                                   options=options)
                 trace = result['trace']
                 self.assertEqual([step['values']['tick'] for step in trace['steps']], [False, True])

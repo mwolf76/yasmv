@@ -19,7 +19,7 @@ INTEGER = {'type': 'integer', 'minimum': 0, 'maximum': 1000000}
 REV = {'revision': STRING}
 PAGE = {'offset': INTEGER, 'limit': {'type': 'integer', 'minimum': 1, 'maximum': 1000}}
 QUERY = {'$ref': 'workbench-v1.schema.json#/properties/query'}
-TIMEOUT = {'type': 'number', 'minimum': 0.05, 'maximum': 300}
+TIMEOUT = {'type': 'number', 'minimum': -1, 'maximum': 2147494}
 OPERATIONS = {}
 
 
@@ -44,7 +44,7 @@ operation('metadata.set', 'Save a named goal, safety property, watch, or input i
 operation('metadata.list', 'Read named goals, properties, watches, or inputs.',
           dict(REV, kind={'type': 'string', 'enum': ['goals', 'properties', 'watches', 'inputs']}), ('revision', 'kind'))
 operation('scenario.configure', 'Save scenario mappings in a new revision.', dict(REV, file=STRING), ('revision', 'file'))
-for name, description in [('query.run', 'Run a bounded job and return a compact result with evidence references.'),
+for name, description in [('query.run', 'Run a checking or exploration job and return a compact result with evidence references.'),
                           ('job.submit', 'Start a job without waiting; use job.events, job.show, job.wait, or job.cancel.')]:
     operation(name, description, dict(REV, query=QUERY, job_id=STRING, hard_timeout=TIMEOUT), ('revision', 'query'))
 operation('job.list', 'List compact job summaries.', PAGE)
@@ -169,8 +169,8 @@ class Client:
 
     def query(self, args, wait=True, emit=None):
         identifier = args.get('job_id', uuid.uuid4().hex)
-        request = dict(version=1, request_id=identifier, revision=args['revision'], query=args['query'],
-                       hard_timeout=args.get('hard_timeout', 60))
+        request = dict(version=1, request_id=identifier, revision=args['revision'], query=args['query'])
+        if 'hard_timeout' in args: request['hard_timeout'] = args['hard_timeout']
         self.engine.submit(request)
         self.select(job_id=identifier)
         if wait:

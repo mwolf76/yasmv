@@ -29,4 +29,4 @@ SEE ALSO
 
 .fi
 .in 3
-help read-model, help set, help check-init, help workspace.
+help read-model, help set, help check, help workspace.

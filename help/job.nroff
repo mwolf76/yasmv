@@ -29,7 +29,8 @@ cancel requests cancellation of an active job. Queries with -async return
 immediately so that these commands can be used while the job runs.
 
 Ctrl-C cancels a waiting job. Closing the shell cancels outstanding jobs and
-reaps workers. Isolated jobs have a default hard deadline of 60 seconds;
+reaps workers. Check jobs derive a watchdog from their time budget (plus ten seconds);
+unlimited checks disable it. Other jobs default to 60 seconds;
 agent requests can set hard_timeout explicitly.
 
 .ti 0
@@ -37,7 +38,7 @@ EXAMPLES
 
 .nf
 .in 3
->> reach FALSE -depth 10000 -async
+>> check reachable FALSE -method bmc -depth 10000 -async
 >> job show
 >> job cancel
 >> job wait
@@ -47,4 +48,4 @@ SEE ALSO
 
 .fi
 .in 3
-help workspace, help reach, help check-property, help prove-property.
+help workspace, help check, help check.

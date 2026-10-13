@@ -29,42 +29,20 @@ states, even when bounded search has found no violation.
 
 ## Native query contract
 
-Use the existing `--query-file` envelope:
+The current interface is [unified check](COMMAND_INTERFACE.md). Both native and
+workbench queries use `operation: "check"`, a `variant`, and a `method` for
+reachable/invariant checks. Native predicates use `target`; workbench requests
+can use `name` to resolve a saved property or goal. BMC and induction require
+`limits.depth`; interpolation rejects depth and is unbounded.
 
 ```json
-{
-  "version": 1,
-  "model": "examples/retry-protocol/deduplicating.smv",
-  "query": {
-    "operation": "prove-property",
-    "property": {"name": "At most once", "expression": "!DUPLICATE"},
-    "limits": {"depth": 12, "wall_ms": 60000}
-  }
-}
+{"version":1,"model":"examples/retry-protocol/deduplicating.smv","query":{"operation":"check","variant":"invariant","method":"induction","target":"!DUPLICATE","limits":{"depth":12}}}
 ```
 
-| Operation | Required query fields | Completed outcomes |
-| --- | --- | --- |
-| `shortest-reach` | Boolean state `target`, nonnegative depth | `reachable`, `unreachable` |
-| `check-property` | Named Boolean state `property`, nonnegative depth | `violated`, `holds_bounded` |
-| `prove-property` | Named Boolean state `property`, positive depth | `violated`, `holds_bounded`, `proven` |
-
-Untimed Boolean state assumptions and Boolean watches are supported. All
-operations honor the existing cancellation, deadline, conflict, and propagation
-budgets. Errors and interrupted queries never publish a proof or optimality
-claim. A wall limit includes loading for fresh CLI requests; the workbench hard
-deadline covers loading, cache validation, waiting, analysis, and witness replay.
-
-Workbench requests name a property from the immutable revision rather than
-sending a new expression:
-
-```json
-{"operation": "prove-property", "property": "At most once", "limits": {"depth": 12}}
-```
-
-Unknown property names are rejected before starting a worker. Native generating
-queries in exported traces contain the resolved name and expression, preserving
-replay without the workbench. Replay checks the violation at the final state.
+Untimed state assumptions restrict every state. Results are `violated`,
+`holds_bounded`, or `proven` for invariants; reachable checks use `reachable`
+and `unreachable` with explicit bounded or unbounded scope. Budgets and
+cancellation apply to verification as well as search.
 
 ### Shortest-witness evidence
 
@@ -273,7 +251,60 @@ process ownership refinement and the remaining in-process migration separately.
 
 ## Guaranteed progress (M6)
 
-Universal eventuality is available through `check-progress`. Its graph proofs,
+Universal eventuality is available through `check progress`. Its graph proofs,
 loop/dead-end evidence, and resource semantics are documented separately in
 [the progress guide](PROGRESS_CHECKING.md). It complements safety induction and
 does not add general LTL/CTL or fairness.
+
+## Interpolation
+
+Interpolation is the default for `check reachable` and `check invariant`,
+or can be selected with `-method interpolation`. Both run without a depth cap.
+A spurious approximate path increases the suffix horizon and restarts search;
+only a replay-validated concrete path becomes a counterexample. A fixed point
+must pass fresh initial-containment, closure and target-exclusion checks.
+
+```text
+check invariant !bad -method interpolation -wall-ms 60000
+job show -full
+```
+
+Resource interruption returns unknown. Image iterations and suffix horizons are
+separate from actual concrete `checked_depths` and shortest-witness evidence.
+There is no depth-cap bounded fallback for interpolation in the current API.
+
+The initial fragment requires deterministic, untimed Boolean INIT, INVAR,
+target/property, and assumptions, expanding defines, parameters, and effective
+inputs. Transition constraints may be nondeterministic but must refer only to
+the current and next state, without absolute time. Arithmetic, finite enums,
+arrays, hierarchy, frozen variables, and partial transitions are supported.
+Assumptions constrain every state and can create dead ends or an empty initial
+set. The result explicitly records vacuity for the latter. Effective input
+values in interpolation witnesses are evaluated with SAT against the pinned
+path; their decoding shares the query's cancellation and solver budgets.
+
+A successful proof has `proof_method: "interpolation"`, `scope: "unbounded"`,
+and `proof.verified: true`. The fresh-solver obligations are
+`initial_containment`, `transition_closure`, and `target_exclusion`, each
+`unsatisfiable`. `statistics.interpolation` records the suffix horizon, image
+queries, enlargements, restarts, concrete/spurious SAT counts, proof nodes, and
+circuit nodes. These counters are not byte-accurate memory accounting.
+
+`proof.invariant` uses [state invariant v1](formats/invariant-v1.schema.json).
+It binds the circuit to the full model/configuration identity, target, and
+assumptions, with a symbol catalog and a one-based atom dictionary. Each atom
+identifies a symbol's flattened native encoding bit and whether it is frozen;
+integer bits are most-significant first, arrays concatenate element encodings.
+`nodes` contains reachable gates in topological order. Even `id` values identify
+gates, `atom` identifies an input, and `and: [left, right]` identifies a
+conjunction. References use their low bit for negation; 0 and 1 denote false
+and true. Gate IDs can have gaps. `root` selects the invariant output.
+
+The inline artifact is inspection evidence, not a new save/revalidate command.
+Schema validation checks structure; it does not establish inductiveness or
+model identity. The engine establishes the three obligations before publishing
+it. Model compilation and these checks share the native compiler/backend.
+
+The [benchmark guide](INTERPOLATION_BENCHMARKS.md) compares interpolation with
+bounded search, simple-path exhaustion, and k-induction on fixed safety cases,
+including process time, memory, proof sizes, and incomplete outcomes.

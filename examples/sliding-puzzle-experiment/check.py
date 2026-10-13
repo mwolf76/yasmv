@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Independent puzzle oracle, exhaustive small encoding checks, and all-k witness."""
+from collections import deque
+import itertools
+import json
+from pathlib import Path
+import sys
+import threading
+import time
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+sys.path[:0] = [str(HERE), str(ROOT)]
+from generate import boards, source
+from tools.workbench.sessions import Session
+
+
+def slide(board, side, direction, columns=None):
+    columns = side if columns is None else columns
+    blank = board.index(0)
+    row, col = divmod(blank, columns)
+    dr, dc = {'UP':(-1,0), 'DOWN':(1,0), 'LEFT':(0,-1), 'RIGHT':(0,1)}[direction]
+    nr, nc = row+dr, col+dc
+    if not (0 <= nr < side and 0 <= nc < columns): return None
+    dest = nr*columns+nc
+    result = list(board); result[blank], result[dest] = result[dest], result[blank]
+    return tuple(result)
+
+
+def parity(board, side, columns=None):
+    columns = side if columns is None else columns
+    # Include the blank as label 0; a slide toggles both terms.
+    permutation = sum(a > b for i,a in enumerate(board) for b in board[i+1:]) % 2
+    row, col = divmod(board.index(0), columns)
+    return permutation ^ ((row+col) % 2)
+
+
+def all_k_witness(side, k, columns=None):
+    goal = tuple(boards(side, columns)[1])
+    a = slide(goal, side, 'LEFT', columns)
+    b = slide(a, side, 'UP', columns)
+    # End in A then RIGHT to G. Alternate A/B for any requested prefix length.
+    prefix = [a if (k-1-i)%2==0 else b for i in range(k)]
+    return prefix+[goal]
+
+
+def main():
+    initial, goal = map(tuple, boards(2))
+    reached={initial}; queue=deque([initial])
+    while queue:
+        board=queue.popleft()
+        for direction in ('UP','DOWN','LEFT','RIGHT'):
+            successor=slide(board,2,direction)
+            if successor is not None:
+                assert parity(board,2)==parity(successor,2)
+                if successor not in reached: reached.add(successor); queue.append(successor)
+    assert len(reached)==12 and goal not in reached
+    generic='\n'.join(line for line in source(2).splitlines() if not line.startswith('INIT '))+'\n'
+    session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=generic,root='',inputs={}),threading.Event(),time.monotonic()+120)
+    checked=0
+    def query(value):
+        result=session.query(dict(value,request_id='oracle'),threading.Event(),time.monotonic()+30)
+        assert result['status']=='completed',result
+        return result
+    try:
+        for board in itertools.permutations(range(4)):
+            for direction in ('UP','DOWN','LEFT','RIGHT'):
+                condition=' && '.join(f'cell_{i} = {v}' for i,v in enumerate(board))+' && move = '+direction
+                picked=query(dict(operation='pick-state',assumptions=[condition]))
+                successor=slide(board,2,direction)
+                if successor is None:
+                    assert picked['outcome']=='unsatisfiable',picked
+                else:
+                    assert picked['trace'],picked
+                    advanced=query(dict(operation='simulate',trace=picked['trace'],limits=dict(depth=1)))
+                    assert advanced['outcome']=='simulated',advanced
+                    observed=tuple(int(advanced['trace']['steps'][-1]['values'][f'cell_{i}']) for i in range(4))
+                    assert observed==successor,(board,direction,observed,successor)
+                    checked+=1
+    finally: session.close()
+    for rows, columns in ((8,8), (4,8), (4,4)):
+        initial, goal = map(tuple, boards(rows,columns))
+        assert parity(initial,rows,columns)!=parity(goal,rows,columns)
+        for k in (1,2,3,4,8,16,63,64,127,1024):
+            path=all_k_witness(rows,k,columns)
+            assert path[-1]==goal and all(s!=goal for s in path[:-1])
+            assert all(sorted(s)==list(range(rows*columns)) for s in path)
+            for a,b in zip(path,path[1:]):
+                assert b in [slide(a,rows,d,columns) for d in ('UP','DOWN','LEFT','RIGHT')]
+        assert (HERE/f'puzzle-{rows*columns-1}.smv').read_text()==source(rows,columns)
+    print('PASS: 24 small boards, 96 action checks, 48 exact legal successors; BFS component has 12 boards.')
+    print('PASS: 63-, 31-, and 15-puzzle generation and parity; constructive induction-step witnesses through k=1024.')
+    # Check every blank location and action against the native
+    # transition relation, using a representative permutation at each location.
+    for rows, columns, expected in ((4,8,(104,24)), (4,4,(48,16))):
+        count=rows*columns
+        generic='\n'.join(line for line in source(rows,columns).splitlines() if not line.startswith('INIT '))+'\n'
+        session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=generic,root='',inputs={}),threading.Event(),time.monotonic()+180)
+        legal=illegal=0
+        try:
+            for blank in range(count):
+                board=list(range(1,count))+[0]
+                board[blank],board[-1]=board[-1],board[blank]
+                for direction in ('UP','DOWN','LEFT','RIGHT'):
+                    condition=' && '.join(f'cell_{i} = {v}' for i,v in enumerate(board))+' && move = '+direction
+                    picked=query(dict(operation='pick-state',assumptions=[condition]))
+                    successor=slide(board,rows,direction,columns)
+                    if successor is None:
+                        assert picked['outcome']=='unsatisfiable',picked
+                        illegal+=1
+                    else:
+                        assert picked['trace'],picked
+                        advanced=query(dict(operation='simulate',trace=picked['trace'],limits=dict(depth=1)))
+                        assert advanced['outcome']=='simulated',advanced
+                        observed=tuple(int(advanced['trace']['steps'][-1]['values'][f'cell_{i}']) for i in range(count))
+                        assert observed==successor,(board,direction,observed,successor)
+                        assert parity(board,rows,columns)==parity(successor,rows,columns)
+                        legal+=1
+            assert (legal,illegal)==expected,(legal,illegal)
+            print(f'PASS: {rows}x{columns} board, {legal+illegal} action checks, {legal} exact legal successors, {illegal} rejected boundary moves.')
+        finally: session.close()
+        session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=source(rows,columns),root='',inputs={}),threading.Event(),time.monotonic()+60)
+        try:
+            assert query(dict(operation='check', variant='init'))['outcome']=='satisfiable'
+            successor=slide(boards(rows,columns)[0],rows,'LEFT',columns)
+            target=' && '.join(f'cell_{i} = {v}' for i,v in enumerate(successor))
+            result=query(dict(operation='check', variant='reachable', method='bmc',target=target,limits=dict(depth=1)))
+            assert result['outcome']=='reachable',result
+            assert query(dict(operation='validate-trace',trace=result['trace']))['outcome']=='valid'
+            print(f'PASS: {count-1}-puzzle initial state and one-slide reachability with fresh trace replay.')
+        finally: session.close()
+    session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=source(2),root='',inputs={}),threading.Event(),time.monotonic()+60)
+    try:
+        result=query(dict(operation='check', variant='reachable', method='interpolation',target='GOAL',limits=dict(wall_ms=30000)))
+        assert result['outcome']=='unreachable' and result['proof']['verified'] and not result['proof']['vacuous'],result
+        output=HERE/'results'; output.mkdir(exist_ok=True)
+        (output/'small-control.json').write_text(json.dumps(result,indent=2)+'\n')
+        print('PASS: interpolation proves the same puzzle on 2x2, with fresh invariant verification.')
+    finally: session.close()
+
+
+if __name__ == '__main__': main()
