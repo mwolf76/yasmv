@@ -121,17 +121,17 @@ def main():
         finally: session.close()
         session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=source(rows,columns),root='',inputs={}),threading.Event(),time.monotonic()+60)
         try:
-            assert query(dict(operation='check-init'))['outcome']=='satisfiable'
+            assert query(dict(operation='check', variant='init'))['outcome']=='satisfiable'
             successor=slide(boards(rows,columns)[0],rows,'LEFT',columns)
             target=' && '.join(f'cell_{i} = {v}' for i,v in enumerate(successor))
-            result=query(dict(operation='reach',target=target,limits=dict(depth=1)))
+            result=query(dict(operation='check', variant='reachable', method='bmc',target=target,limits=dict(depth=1)))
             assert result['outcome']=='reachable',result
             assert query(dict(operation='validate-trace',trace=result['trace']))['outcome']=='valid'
             print(f'PASS: {count-1}-puzzle initial state and one-slide reachability with fresh trace replay.')
         finally: session.close()
     session=Session(str(ROOT/'yasmv'),str(ROOT),dict(source=source(2),root='',inputs={}),threading.Event(),time.monotonic()+60)
     try:
-        result=query(dict(operation='reach',strategy='interpolation',target='GOAL',limits=dict(wall_ms=30000)))
+        result=query(dict(operation='check', variant='reachable', method='interpolation',target='GOAL',limits=dict(wall_ms=30000)))
         assert result['outcome']=='unreachable' and result['proof']['verified'] and not result['proof']['vacuous'],result
         output=HERE/'results'; output.mkdir(exist_ok=True)
         (output/'small-control.json').write_text(json.dumps(result,indent=2)+'\n')

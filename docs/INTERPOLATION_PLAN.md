@@ -1,5 +1,10 @@
 # Interpolation-based reachability proposal
 
+> Historical design/measurement record. The checking interface was replaced by
+> [unified check and settings](COMMAND_INTERFACE.md). Old command/API spellings,
+> defaults and interpolation depth caps below describe the recorded milestone.
+> The current benchmark runner compares BMC, induction and unbounded interpolation.
+
 Status: milestones 1–5 implemented, 2026-09-29.
 See [proof validation](INTERPOLATION_PROOF_VALIDATION.md). Interpolation is an
 opt-in reachability and safety strategy. The

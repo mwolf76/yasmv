@@ -81,9 +81,12 @@ class ScalarTests(unittest.TestCase):
         artifact=self.candidate(source,entry)
         return publish(artifact,self.path/f'bundle-{self.serial}',CHECKER,timeout=60)
 
-    def query(self, model, operation='reach', **extra):
+    def query(self, model, operation='check', **extra):
         path=self.path/'query.json'
-        path.write_text(json.dumps(dict(version=1,model=str(model/'model.smv'),query=dict(operation=operation,**extra))))
+        query = dict(operation=operation, **extra)
+        if operation == 'check': query.update(variant='reachable', method='bmc')
+        if operation == 'trans': query.update(operation='check', variant='trans')
+        path.write_text(json.dumps(dict(version=1,model=str(model/'model.smv'),query=query)))
         p=subprocess.run([CHECKER,'--quiet','--query-file',str(path)],capture_output=True,text=True,timeout=180)
         self.assertEqual(p.returncode,0,p.stdout+p.stderr)
         return json.loads(p.stdout)
@@ -118,7 +121,7 @@ class ScalarTests(unittest.TestCase):
                 self.assertEqual(self.reach(model,f'{ERROR} || ({DONE} && {RETURN}!=(uint32){expected})',len(r['trace']['steps'])+2)['outcome'],'unreachable')
         model=self.compile_c(ROOT/'tests/llvm2smv/scalar/loops.c','endless')
         self.assertEqual(self.reach(model,f'{DONE} || {ERROR}',12)['outcome'],'unreachable')
-        self.assertEqual(self.query(model,'check-trans',limits={'depth':12})['outcome'],'satisfiable')
+        self.assertEqual(self.query(model,'trans',limits={'depth':12})['outcome'],'satisfiable')
 
     def test_phi_swap_and_switch(self):
         source='''define i8 @main() {

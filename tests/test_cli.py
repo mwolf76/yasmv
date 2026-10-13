@@ -27,7 +27,7 @@ class CLITests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.store = Path(self.temp.name) / 'workspace with spaces'
-        self.env = dict(os.environ, YASMV_HOME=str(ROOT))
+        self.env = dict(os.environ, YASMV_HOME=str(ROOT), XDG_CONFIG_HOME=str(Path(self.temp.name) / "config"))
 
     def run_cli(self, mode, script=None, code=0):
         command = [str(ROOT / 'yasmv'), '--' + mode]
@@ -47,6 +47,75 @@ class CLITests(unittest.TestCase):
     def results(self):
         return [json.loads(path.read_text()) for path in self.store.glob('jobs/*/result.json')]
 
+    def test_unified_checks_settings_and_submission_snapshot(self):
+        source = ROOT / 'tests/models/query.smv'
+        text = self.native(f'''settings set check.timeout 2m
+settings set check.execution async
+settings save
+read-model "{source}"
+check init -sync
+check trans -depth 2 -sync
+check reachable x -method induction -depth 2 -sync
+check invariant TRUE -sync
+check progress x -sync
+check init
+settings set check.timeout 0ms
+job wait
+job show -full
+settings show check.timeout
+''')
+        self.assertIn('check.timeout = 0ms (session)', text)
+        requests = [json.loads(path.read_text()) for path in self.store.glob('jobs/*/request.json')]
+        checks = [r for r in requests if r['query']['operation'] == 'check']
+        self.assertEqual(len(checks), 6)
+        self.assertTrue(all(r['query']['limits']['wall_ms'] == 120000 for r in checks))
+        self.assertTrue(all(r['hard_timeout'] == 130 for r in checks))
+        self.assertEqual({r['query']['variant'] for r in checks}, {'init', 'trans', 'reachable', 'invariant', 'progress'})
+        self.assertTrue(all(r['status'] == 'completed' for r in self.results()))
+        restored = self.native('settings list')
+        self.assertIn('check.timeout = 2m (user)', restored)
+        self.assertIn('check.execution = async (user)', restored)
+        reset = self.native('settings reset check.timeout\nsettings save\nsettings show check.timeout')
+        self.assertIn('check.timeout = 30s (builtin)', reset)
+
+    def test_unified_expression_name_resolution_and_invalid_combinations(self):
+        source = ROOT / 'tests/models/query.smv'
+        text = self.native(f'''read-model "{source}"
+goal set x !x
+property set x TRUE
+check reachable x -method bmc -depth 0
+check reachable -name x -method bmc -depth 0
+check invariant -name x
+''')
+        self.assertIn('Target is unreachable within the bound', text)
+        self.assertIn('Target is reachable', text)
+        self.assertIn('Safety property proven', text)
+        for command in ('check invariant TRUE -depth 1', 'check reachable x -method bmc',
+                        'check init -depth 1', 'check trans -method bmc',
+                        'check progress x -shortest', 'check reachable x -shortest',
+                        'check invariant -name absent', 'settings set check.timeout tomorrow',
+                        'settings set check.execution maybe', 'settings set unknown 1'):
+            with self.subTest(command=command):
+                self.native(f'read-model "{source}"\n' + command, code=2)
+        for old in ('check-init', 'check-trans', 'reach x', 'check-property x -depth 1',
+                    'prove-property x -depth 1', 'check-progress x'):
+            with self.subTest(old=old):
+                self.native(f'read-model "{source}"\n' + old, code=2)
+
+    def test_settings_unlimited_and_explicit_execution_override(self):
+        source = ROOT / 'tests/models/query.smv'
+        self.native(f'''settings set check.timeout unlimited
+settings set check.execution async
+read-model "{source}"
+check invariant TRUE -sync
+check init -wall-ms 0 -sync
+''', code=3)
+        requests = [json.loads(path.read_text()) for path in self.store.glob('jobs/*/request.json')]
+        proof = next(r for r in requests if r['query'].get('variant') == 'invariant')
+        self.assertEqual(proof['hard_timeout'], -1)
+        self.assertEqual(proof['query']['limits']['wall_ms'], -1)
+        self.assertTrue(any(r['outcome'] == 'proven' for r in self.results()))
+
     def test_retry_native_workflow(self):
         example = ROOT / 'examples/retry-protocol'
         export = Path(self.temp.name) / 'trace.json'
@@ -56,7 +125,7 @@ goal set duplicate DUPLICATE
 property set once !DUPLICATE
 watch set duplicate DUPLICATE
 show-symbols
-reach duplicate -shortest -depth 12
+check reachable -name duplicate -shortest -depth 12 -method bmc
 list-traces
 dump-trace -f json -o "{export}"
 compare-traces workspace_1 workspace_1
@@ -68,7 +137,7 @@ explain-step -at 0 -c action = ACK -minimize
 job show -full
 simulate -at 0 -c action = ACK -depth 1
 read-trace "{export}"
-check-property once -depth 12
+check invariant -name once -method bmc -depth 12
 ''')
         self.assertIn('Shortest witness: 5 transitions', text)
         self.assertIn('[*] workspace_1', text)
@@ -81,7 +150,7 @@ check-property once -depth 12
         self.assertTrue(any(r.get('explanation') for r in self.results()))
         proven = self.native(f'''read-model "{example}/deduplicating.smv"
 property set once !DUPLICATE
-prove-property once -depth 12
+check invariant -name once -method induction -depth 12
 ''')
         self.assertIn('Safety property proven', proven)
 
@@ -89,7 +158,7 @@ prove-property once -depth 12
         source = ROOT / 'tests/models/query.smv'
         text = self.native(f'''read-model "{source}"
 property set safe TRUE
-prove-property safe -strategy interpolation -depth 2
+check invariant -name safe -method interpolation
 ''')
         self.assertIn('Safety property proven', text)
         proof = next(r for r in self.results() if r.get('proof_method') == 'interpolation')
@@ -121,10 +190,10 @@ dump-trace -f json -o "{export}"
         text = self.native(f'''set enabled TRUE
 read-model "{source}"
 goal set target x
-reach target -depth 0
+check reachable -name target -depth 0 -method bmc
 set enabled FALSE
 goal list
-reach !x -depth 0
+check reachable !x -depth 0 -method bmc
 dump-trace -f json -o "{export}"
 ''', options=('--word-width', '8', '--sat-random-seed', '7'))
         self.assertIn('target = x', text)
@@ -142,7 +211,7 @@ dump-trace -f json -o "{export}"
 
     def test_unknown_and_batch_failure_status(self):
         source = ROOT / 'tests/models/query.smv'
-        text = self.native(f'read-model "{source}"\nreach TRUE -depth 0 -wall-ms 0\ngoal list', code=3)
+        text = self.native(f'read-model "{source}"\ncheck reachable TRUE -depth 0 -wall-ms 0 -method bmc\ngoal list', code=3)
         self.assertIn('UNKNOWN', text)
         text = self.native('show-symbols\nworkspace show', code=2)
         self.assertIn('No validated model', text)
@@ -153,14 +222,14 @@ dump-trace -f json -o "{export}"
         other = Path(self.temp.name) / 'other'
         text = self.native(f'''read-model "{source}"
 goal set target x
-reach FALSE -depth 10000 -async
+check reachable FALSE -depth 10000 -async -method bmc
 job cancel
 job wait
 workspace open "{other}"
 show-symbols
 workspace open "{self.store}"
 goal list
-reach target -shortest -depth 1 -async
+check reachable -name target -shortest -depth 1 -async -method bmc
 job wait
 list-traces
 ''', code=3)
@@ -229,7 +298,7 @@ list-traces
         before, after = (Path(self.temp.name) / name for name in ('before.json', 'after.json'))
         output = self.native(f'''read-model "{source}"
 goal set target x
-reach target -shortest -depth 1
+check reachable -name target -shortest -depth 1 -method bmc
 dump-trace -f json -o "{before}"
 do workspace clear; workspace show;
 job list
@@ -251,7 +320,7 @@ dump-trace -f json -o "{after}"
         output = self.native(f'''workspace clear
 read-model "{source}"
 goal set target x
-reach target -shortest -depth 1
+check reachable -name target -shortest -depth 1 -method bmc
 workspace clear
 goal list
 simulate -depth 1
@@ -268,9 +337,9 @@ dump-trace -f json -o "{export}"
         process, send = self.start_agent()
         source = (ROOT / 'tests/models/query.smv').read_text()
         revision = send('model.save', {'document': {'source': source}})['revision']
-        found = send('query.run', dict(revision=revision, query=dict(operation='shortest-reach', target='x', limits={'depth': 1})))
+        found = send('query.run', dict(revision=revision, query=dict(operation='check', variant='reachable', method='bmc', shortest=True, target='x', limits={'depth': 1})))
         trace_id = found['trace_id']
-        started = send('job.submit', dict(revision=revision, query=dict(operation='reach', target='FALSE', limits={'depth': 10000})))
+        started = send('job.submit', dict(revision=revision, query=dict(operation='check', variant='reachable', method='bmc', target='FALSE', limits={'depth': 10000})))
         job_id = started['data']['job_id']
         rejected = send('workspace.clear', {})
         self.assertEqual(rejected['status'], 'error')
@@ -280,7 +349,7 @@ dump-trace -f json -o "{export}"
         send('job.cancel', {'job_id': job_id})
         self.assertEqual(send('job.wait', {'job_id': job_id})['stop_reason'], 'cancelled')
         # Cancellation may discard its snapshot; prime a live one before clearing.
-        self.assertEqual(send('query.run', dict(revision=revision, query=dict(operation='shortest-reach', target='x', limits={'depth': 1})))['outcome'], 'reachable')
+        self.assertEqual(send('query.run', dict(revision=revision, query=dict(operation='check', variant='reachable', method='bmc', shortest=True, target='x', limits={'depth': 1})))['outcome'], 'reachable')
         children = Path(f'/proc/{process.pid}/task/{process.pid}/children')
         snapshots = children.read_text().split()
         self.assertTrue(snapshots)
@@ -293,13 +362,13 @@ dump-trace -f json -o "{export}"
             self.assertEqual(send(operation, {})['data']['total'], 0)
         self.assertEqual(send('model.show', {'revision': revision})['status'], 'error')
         revision = send('model.save', {'document': {'source': source}})['revision']
-        found = send('query.run', dict(revision=revision, query=dict(operation='shortest-reach', target='x', limits={'depth': 1})))
+        found = send('query.run', dict(revision=revision, query=dict(operation='check', variant='reachable', method='bmc', shortest=True, target='x', limits={'depth': 1})))
         self.assertEqual(found['outcome'], 'reachable')
         self.assertEqual(send('workspace.clear', {})['status'], 'completed')
 
     def test_native_exit_cancels_outstanding_work(self):
         source = ROOT / 'tests/models/query.smv'
-        self.native(f'read-model "{source}"\nreach FALSE -depth 10000 -async')
+        self.native(f'read-model "{source}"\ncheck reachable FALSE -depth 10000 -async -method bmc')
         results = self.results()
         self.assertEqual(len(results), 1)
         self.assertEqual(results[0]['status'], 'unknown')
@@ -308,9 +377,9 @@ dump-trace -f json -o "{export}"
     def test_command_words_remain_model_identifiers(self):
         source = Path(self.temp.name) / 'names.smv'
         source.write_text('MODULE main\nVAR property:boolean;\nVAR goal:boolean;\nINIT property && goal;\n')
-        text = self.native(f'read-model "{source}"\nreach property && goal -depth 0')
+        text = self.native(f'read-model "{source}"\ncheck reachable property && goal -depth 0 -method bmc')
         self.assertIn('Target is reachable', text)
-        for command in ('reach TRUE -depth "bad"', 'explain-step -at 9223372036854775807'):
+        for command in ('check reachable TRUE -method bmc -depth "bad"', 'explain-step -at 9223372036854775807'):
             with self.subTest(command=command):
                 self.native(command, code=2)
 
@@ -318,7 +387,7 @@ dump-trace -f json -o "{export}"
         source = Path(self.temp.name) / 'wide.smv'
         source.write_text('#word-width 64\nMODULE main\nVAR x : uint64;\nINIT x = (uint64)18446744073709551615;\n')
         export = Path(self.temp.name) / 'trace.json'
-        self.native(f'read-model "{source}"\nreach TRUE -depth 0\ndump-trace -f json -o "{export}"')
+        self.native(f'read-model "{source}"\ncheck reachable TRUE -depth 0 -method bmc\ndump-trace -f json -o "{export}"')
         self.assertEqual(json.loads(export.read_text())['steps'][0]['values']['x'], '18446744073709551615')
         source.write_text('MODULE main\nVAR x : boolean;\nINIT FALSE;\n')
         text = self.native(f'read-model "{source}"\nshow-symbols\nexplain-init')
@@ -377,7 +446,7 @@ dump-trace -f json -o "{export}"
         self.assertTrue(any(d['type']['kind'] == 'boolean' for d in symbols['data']['symbols'].values()))
         invalid = send('query.run', {'query': {'operation': 'pick-state'}})
         self.assertEqual(invalid['status'], 'error')
-        started = send('job.submit', dict(revision=revision, job_id='long-job', query=dict(operation='reach', target='FALSE', limits={'depth': 10000})))
+        started = send('job.submit', dict(revision=revision, job_id='long-job', query=dict(operation='check', variant='reachable', method='bmc', target='FALSE', limits={'depth': 10000})))
         self.assertEqual(started['data']['job_id'], 'long-job')
         self.assertTrue(send('job.cancel', {'job_id': 'long-job'})['data']['cancel_requested'])
         cancelled = send('job.wait', {'job_id': 'long-job'})
@@ -386,13 +455,13 @@ dump-trace -f json -o "{export}"
         events = send('job.events', {'job_id': 'long-job', 'limit': 1})['data']
         self.assertEqual(len(events['events']), 1)
         self.assertTrue(events['more'])
-        found = send('query.run', dict(revision=revision, query=dict(operation='shortest-reach', target='x', limits={'depth': 2})))
+        found = send('query.run', dict(revision=revision, query=dict(operation='check', variant='reachable', method='bmc', shortest=True, target='x', limits={'depth': 2})))
         self.assertEqual(found['optimality']['depth'], 1)
         trace_id = found['trace_id']
         other = send('model.save', {'document': {'source': source.replace('INIT !x', 'INIT x')}})['revision']
         rejected = send('query.run', dict(revision=other, query=dict(operation='simulate', trace_id=trace_id, limits={'depth': 1})))
         self.assertEqual(rejected['status'], 'error')
-        self.assertEqual(send('query.run', dict(revision=revision, query=dict(operation='reach', target='x', limits={'depth': 0})))['outcome'], 'unreachable')
+        self.assertEqual(send('query.run', dict(revision=revision, query=dict(operation='check', variant='reachable', method='bmc', target='x', limits={'depth': 0})))['outcome'], 'unreachable')
         process.stdin.close()
         self.assertEqual(process.wait(timeout=30), 2)  # First failed request stays reflected in batch status.
 
@@ -401,7 +470,7 @@ dump-trace -f json -o "{export}"
         loaded = send('model.save', {'document': {'source': (ROOT / 'tests/models/query.smv').read_text()}})
         self.assertEqual(loaded['status'], 'completed')
         request = dict(version=1, request_id='interrupt', operation='query.run', arguments=dict(
-            revision=loaded['revision'], query=dict(operation='reach', target='FALSE', limits={'depth': 10000})))
+            revision=loaded['revision'], query=dict(operation='check', variant='reachable', method='bmc', target='FALSE', limits={'depth': 10000})))
         process.stdin.write(json.dumps(request) + '\n')
         process.stdin.flush()
         first = process.cli_messages.get(timeout=30)
@@ -441,8 +510,7 @@ dump-trace -f json -o "{export}"
         environment = dict(self.env, PATH=str(helpers) + os.pathsep + os.environ['PATH'])
         topics = ('workspace', 'goal', 'property', 'watch', 'show-symbols',
                   'capabilities', 'job', 'scenario', 'explain-init', 'explain-step',
-                  'explain-reach', 'check-property', 'prove-property', 'compare-traces',
-                  'reach')
+                  'explain-reach', 'check', 'settings', 'compare-traces')
         commands = 'help\n' + ''.join(f'help {topic} # open the listed topic\n' for topic in topics)
         result = subprocess.run([str(ROOT / 'yasmv'), '--quiet'],
                                 input=commands + '86400 * 365\nquit\n',
@@ -491,10 +559,10 @@ dump-trace -f json -o "{export}"
             os.write(master, f'read-model "{source}"\n'.encode())
             expect(b'>> ')
             source.write_text('broken source after load')
-            os.write(master, b'reach x -shortest -depth 1\n')
+            os.write(master, b'check reachable x -shortest -depth 1 -method bmc\n')
             expect(b'Shortest witness: 1 transitions')
             expect(b'>> ')
-            os.write(master, b'reach FALSE -depth 10000\n')
+            os.write(master, b'check reachable FALSE -depth 10000 -method bmc\n')
             # Wait until the worker has published its request before signalling.
             end = time.monotonic() + 30
             while not any('10000' in p.read_text() for p in self.store.glob('jobs/*/request.json')):

@@ -72,4 +72,4 @@ DEFINE
   GOAL := x = 7 && y = 7;
 
 -- to solve the labyrinth issue the command:
--- >> reach GOAL;
+-- >> check reachable GOAL -method bmc -depth 100;

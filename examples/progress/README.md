@@ -2,7 +2,7 @@
 
 These small models distinguish reaching a goal from guaranteeing its arrival.
 
-| Model | `check-progress FINISHED` |
+| Model | `check progress FINISHED` |
 | --- | --- |
 | `complete.smv` | Proven: READY → WORKING → DONE |
 | `stalled.smv` | Violated: WORKING has no successor |
@@ -13,8 +13,8 @@ Use a fresh native process for each model:
 ```text
 workspace open "/tmp/progress-investigation"
 read-model "examples/progress/retry-forever.smv"
-reach FINISHED -shortest -depth 3
-check-progress FINISHED -states 10000 -wall-ms 30000
+check reachable FINISHED -method bmc -shortest -depth 3
+check progress FINISHED -states 10000 -wall-ms 30000
 dump-trace
 export-progress "/tmp/progress.json"
 validate-progress "/tmp/progress.json"

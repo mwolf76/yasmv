@@ -12,6 +12,7 @@ from .client import Client
 from .cli import render, error_result
 from .engine import encoded
 from . import protocol
+from .settings import Settings
 
 
 class Native:
@@ -20,6 +21,7 @@ class Native:
         self.client = None
         self.context = {}
         self.trace_ids = {}
+        self.settings = None
 
     def open(self, directory):
         if self.client and self.client.engine.active:
@@ -96,6 +98,12 @@ class Native:
 
     def execute(self, request):
         op, args = request['operation'], deepcopy(request['arguments'])
+        if op == 'settings' or op == 'query.run' and args['query']['operation'] == 'check':
+            if self.settings is None:
+                self.settings = Settings()
+            if op == 'settings':
+                return self.settings.execute(args), None
+            args = self.settings.apply(args)
         if op == 'workspace.open': self.open(args['directory'])
         if op == 'workspace.clear':
             if not self.client: self.open(self.options.store)
@@ -116,7 +124,7 @@ class Native:
         background = args.pop('background', False)
         if op == 'query.run':
             q = args['query']
-            if 'target' in q:
+            if 'target' in q and q['operation'] == 'explain-reach':
                 q['target'] = c.engine.revision(args['revision'])['goals'].get(q['target'], q['target'])
             if q['operation'] in ('simulate', 'explain-step'):
                 q['trace_id'] = self.trace(args.pop('native_trace', None))

@@ -141,7 +141,7 @@ def main():
                        YASMV_IMC_HEAP_RELEASE=args.heap_release)
     if args.operation == 'capture':
         model = args.model.resolve()
-        request = dict(version=1, model=str(model), query=dict(operation='reach', strategy='interpolation',
+        request = dict(version=1, model=str(model), query=dict(operation='check', variant='reachable', method='interpolation',
                        target=args.target, limits=dict(wall_ms=args.wall_seconds * 1000)))
         write(output / 'request.json', request)
         environment.update(YASMV_IMC_CAPTURE=args.capture, YASMV_IMC_IMAGES=str(args.images))

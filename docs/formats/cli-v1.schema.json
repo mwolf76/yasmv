@@ -148,8 +148,8 @@
               },
               "hard_timeout": {
                 "type": "number",
-                "minimum": 0.05,
-                "maximum": 300
+                "minimum": -1,
+                "maximum": 2147494
               }
             },
             "required": [
@@ -178,8 +178,8 @@
               },
               "hard_timeout": {
                 "type": "number",
-                "minimum": 0.05,
-                "maximum": 300
+                "minimum": -1,
+                "maximum": 2147494
               }
             },
             "required": [
@@ -291,8 +291,8 @@
               },
               "hard_timeout": {
                 "type": "number",
-                "minimum": 0.05,
-                "maximum": 300
+                "minimum": -1,
+                "maximum": 2147494
               }
             },
             "required": [
@@ -442,8 +442,8 @@
               },
               "hard_timeout": {
                 "type": "number",
-                "minimum": 0.05,
-                "maximum": 300
+                "minimum": -1,
+                "maximum": 2147494
               }
             },
             "required": [
@@ -481,8 +481,8 @@
               },
               "hard_timeout": {
                 "type": "number",
-                "minimum": 0.05,
-                "maximum": 300
+                "minimum": -1,
+                "maximum": 2147494
               }
             },
             "required": [
@@ -865,8 +865,8 @@
               },
               "hard_timeout": {
                 "type": "number",
-                "minimum": 0.05,
-                "maximum": 300
+                "minimum": -1,
+                "maximum": 2147494
               }
             },
             "required": [
@@ -961,8 +961,8 @@
               },
               "hard_timeout": {
                 "type": "number",
-                "minimum": 0.05,
-                "maximum": 300
+                "minimum": -1,
+                "maximum": 2147494
               }
             },
             "required": [
@@ -1004,8 +1004,8 @@
               },
               "hard_timeout": {
                 "type": "number",
-                "minimum": 0.05,
-                "maximum": 300
+                "minimum": -1,
+                "maximum": 2147494
               }
             },
             "required": [

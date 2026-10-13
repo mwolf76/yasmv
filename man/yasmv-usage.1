@@ -20,7 +20,7 @@ can be entered interactively, piped via stdin, or loaded from files.
 .PP
 3. Perform verification:
 .nf
-   >> reach GOAL
+   >> check reachable GOAL
    >> simulate -k 10
 .fi
 .PP
@@ -45,15 +45,24 @@ Select initial state(s)
 .B simulate
 Perform simulation steps
 .TP
-.B reach
-Find path to target condition
+.B check reachable EXPR
+Check existential reachability; interpolation by default.
 .SS Verification
 .TP
-.B check-init
+.B check init
 Verify initial state consistency
 .TP
-.B check-trans
+.B check trans [-depth N]
 Verify transition relation consistency
+.TP
+.B check invariant EXPR
+Check a safety property with BMC, induction, or interpolation.
+.TP
+.B check progress EXPR
+Check universal eventual completion without fairness.
+.TP
+.B settings
+Inspect, change, reset, or save typed interactive checking defaults.
 .TP
 .B diameter
 Compute state space diameter
@@ -107,13 +116,13 @@ Exit yasmv
     >> set goal_pos OFFICE
     
     # Find solution
-    >> reach pos = goal_pos
+    >> check reachable pos = goal_pos
     >> dump-trace
 .fi
 .SS Bounded Verification
 .nf
     # Check if error state is reachable
-    >> reach ERROR_STATE
+    >> check reachable ERROR_STATE
     
     # If unreachable within bounds:
     !! Reachability failed
@@ -145,7 +154,7 @@ Variables marked with #input in the model can be set before verification:
 .PP
 .nf
     >> set input_var value
-    >> reach GOAL
+    >> check reachable GOAL
 .fi
 .PP
 Input variables act as parameters to the verification problem.
@@ -154,19 +163,19 @@ Constraints can reference specific time points:
 .PP
 .nf
     # Require condition at step 3
-    >> reach GOAL -c "@3{x = 5}"
+    >> check reachable GOAL -method bmc -depth 20 -c @3{x = 5}
     
     # Require condition from step 2 to 5
-    >> reach GOAL -c "@2..5{safe = TRUE}"
+    >> check reachable GOAL -method bmc -depth 20 -c @2..5{safe = TRUE}
 .fi
 .SH ADVANCED FEATURES
 .SS Command Composition
 .nf
     # Execute multiple commands
-    >> do read-model 'test.smv'; pick-state; reach GOAL; quit;
+    >> do read-model 'test.smv'; pick-state; check reachable GOAL; quit;
     
     # Conditional execution
-    >> reach GOAL
+    >> check reachable GOAL
     >> on success dump-trace
     >> on failure echo "No solution found"
 .fi
@@ -174,12 +183,12 @@ Constraints can reference specific time points:
 .nf
     # Compare multiple solutions
     >> pick-state -c "strategy = FAST"
-    >> reach GOAL
+    >> check reachable GOAL
     >> dup-trace sim_1 fast_solution
     
     >> clear
     >> pick-state -c "strategy = SAFE"  
-    >> reach GOAL
+    >> check reachable GOAL
     >> dup-trace sim_2 safe_solution
 .fi
 .SH TIPS AND BEST PRACTICES

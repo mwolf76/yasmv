@@ -126,13 +126,13 @@ In the native shell, try the retry-protocol example:
 
 ```text
 read-model "examples/retry-protocol/faulty.smv"
-reach DUPLICATE -shortest -depth 12
+check reachable DUPLICATE -method bmc -shortest -depth 12
 list-traces
 dump-trace
 ```
 
 The shortest witness reaches duplicate execution after five transitions.
-Use `help`, `help reach`, or `help workspace` for commands and artifact storage.
+Use `help`, `help check`, or `help workspace` for commands and artifact storage.
 Shell command options use a single dash; `--` starts an SMV comment.
 
 The [CLI guide](docs/CLI_WORKBENCH.md) walks through named goals, properties,
@@ -203,3 +203,5 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for details.
 
 yasmv is in no way related to, or endorsed by, the NuSMV development board or
 FBK. yasmv does not contain any code from NuSMV's code base.
+
+Checking and interactive preferences are documented in the [unified command guide](docs/COMMAND_INTERFACE.md).

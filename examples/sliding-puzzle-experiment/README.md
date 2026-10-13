@@ -132,8 +132,9 @@ request for the large experiment is:
   "version": 1,
   "model": "examples/sliding-puzzle-experiment/puzzle-63.smv",
   "query": {
-    "operation": "reach",
-    "strategy": "interpolation",
+    "operation": "check",
+    "variant": "reachable",
+    "method": "interpolation",
     "target": "GOAL",
     "limits": {"wall_ms": 120000}
   }

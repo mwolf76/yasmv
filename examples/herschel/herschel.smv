@@ -5,7 +5,7 @@
 -- The GOAL defined in this model is expected to be UNREACHABLE.
 --
 -- e. g.
--- >> reach GOAL
+-- >> check reachable GOAL
 -- << Target is UNREACHABLE
 --
 MODULE herschel;

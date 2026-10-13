@@ -21,12 +21,11 @@ class BenchmarkTests(unittest.TestCase):
             query = benchmark.query_for(case, method, 1234)
             self.assertEqual(query['assumptions'], ['legal'])
             self.assertEqual(query['limits']['wall_ms'], 1234)
-            if method == 'simple-path':
+            if method == 'interpolation':
                 self.assertNotIn('depth', query['limits'])
-                self.assertEqual(query['target'], 'bad')
             else:
                 self.assertEqual(query['limits']['depth'], 7)
-                self.assertEqual(query['property']['expression'], '!(bad)')
+            self.assertEqual(query['target'], '!(bad)')
 
     def test_outcomes_are_not_upgraded_or_contradicted(self):
         result = dict(status='completed', outcome='holds_bounded', scope='through_depth')
@@ -83,7 +82,7 @@ class BenchmarkTests(unittest.TestCase):
     def test_native_unknown_exit_code_is_a_sample(self):
         with tempfile.TemporaryDirectory() as temporary:
             measured, result = benchmark.run_query(ROOT / 'yasmv', ROOT / 'tests/models/query.smv', {},
-                dict(operation='reach', target='x', limits=dict(wall_ms=0)), Path(temporary), 15, ROOT)
+                dict(operation='check', variant='reachable', method='interpolation', target='x', limits=dict(wall_ms=0)), Path(temporary), 15, ROOT)
             self.assertEqual(measured['exit_code'], 3)
             self.assertEqual(result['status'], 'unknown')
             self.assertIsNone(result['trace'])

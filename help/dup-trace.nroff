@@ -23,7 +23,7 @@ EXAMPLES
 
 .nf
 >> read-model 'examples/ferryman/ferryman.smv'
->> reach GOAL
+>> check reachable GOAL
 -- Target is reachable, registered witness `reach_1`, 8 steps.
 >> dump-trace -f yaml
 witness:

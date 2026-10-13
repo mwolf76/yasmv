@@ -65,7 +65,7 @@ class WorkbenchTests(unittest.TestCase):
         return self.wait(self.engine.submit(self.request(rev, query, **extra)))
 
     def reach(self, rev, target='x', depth=2):
-        return self.run_job(rev, dict(operation='reach', target=target, limits={'depth': depth}))
+        return self.run_job(rev, dict(operation='check', variant='reachable', method='bmc', target=target, limits={'depth': depth}))
 
     def fake(self, code):
         path = Path(self.temp.name) / 'fake-worker'
@@ -126,14 +126,14 @@ class WorkbenchTests(unittest.TestCase):
         rev = self.revision()
         marker = Path(self.temp.name) / 'launched'
         self.fake(f'from pathlib import Path\nPath({str(marker)!r}).touch()\n')
-        base = self.request(rev, {'operation': 'reach', 'target': 'x', 'limits': {'depth': 2}})
+        base = self.request(rev, {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x', 'limits': {'depth': 2}})
         variants = []
         for key, value in [('version', 2), ('version', True), ('extra', 1), ('request_id', '../escape')]:
             v = deepcopy(base); v[key] = value; variants.append(v)
-        for query in [{'operation': 'arbitrary'}, {'operation': 'reach', 'target': 'x'},
+        for query in [{'operation': 'arbitrary'}, {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x'},
                       {'operation': 'pick-state', 'limits': {'depth': 1}},
-                      {'operation': 'reach', 'target': 'x', 'limits': {'depth': True}},
-                      {'operation': 'reach', 'target': 'x', 'limits': {'depth': -1}},
+                      {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x', 'limits': {'depth': True}},
+                      {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': 'x', 'limits': {'depth': -1}},
                       {'operation': 'simulate', 'trace': {}, 'trace_id': 'x', 'limits': {'depth': 1}},
                       {'operation': 'validate-model', 'assumptions': ['x']}]:
             v = deepcopy(base); v['query'] = query; variants.append(v)

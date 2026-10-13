@@ -9,7 +9,7 @@
 -- command.
 --
 -- e. g.
--- >> set from HOME; set to POSITIVE; reach GOAL; dump-trace
+-- >> set from HOME; set to POSITIVE; check reachable GOAL; dump-trace
 --
 MODULE automation
 

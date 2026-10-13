@@ -152,31 +152,6 @@ namespace opts {
             )
             ;
 
-        // REACH options
-        boost::program_options::options_description reach_opts("REACH options");
-        reach_opts.add_options()
-            (
-                "reach-fast-backward-strategy",
-                boost::program_options::value<std::string>(),
-                "enable fast backward strategy (yes/no, default: yes)"
-            )
-            (
-                "reach-backward-strategy",
-                boost::program_options::value<std::string>(),
-                "enable backward strategy (yes/no, default: yes)"
-            )
-            (
-                "reach-fast-forward-strategy",
-                boost::program_options::value<std::string>(),
-                "enable fast forward strategy (yes/no, default: yes)"
-            )
-            (
-                "reach-forward-strategy",
-                boost::program_options::value<std::string>(),
-                "enable forward strategy (yes/no, default: yes)"
-            )
-            ;
-
         boost::program_options::options_description sat_opts("CaDiCaL solver options");
         sat_opts.add_options()
             ("sat-random-seed", boost::program_options::value<int>(),
@@ -191,7 +166,6 @@ namespace opts {
             .add(general_opts)
             .add(cnf_opts)
             .add(fsm_opts)
-            .add(reach_opts)
             .add(sat_opts);
         
         // clang-format on

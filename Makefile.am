@@ -38,7 +38,7 @@ EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/ve
     docs/formats/explanation-v1.schema.json docs/formats/executable-scenario-v1.schema.json \
     tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py tools/workbench/sessions.py tests/test_analysis.py tests/test_sessions.py \
     docs/STRONGER_ANALYSIS.md docs/formats/analysis-v1.schema.json tools/benchmark-sessions.py \
-    docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tests/test_cli.py docs/CLI_WORKBENCH.md docs/formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
+    docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tools/workbench/settings.py tests/test_cli.py tests/test_functional_check.py docs/CLI_WORKBENCH.md docs/COMMAND_INTERFACE.md docs/formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
 EXTRA_DIST += README.md setup.sh tests/test_setup.py
 EXTRA_DIST += tests/test_cadical_configure.py
 EXTRA_DIST += docs/INTERPOLATION_PLAN.md docs/INTERPOLATION_PROOF_VALIDATION.md

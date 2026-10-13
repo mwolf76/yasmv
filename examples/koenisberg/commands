@@ -1,4 +1,5 @@
-reach GOAL
+# NEXT in INVAR is supported by BMC, not the interpolation fragment.
+check reachable GOAL -method bmc -depth 8
 on success echo "*** unexpected result ***"
-on failure echo "As old Euler said, there really is *no* way to cross all the bridges in Koenisberg exactly once."
+on failure echo "No crossing found through 8 transitions."
 quit

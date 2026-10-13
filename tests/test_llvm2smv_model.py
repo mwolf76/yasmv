@@ -56,7 +56,7 @@ class Models(unittest.TestCase):
         return json.loads(p.stdout)
 
     def reach(self, model, target, depth):
-        return self.query(model, {'operation': 'reach', 'target': target, 'limits': {'depth': depth}})
+        return self.query(model, {'operation': 'check', 'variant': 'reachable', 'method': 'bmc', 'target': target, 'limits': {'depth': depth}})
 
     def test_sequence_frames_exit_and_properties(self):
         model = self.publish('sequence')
@@ -72,7 +72,7 @@ class Models(unittest.TestCase):
         for key, expected in [('unchanged', 7), ('immutable', 9), ('x', 1), ('y', 2)]:
             target = f'p_646f6e65 && {symbol(key)} != (uint8){expected}'
             self.assertEqual(self.reach(model, target, 4)['outcome'], 'unreachable')
-        self.assertEqual(self.query(model, {'operation': 'check-trans', 'limits': {'depth': 4}})['outcome'], 'satisfiable')
+        self.assertEqual(self.query(model, {'operation': 'check', 'variant': 'trans', 'limits': {'depth': 4}})['outcome'], 'satisfiable')
 
     def test_simultaneous_rhs(self):
         model = self.publish('swap')

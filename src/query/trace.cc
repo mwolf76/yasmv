@@ -421,7 +421,7 @@ namespace query::trace {
             QuerySpec spec = spec_from_json(v["query"]);
             require(!spec.target || state_expression(spec.target), "Trace goal must be a state expression");
             for (auto e : spec.assumptions)
-                require(state_expression(e, spec.operation == Operation::reach && spec.limits.depth < 0), "Incompatible timed trace assumption");
+                require(state_expression(e, spec.operation == Operation::reach && spec.strategy != "interpolation"), "Incompatible timed trace assumption");
             const Json::Value& resolved_parent = parent.isNull() ? spec.parent_trace : parent;
             const auto& parent = resolved_parent;
             if (!v["branch"].isNull()) {

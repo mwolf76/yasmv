@@ -86,7 +86,9 @@ Use the returned `id` in a job document:
   "revision": "REPLACE_WITH_REVISION_ID",
   "hard_timeout": 60,
   "query": {
-    "operation": "reach",
+    "operation": "check",
+    "variant": "reachable",
+    "method": "bmc",
     "target": "DUPLICATE",
     "assumptions": [],
     "limits": {"depth": 12, "wall_ms": 50000}

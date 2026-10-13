@@ -1,5 +1,10 @@
 # Interpolation milestones 1–2: proofs and state predicates
 
+> Historical design/measurement record. The checking interface was replaced by
+> [unified check and settings](COMMAND_INTERFACE.md). Old command/API spellings,
+> defaults and interpolation depth caps below describe the recorded milestone.
+> The current benchmark runner compares BMC, induction and unbounded interpolation.
+
 The first [interpolation milestone](INTERPOLATION_PLAN.md) adds a standalone
 CaDiCaL proof probe and a solver-independent resolution DAG. Milestone 2 adds
 internal partitioned encoding, interpolant extraction, and fresh validation.

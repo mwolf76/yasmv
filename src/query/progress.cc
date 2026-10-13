@@ -207,7 +207,7 @@ namespace query {
             require(s.target && state_expression(s.target) && local(s.target, empty, 0, 0, 0, true) && mm.type(s.target)->is_boolean(), "Progress target must be a deterministic Boolean state expression");
             for (auto e : s.assumptions)
                 require(state_expression(e) && local(e, empty, 0, 0, 0, true) && mm.type(e)->is_boolean(), "Progress assumptions must be deterministic Boolean state expressions");
-            require(s.limits.depth == -1 && s.limits.states > 0 && s.limits.wall_ms >= 0, "Progress requires positive states and a wall budget; depth is unsupported");
+            require(s.limits.depth == -1 && s.limits.states > 0 && s.limits.wall_ms >= -1, "Progress requires positive states and a valid wall budget; depth is unsupported");
             require(s.strategy == "auto" && !s.until && !s.enumerate && !s.count && s.prefix_length == -1 && s.trace.isNull() && s.parent_trace.isNull() && s.trace_id.empty() && s.explanation.isNull() && s.property.isNull() && s.progress.isNull(), "Unsupported progress query option");
             check_fragment();
         }
@@ -299,6 +299,7 @@ namespace query {
                 for (size_t i = 1; i < loop.size(); ++i) path.push_back(loop[(offset + i) % loop.size()]);
             }
             QuerySpec reach;
+            reach.limits.depth = path.size() - 1;
             reach.operation = Operation::reach; reach.target = g.a.em().make_not(g.spec.target); reach.assumptions = g.spec.assumptions;
             Json::Value t;
             t["version"] = 1; t["id"] = "progress-path"; t["identity"] = id; t["initial_time"] = 0;
@@ -315,7 +316,7 @@ namespace query {
     void analyze_progress(const QuerySpec& request, QueryResult& result, QueryContext& context)
     {
         const bool validating = request.operation == Operation::validate_progress;
-        require(request.limits.depth == -1 && request.limits.states > 0 && request.limits.wall_ms >= 0, "Progress requires positive states and a wall budget; depth is unsupported");
+        require(request.limits.depth == -1 && request.limits.states > 0 && request.limits.wall_ms >= -1, "Progress requires positive states and a valid wall budget; depth is unsupported");
         if (validating) require(!request.target && request.assumptions.empty() && request.watches.empty() && request.trace.isNull() && request.parent_trace.isNull() && request.trace_id.empty(), "Validation uses artifact context, not new assumptions or traces");
         auto spec = validating ? progress_spec(request.progress) : request;
         check_spec(spec);
