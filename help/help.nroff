@@ -26,7 +26,7 @@ EXAMPLES
 .in 3
 >> help
 >> help workspace
->> help reach
+>> help check
 >> help job
 
-Guaranteed progress: check-progress, validate-progress, export-progress.
+Guaranteed progress: check progress, validate-progress, export-progress.

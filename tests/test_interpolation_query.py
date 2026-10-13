@@ -78,7 +78,7 @@ class InterpolationQueries(unittest.TestCase):
             while state not in distances:
                 distances[state] = len(distances); state = edges[state]
             for bad in range(4):
-                result = self.query(session, dict(operation='reach', strategy='interpolation', target=f'x = {bad}'))
+                result = self.query(session, dict(operation='check', variant='reachable', method='interpolation', target=f'x = {bad}'))
                 self.assertEqual(result['strategy'], 'interpolation')
                 self.assertEqual(result['scope'], 'unbounded')
                 self.assertEqual(result['checked_depths'], list(range(len(result['checked_depths']))))
@@ -91,46 +91,35 @@ class InterpolationQueries(unittest.TestCase):
                 else:
                     self.assertEqual(result['outcome'], 'unreachable')
                     self.check_invariant(result, edges, bad)
-                for depth in (1, 3):
-                    result = self.query(session, dict(operation='prove-property', strategy='interpolation',
-                        property=dict(name='safe', expression=f'x != {bad}'), limits=dict(depth=depth)))
-                    if result['outcome'] == 'proven':
-                        self.assertNotIn(bad, distances)
-                        self.check_invariant(result, edges, bad)
-                    elif result['outcome'] == 'violated':
-                        self.assertLessEqual(distances[bad], depth)
-                        self.assertEqual(result['optimality']['depth'], distances[bad])
-                        self.replay(session, result)
-                    else:
-                        self.assertEqual(result['outcome'], 'holds_bounded')
-                        self.assertEqual(result['scope'], 'through_depth')
-                        self.assertEqual(result['unbounded_outcome'], 'unknown')
-                        self.assertEqual(result['stop_reason'], 'depth_limit')
-                        self.assertEqual(result['checked_depths'], list(range(depth + 1)))
-                        self.assertEqual(result['proof']['base_unsat_depths'], list(range(depth + 1)))
-                        self.assertFalse(result['proof'].get('verified', False))
-                        self.assertNotIn('invariant', result['proof'])
+                result = self.query(session, dict(operation='check', variant='invariant', method='interpolation', target=f'x != {bad}'))
+                if bad in distances:
+                    self.assertEqual(result['outcome'], 'violated')
+                    self.assertEqual(result['optimality']['depth'], distances[bad])
+                    self.replay(session, result)
+                else:
+                    self.assertEqual(result['outcome'], 'proven')
+                    self.check_invariant(result, edges, bad)
             session.close()
 
     def test_native_types_domains_assumptions_and_empty_initial_states(self):
         source = (ROOT / 'tests/models/interpolation-search.smv').read_text()
         session = self.session(source, root='main', inputs={'gate': 'x'})
         for target in ('n = 3', 'n = 2 && cells[1]', 'gate'):
-            result = self.query(session, dict(operation='reach', strategy='interpolation', target=target))
+            result = self.query(session, dict(operation='check', variant='reachable', method='interpolation', target=target))
             self.assertEqual(result['outcome'], 'reachable'); self.replay(session, result)
             for frame in result['trace']['steps']:
                 self.assertEqual(frame['values']['fixed_bit'], result['trace']['steps'][0]['values']['fixed_bit'])
         for target in ('sub.flag != fixed_bit', '!(palette[0] = RED || palette[0] = GREEN || palette[0] = BLUE)'):
-            result = self.query(session, dict(operation='reach', strategy='interpolation', target=target))
+            result = self.query(session, dict(operation='check', variant='reachable', method='interpolation', target=target))
             self.assertTrue(result['proof']['verified'])
             self.assertTrue(any(bit['frozen'] for bit in result['proof']['invariant']['bits']))
         for assumption, vacuous in [('n < 2', False), ('n = 7', True)]:
-            result = self.query(session, dict(operation='reach', strategy='interpolation', target='n = 2', assumptions=[assumption]))
+            result = self.query(session, dict(operation='check', variant='reachable', method='interpolation', target='n = 2', assumptions=[assumption]))
             self.assertEqual(result['outcome'], 'unreachable')
             self.assertEqual(result['proof']['vacuous'], vacuous)
             self.assertEqual(result['proof']['invariant']['assumptions'], result['proof']['assumptions'])
         for target in ('future', 'view.value', 'choice'):
-            result = self.query(session, dict(operation='reach', strategy='interpolation', target=target), 'error')
+            result = self.query(session, dict(operation='check', variant='reachable', method='interpolation', target=target), 'error')
             self.assertIsNone(result['proof']); self.assertIsNone(result['trace'])
 
     def test_effective_input_values_are_decoded_and_replayed(self):
@@ -146,7 +135,7 @@ TRANS x := x + 1;
 """
         session = self.session(source, inputs={'number': 'x + 1', 'signed_number': '(int3) x - 1',
                                               'flags': '[x = 0, x = 1]', 'color': 'GREEN'})
-        result = self.query(session, dict(operation='reach', strategy='interpolation', target='x = 2'))
+        result = self.query(session, dict(operation='check', variant='reachable', method='interpolation', target='x = 2'))
         self.assertEqual(result['outcome'], 'reachable')
         self.assertEqual([s['values']['number'] for s in result['trace']['steps']], ['1', '2', '3'])
         self.assertEqual([s['values']['signed_number'] for s in result['trace']['steps']], ['-1', '0', '1'])
@@ -156,18 +145,18 @@ TRANS x := x + 1;
     def test_strategy_validation_and_budgets_preserve_session(self):
         session = self.session(model([1, 2, 2, 3]))
         for query in (
-            dict(operation='reach', target='x = 2', limits=dict(depth=2)),
-            dict(operation='shortest-reach', target='x = 2', limits=dict(depth=2)),
-            dict(operation='check-property', property=dict(name='p', expression='TRUE'), limits=dict(depth=2)),
-            dict(operation='prove-property', property=dict(name='p', expression='TRUE'), limits=dict(depth=0)),
-            dict(operation='check-init')):
-            self.query(session, dict(query, strategy='interpolation'), 'error')
+            dict(operation='check', variant='reachable', method='bmc', target='x = 2', limits=dict(depth=2)),
+            dict(operation='check', variant='reachable', method='bmc', shortest=True, target='x = 2', limits=dict(depth=2)),
+            dict(operation='check', variant='invariant', method='bmc', target='TRUE', limits=dict(depth=2)),
+            dict(operation='check', variant='invariant', method='induction', target='TRUE', limits=dict(depth=0)),
+            dict(operation='check', variant='init')):
+            self.query(session, dict(query, method='interpolation'), 'error')
         for budget in ('wall_ms', 'conflicts', 'propagations'):
-            result = self.query(session, dict(operation='reach', target='x = 3', strategy='interpolation', limits={budget: 0}), 'unknown')
+            result = self.query(session, dict(operation='check', variant='reachable', method='interpolation', target='x = 3', limits={budget: 0}), 'unknown')
             for field in ('trace', 'proof', 'optimality'): self.assertIsNone(result[field])
-        result = self.query(session, dict(operation='reach', target='x = 2', strategy='interpolation'))
+        result = self.query(session, dict(operation='check', variant='reachable', method='interpolation', target='x = 2'))
         self.replay(session, result)
-        ordinary = self.query(session, dict(operation='reach', target='x = 2', limits=dict(depth=1)))
+        ordinary = self.query(session, dict(operation='check', variant='reachable', method='bmc', target='x = 2', limits=dict(depth=1)))
         self.assertEqual(ordinary['scope'], 'through_depth')
         self.assertEqual(ordinary['outcome'], 'unreachable')
 
@@ -176,9 +165,10 @@ TRANS x := x + 1;
             engine = Engine(directory, reuse_models=True)
             try:
                 revision = engine.save_revision(dict(source=model([1, 2, 2, 3]), properties={'safe': 'x != 3'}))
-                for identifier, query in [('proof', dict(operation='prove-property', property='safe', limits=dict(depth=3))),
-                                          ('path', dict(operation='reach', target='x = 2', limits=dict(wall_ms=10000)))]:
-                    query['strategy'] = 'interpolation'
+                for identifier, query in [('proof', dict(operation='check', variant='invariant', method='induction', name='safe', limits=dict(depth=3))),
+                                          ('path', dict(operation='check', variant='reachable', method='bmc', target='x = 2', limits=dict(wall_ms=10000)))]:
+                    query['method'] = 'interpolation'
+                    query['limits'].pop('depth', None)
                     request = dict(version=1, request_id=identifier, revision=revision['id'], query=query)
                     protocol.request(request)
                     engine.submit(request)
@@ -209,7 +199,7 @@ TRANS x := x + 1;
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory); (path / 'model.smv').write_text(model([1, 2, 2, 3]))
             for target in ('x = 3', 'x = 2'):
-                request = dict(version=1, model=str(path / 'model.smv'), query=dict(operation='reach', strategy='interpolation', target=target))
+                request = dict(version=1, model=str(path / 'model.smv'), query=dict(operation='check', variant='reachable', method='interpolation', target=target))
                 validate('query-v1.schema.json', request)
                 (path / 'request.json').write_text(json.dumps(request))
                 run = subprocess.run([str(ROOT / 'yasmv'), '--quiet', '--query-file', str(path / 'request.json')],
@@ -225,9 +215,9 @@ TRANS x := x + 1;
                 else: validate('trace-v1.schema.json', result['trace'])
                 invalid = deepcopy(request); invalid['query']['limits'] = dict(depth=1)
                 with self.assertRaises(jsonschema.ValidationError): validate('query-v1.schema.json', invalid)
-        query = dict(operation='prove-property', strategy='interpolation', property='safe', limits=dict(depth=2))
+        query = dict(operation='check', variant='invariant', method='interpolation', name='safe')
         validate('workbench-v1.schema.json', dict(version=1, request_id='schema', revision='a'*64, query=query))
-        query = dict(operation='reach', strategy='interpolation', target='x', limits=dict(wall_ms=1000))
+        query = dict(operation='check', variant='reachable', method='interpolation', target='x', limits=dict(wall_ms=1000))
         envelope = dict(version=1, request_id='schema', revision='a'*64, query=query)
         validate('workbench-v1.schema.json', envelope); protocol.request(envelope)
         query['limits']['depth'] = 2

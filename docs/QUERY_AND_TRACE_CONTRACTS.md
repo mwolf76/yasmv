@@ -1,5 +1,7 @@
 # Query, diagnostic, and trace contracts (M1)
 
+The current command/API contract is [unified check and settings](COMMAND_INTERFACE.md).
+
 M1 implements packages 06–09 of [the implementation plan](IMPLEMENTATION_PLAN.md).
 The core still owns one model per process. Use a fresh process for each external
 job; the direct C++ interface serializes execution over the existing managers.
@@ -15,7 +17,9 @@ From the repository root, save this as `request.json`:
   "model": "tests/models/query.smv",
   "query": {
     "request_id": "toggle-1",
-    "operation": "reach",
+    "operation": "check",
+    "variant": "reachable",
+    "method": "bmc",
     "target": "x",
     "limits": {"depth": 3, "wall_ms": 5000}
   }
@@ -73,22 +77,19 @@ compilation, encoding, solving, and decoding boundaries. The signal handler
 only sets a `sig_atomic_t` notification; ordinary code performs interruption.
 
 Contexts and manager-backed expression/witness pointers are process-local.
-Persistent concurrent sessions and ownership cleanup remain M4 work. The
-current service deliberately selects one compatible reachability strategy per
-query. Explicit `forward`/`backward` select direction; bounded reach supports
-forward only. Opt-in `interpolation` supports unbounded `reach` and
-`prove-property` with a positive concrete depth cap. See
-[interpolation](STRONGER_ANALYSIS.md#interpolation) for evidence and eligibility.
-Empty, unknown, or incompatible strategy configurations fail.
+Compiled sessions reuse validated model snapshots. The public checking methods
+are BMC, induction and interpolation; interpolation is the default and unbounded.
+Unsupported method/variant combinations fail. Internal solver direction names
+are not public query options. See [unified checking](COMMAND_INTERFACE.md).
 
 ## Outcomes and scope
 
 | Operation | Completed outcomes | Evidence / scope |
 | --- | --- | --- |
-| `check-init` | `satisfiable`, `unsatisfiable` | Initial-state consistency at depth 0 |
-| `check-trans` | `satisfiable`, `unsatisfiable` | Transition consistency through a required positive depth; does not assert INIT |
+| `check init` | `satisfiable`, `unsatisfiable` | Initial-state consistency at depth 0 |
+| `check trans` | `satisfiable`, `unsatisfiable` | Transition consistency through a positive depth (default 1); does not assert INIT |
 | `pick-state` | `satisfiable`, `unsatisfiable` | Initial witness, enumeration, or exact count |
-| `reach` | `reachable`, `unreachable` | Witness, bounded negative, or legacy simple-path exhaustion |
+| `check reachable` | `reachable`, `unreachable` | Witness, bounded negative, or verified unbounded proof |
 | `simulate` | `simulated`, `deadlocked` | New chronological continuation trace with parent metadata |
 | `diameter` | `diameter` | Legacy maximum simple-path bound over invariant states |
 | `validate-trace` | `valid`, `invalid` | Whole-trace replay, with mismatch step when inconsistent |
@@ -151,7 +152,7 @@ complete result was established. Every fully solved search depth is recorded.
 Loading/guard validation consumes the same wall and solver-work budget.
 
 Bounded reach and continuation require state assumptions. Legacy unbounded
-reach accepts compatible timed assumptions. Backward trace replay translates
+check reachable accepts compatible timed assumptions. Backward trace replay translates
 end-relative constraints into chronological coordinates; constraints outside
 the recorded trace fail validation. The isolated runner supplies the hard stop
 for operations without frequent cooperative checkpoints.
@@ -296,7 +297,7 @@ contract and the separate executable scenario/implementation replay workflow.
 
 ## M4 additions
 
-`shortest-reach`, `check-property`, and `prove-property` add shortest-witness
+BMC and induction variants of `check` add shortest-witness
 evidence and named safety checks. Bounded reachable results now include an
 `optimality` certificate; safety results use `violated`, `holds_bounded`, or
 `proven` with explicit base/step verification evidence. Trace replay recognizes

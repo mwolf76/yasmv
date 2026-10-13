@@ -37,9 +37,6 @@
 #include <cmd/commands/dump_model.hh>
 #include <cmd/commands/read_model.hh>
 
-#include <cmd/commands/check_init.hh>
-#include <cmd/commands/check_trans.hh>
-#include <cmd/commands/reach.hh>
 
 #include <cmd/commands/pick_state.hh>
 #include <cmd/commands/simulate.hh>
@@ -116,20 +113,8 @@ namespace cmd {
             return new DumpModel(f_interpreter);
         }
 
-        inline Command_ptr make_reach()
-        {
-            return new Reach(f_interpreter);
-        }
 
-        inline Command_ptr make_check_init()
-        {
-            return new CheckInit(f_interpreter);
-        }
 
-        inline Command_ptr make_check_trans()
-        {
-            return new CheckTrans(f_interpreter);
-        }
 
         inline Command_ptr make_pick_state()
         {
@@ -235,20 +220,8 @@ namespace cmd {
             return new DumpModelTopic(f_interpreter);
         }
 
-        inline CommandTopic_ptr topic_reach()
-        {
-            return new ReachTopic(f_interpreter);
-        }
 
-        inline CommandTopic_ptr topic_check_init()
-        {
-            return new CheckInitTopic(f_interpreter);
-        }
 
-        inline CommandTopic_ptr topic_check_trans()
-        {
-            return new CheckTransTopic(f_interpreter);
-        }
 
         inline CommandTopic_ptr topic_pick_state()
         {

@@ -39,6 +39,9 @@ namespace query {
     struct QuerySpec {
         Operation operation = Operation::check_init;
         std::string request_id, strategy = "auto";
+        std::string check_variant, method;
+        expr::Expr_ptr check_target = nullptr;
+        bool shortest = false;
         expr::Expr_ptr target = nullptr, until = nullptr;
         expr::ExprVector assumptions;
         std::map<std::string, expr::Expr_ptr> watches;

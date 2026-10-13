@@ -1,6 +1,11 @@
 TODO
 ====
 
+Unified checking interface (2026-10-13): see docs/COMMAND_INTERFACE.md.
+Old checking command/API names are removed; check variants and settings are
+the maintained interface. The older brainstorming notes below are historical
+and do not describe the current command surface.
+
 Backward BMC strategy works ok (and strangely somewhat faster than forward
 strategy?) but it produces reversed CTX witnesses. It would be nice to have them
 straight.
@@ -138,7 +143,7 @@ check-fsm:
 
 Ok if no inconsistencies detected, false otherwise.
 
-check-init:
+check init:
 
 kill
 

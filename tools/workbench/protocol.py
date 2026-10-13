@@ -1,13 +1,14 @@
 """Versioned job protocol. No checker is started until the envelope is validated."""
+from copy import deepcopy
 import json
 import math
 import re
 
 VERSION = 1
-OPERATIONS = ('check-progress', 'validate-progress', 'shortest-reach', 'check-property', 'prove-property', 'validate-model', 'pick-state', 'reach', 'validate-trace', 'simulate', 'explain-init', 'explain-step', 'explain-reach', 'export-scenario', 'replay-scenario')
+OPERATIONS = ('check', 'validate-progress', 'validate-model', 'pick-state', 'validate-trace', 'simulate', 'explain-init', 'explain-step', 'explain-reach', 'export-scenario', 'replay-scenario')
 CAPABILITIES = {
     'version': VERSION, 'operations': list(OPERATIONS), 'events': ['started', 'progress', 'result'],
-    'trace_version': 1, 'bounded_only': False, 'progress': {'form': 'universal-eventuality', 'backend': 'explicit-sat-graph', 'fairness': 'none', 'artifact_version': 1}, 'proof_methods': ['k-induction', 'interpolation', 'finite-graph-ranking'], 'interpolation': {'reach': 'unbounded', 'prove_property': 'positive-depth-cap', 'invariant_version': 1}, 'shortest_witnesses': True, 'compiled_sessions': 'process-snapshot', 'watch_types': ['boolean'],
+    'trace_version': 1, 'bounded_only': False, 'progress': {'form': 'universal-eventuality', 'backend': 'explicit-sat-graph', 'fairness': 'none', 'artifact_version': 1}, 'proof_methods': ['k-induction', 'interpolation', 'finite-graph-ranking'], 'check_variants': ['init', 'trans', 'reachable', 'invariant', 'progress'], 'check_methods': ['bmc', 'induction', 'interpolation'], 'interpolation': {'depth_cap': False, 'invariant_version': 1}, 'shortest_witnesses': True, 'compiled_sessions': 'process-snapshot', 'watch_types': ['boolean'],
     'explanations': ['initial', 'single_step_continuation', 'bounded_reach'],
     'scenario_adapters': ['retry-protocol-v1'], 'selected_prefix': True, 'process_isolation': True,
     'limits': ['states', 'depth', 'wall_ms', 'conflicts', 'propagations'],
@@ -84,6 +85,7 @@ def revision(value):
 
 
 def request(value):
+    value = deepcopy(value)
     fields(value, ('version', 'request_id', 'revision', 'query', 'hard_timeout'), ('version', 'request_id', 'revision', 'query'))
     if type(value['version']) is not int or value['version'] != VERSION:
         raise ValueError('Unsupported protocol major version')
@@ -91,42 +93,68 @@ def request(value):
         if not isinstance(value[key], str) or not ID.fullmatch(value[key]):
             raise ValueError('Invalid ' + key)
     timeout = value.get('hard_timeout', 60)
-    if type(timeout) not in (int, float) or not math.isfinite(timeout) or not 0.05 <= timeout <= 300:
-        raise ValueError('Hard timeout must be between 0.05 and 300 seconds')
+    if type(timeout) not in (int, float) or not math.isfinite(timeout) or not (timeout == -1 or 0.05 <= timeout <= 2147494):
+        raise ValueError('Hard timeout must be -1 (unlimited) or from 0.05 to 2147494 seconds')
     q = value['query']
-    fields(q, ('operation', 'strategy', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation', 'property', 'progress'), ('operation',))
+    fields(q, ('operation', 'variant', 'method', 'shortest', 'name', 'target', 'assumptions', 'limits', 'trace', 'trace_id', 'prefix_length', 'until', 'watches', 'explanation', 'scenario_id', 'implementation', 'progress'), ('operation',))
     op = q['operation']
     if op not in OPERATIONS:
         raise ValueError('Unsupported operation')
     for key in ('target', 'until'):
         if key in q and (not isinstance(q[key], str) or not q[key].strip() or len(q[key]) > 4096):
             raise ValueError('Invalid ' + key)
-    if ('target' in q) != (op in ('reach', 'shortest-reach', 'explain-reach', 'check-progress')) or ('until' in q and op != 'simulate'):
-        raise ValueError('Target is required only for reach; until is supported only for simulate')
-    if op in ('check-property', 'prove-property'):
-        if not isinstance(q.get('property'), str) or not q['property'].strip() or len(q['property']) > 120:
-            raise ValueError('Select a named safety property from the revision')
-    elif 'property' in q:
-        raise ValueError('Property applies only to safety queries')
-    strategy = q.get('strategy', 'auto')
-    if strategy not in ('auto', 'interpolation'):
-        raise ValueError('Unsupported query strategy')
-    if strategy == 'interpolation' and op not in ('reach', 'prove-property'):
-        raise ValueError('Interpolation requires unbounded reach or prove-property')
-    unbounded = strategy == 'interpolation' and op == 'reach'
-    limits = q.get('limits', {})
-    if unbounded and 'depth' in limits:
-        raise ValueError('Interpolation reach does not accept a depth limit')
+    checking = op == 'check'
+    variant = q.get('variant')
+    search = checking and variant in ('reachable', 'invariant')
+    if checking:
+        if variant not in CAPABILITIES['check_variants']:
+            raise ValueError('Unknown check variant')
+        predicate = search or variant == 'progress'
+        if predicate and (('target' in q) == ('name' in q)):
+            raise ValueError('Specify exactly one target expression or saved name')
+        if not predicate and ('target' in q or 'name' in q):
+            raise ValueError('This check has no target')
+        if 'name' in q and (not isinstance(q['name'], str) or not q['name'].strip() or len(q['name']) > 120):
+            raise ValueError('Invalid saved name')
+        method = q.get('method', 'interpolation') if search else None
+        if 'method' in q and not search or search and method not in CAPABILITIES['check_methods']:
+            raise ValueError('Unsupported check method')
+        if 'shortest' in q and (type(q['shortest']) is not bool or not search or method != 'bmc'):
+            raise ValueError('Shortest requires BMC')
+        if any(key in q for key in ('until', 'trace', 'trace_id', 'prefix_length', 'explanation', 'progress', 'scenario_id', 'implementation')):
+            raise ValueError('Unsupported option for check')
+        if search:
+            q['method'] = method
+    else:
+        if any(key in q for key in ('variant', 'method', 'shortest', 'name')):
+            raise ValueError('Check options require operation check')
+        if ('target' in q) != (op == 'explain-reach'):
+            raise ValueError('This operation requires exactly its target')
+    if 'until' in q and op != 'simulate':
+        raise ValueError('Until applies only to simulate')
+    limits = q.setdefault('limits', {})
     fields(limits, CAPABILITIES['limits'])
     for key, val in limits.items():
-        integer(val, 0, 10000 if key == 'depth' else 2147483647, key)
-    if not unbounded and op in ('reach', 'shortest-reach', 'simulate', 'explain-reach', 'check-property', 'prove-property'):
-        integer(limits.get('depth'), 1 if op in ('simulate', 'prove-property') else 0, 10000, 'depth')
+        integer(val, -1 if key in ('wall_ms', 'conflicts', 'propagations') else 0,
+                10000 if key == 'depth' else 2147483647, key)
+    if checking:
+        limits.setdefault('wall_ms', 30000)
+        if variant == 'trans':
+            limits.setdefault('depth', 1)
+            integer(limits['depth'], 1, 10000, 'depth')
+        elif search and method in ('bmc', 'induction'):
+            integer(limits.get('depth'), 1 if method == 'induction' else 0, 10000, 'depth')
+        elif 'depth' in limits:
+            raise ValueError('Depth is unsupported for this check method')
+        if variant == 'progress':
+            limits.setdefault('states', 10000)
+    elif op in ('simulate', 'explain-reach'):
+        integer(limits.get('depth'), 1 if op == 'simulate' else 0, 10000, 'depth')
     elif 'depth' in limits and not (op == 'explain-step' and limits['depth'] == 1):
-        raise ValueError('Depth applies only to reach and simulate')
-    if op in ('check-progress', 'validate-progress'):
+        raise ValueError('Depth is unsupported for this operation')
+    if checking and variant == 'progress' or op == 'validate-progress':
         integer(limits.get('states'), 1, 1000000, 'states')
-        integer(limits.get('wall_ms'), 0, 2147483647, 'wall_ms')
+        integer(limits.get('wall_ms'), -1, 2147483647, 'wall_ms')
     elif 'states' in limits and op != 'pick-state':
         raise ValueError('State limit applies only to progress and pick-state')
     if op == 'validate-progress':
@@ -185,6 +213,8 @@ def request(value):
         raise ValueError('Scenario fields require replay-scenario')
     if op in ('export-scenario', 'replay-scenario') and (assumptions or 'watches' in q or limits):
         raise ValueError('Scenario jobs use saved query context and a hard timeout only')
+    if 'hard_timeout' not in value and checking:
+        value['hard_timeout'] = -1 if limits['wall_ms'] == -1 else max(.05, limits['wall_ms'] / 1000 + 10)
     return value
 
 

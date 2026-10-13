@@ -13,13 +13,13 @@ BINARY = Path(os.environ.get("YASMV", str(ROOT / "yasmv"))).resolve()
 
 
 class CheckerTests(unittest.TestCase):
-    def run_model(self, model, commands="check-init\nquit\n", options=(), code=0):
+    def run_model(self, model, commands="check init\nquit\n", options=(), code=0):
         with tempfile.TemporaryDirectory(prefix="yasmv-test-") as directory:
             path = Path(directory) / "model.smv"
             path.write_text(model)
-            result = subprocess.run([str(BINARY), "--quiet", *options, str(path)],
-                                    input=commands, text=True, capture_output=True,
-                                    env=ENV, cwd=ROOT, timeout=20)
+            result = subprocess.run([str(BINARY), "--quiet", *options],
+                                    input=f'workspace open "{directory}/workspace"\nread-model "{path}"\n' + commands, text=True, capture_output=True,
+                                    env=dict(ENV, XDG_CONFIG_HOME=directory), cwd=ROOT, timeout=20)
         self.assertEqual(result.returncode, code, result.stdout + result.stderr)
         return result
 
@@ -29,7 +29,7 @@ class CheckerTests(unittest.TestCase):
                 ("--cnf-tautology-removal", "--cnf-duplicate-removal", "--cnf-subsumption"), toggles)))
             with self.subTest(options=options):
                 r = self.run_model("MODULE main\nVAR x : boolean;\nINIT x && !x;\n", options=options)
-                self.assertIn("consistency check failed", r.stdout)
+                self.assertIn("Constraints are inconsistent", r.stdout)
 
     def test_quarantined_options(self):
         for option in ("blocked-clause", "variable-elimination", "self-subsumption"):
@@ -37,7 +37,7 @@ class CheckerTests(unittest.TestCase):
                 with self.subTest(option=option, value=value):
                     r = self.run_model("MODULE main;", options=("--cnf-" + option, value), code=2)
                     self.assertIn("Unsupported option", r.stderr)
-                    self.assertNotIn("consistency check ok", r.stdout)
+                    self.assertNotIn("Constraints are satisfiable", r.stdout)
 
     def test_retired_minisat_options(self):
         retired = (
@@ -62,15 +62,15 @@ class CheckerTests(unittest.TestCase):
             with self.subTest(value=value):
                 r = self.run_model("MODULE main\nVAR x:boolean;\nINIT x;\n",
                                    options=("--sat-random-seed", value))
-                self.assertIn("consistency check ok", r.stdout)
+                self.assertIn("Constraints are satisfiable", r.stdout)
 
     def test_relational_crash_original(self):
         r = self.run_model((ROOT / "short-tests/relational/relational01.smv").read_text())
-        self.assertIn("consistency check failed", r.stdout)
+        self.assertIn("Constraints are inconsistent", r.stdout)
 
     def test_integer_boundaries(self):
         r = self.run_model((ROOT / "short-tests/types/types00.smv").read_text())
-        self.assertIn("consistency check failed", r.stdout)
+        self.assertIn("Constraints are inconsistent", r.stdout)
 
     def test_mixed_comparisons(self):
         # Each expression has mixed signedness, including nested cached DEFINEs.
@@ -78,27 +78,27 @@ class CheckerTests(unittest.TestCase):
             with self.subTest(comparison=comparison):
                 r = self.run_model("#word-width 8\nMODULE main\nVAR a:uint8; b:int8;\n"
                                    "INIT a=1 && b=0;\nDEFINE p := " + comparison + ";\nINVAR p;\n")
-                self.assertIn("consistency check ok", r.stdout)
+                self.assertIn("Constraints are satisfiable", r.stdout)
 
     def test_widening_uses_source_signedness(self):
         r = self.run_model("#word-width 16\nMODULE main\nVAR u:uint8; s:int8;\n"
                            "INIT u=(uint8)200 && s=(int8)-50;\n"
                            "INVAR (int16)u=200 && (uint16)s=(uint16)-50;\n")
-        self.assertIn("consistency check ok", r.stdout)
+        self.assertIn("Constraints are satisfiable", r.stdout)
 
     def test_overlapping_guards_invalidate_model(self):
         r = self.run_model("MODULE main\n#inertial\nVAR x:boolean;\nINIT !x;\n"
                            "TRANS TRUE ?: x:=TRUE;\nTRANS TRUE ?: x:=FALSE;\n",
-                           "last\ncheck-trans\nquit\n", code=2)
+                           "last\ncheck trans\nquit\n", code=2)
         self.assertIn("UNSUCCESSFUL", r.stdout)
         self.assertIn("mutually exclusive", r.stderr)
-        self.assertIn("No validated model", r.stderr)
-        self.assertNotIn("consistency check ok", r.stdout)
+        self.assertIn("No validated model", r.stdout + r.stderr)
+        self.assertNotIn("Constraints are satisfiable", r.stdout)
 
     def test_exclusive_guards(self):
         r = self.run_model("MODULE main\n#inertial\nVAR x:boolean;\nINIT !x;\n"
-                           "TRANS x ?: x:=FALSE;\nTRANS !x ?: x:=TRUE;\n", "check-trans\nquit\n")
-        self.assertIn("consistency check ok", r.stdout)
+                           "TRANS x ?: x:=FALSE;\nTRANS !x ?: x:=TRUE;\n", "check trans\nquit\n")
+        self.assertIn("Constraints are satisfiable", r.stdout)
 
     def test_guard_overlap_outside_invariant_is_rejected(self):
         r = self.run_model("MODULE main\n#inertial\nVAR x:boolean;\nINIT !x;\nINVAR !x;\n"
@@ -113,8 +113,8 @@ class CheckerTests(unittest.TestCase):
         options = tuple(itertools.chain.from_iterable(
             ("--reach-" + name + "-strategy", "no")
             for name in ("forward", "backward", "fast-forward", "fast-backward")))
-        r = self.run_model("MODULE main\nVAR x:boolean;\n", "reach x\nquit\n", options, code=2)
-        self.assertIn("No compatible reachability strategy", r.stderr)
+        r = self.run_model("MODULE main\nVAR x:boolean;\n", "check reachable x -method bmc -depth 100\nquit\n", options, code=2)
+        self.assertIn("unrecognised option", r.stderr)
 
     def test_trailing_model_input_is_rejected(self):
         self.run_model("MODULE main\nVAR x:boolean;\nGARBAGE", code=2)
@@ -123,19 +123,19 @@ class CheckerTests(unittest.TestCase):
         for source in ("NOT_A_MODEL", "MODULE main\nVAR x:boolean;\nINIT missing;\n",
                        "MODULE main\nVAR x:boolean;\nINIT x + TRUE;\n"):
             with self.subTest(source=source):
-                r = self.run_model(source, "check-init\necho \"after error\"\nquit\n", code=2)
-                self.assertNotIn("consistency check ok", r.stdout)
+                r = self.run_model(source, "check init\necho \"after error\"\nquit\n", code=2)
+                self.assertNotIn("Constraints are satisfiable", r.stdout)
 
     def test_command_parse_error_is_sticky(self):
-        for command in ("not-a-command", "check-init ignored", "reach x -f TRUE"):
+        for command in ("not-a-command", "check init ignored", "check reachable x -f TRUE -method bmc -depth 100"):
             self.run_model("MODULE main\nVAR x:boolean;\n", command + "\nquit\n", code=2)
 
     def test_eof_preserves_last_result(self):
-        r = self.run_model("MODULE main\nVAR x:boolean;\nINIT FALSE;\n", "check-init\nlast\n")
+        r = self.run_model("MODULE main\nVAR x:boolean;\nINIT FALSE;\n", "check init\nlast\n")
         self.assertIn("UNSUCCESSFUL", r.stdout)
 
     def test_invalid_limits(self):
-        for command in ("pick-state -l 0", "check-trans -l 0"):
+        for command in ("pick-state -l 0", "check trans -depth 0"):
             with self.subTest(command=command):
                 self.run_model("MODULE main\nVAR x:boolean;\n", command + "\nquit\n", code=2)
 
@@ -181,21 +181,21 @@ class CheckerTests(unittest.TestCase):
             self.run_model(source, code=2)
             self.run_model(source, options=("--root", "missing"), code=2)
             r = self.run_model(source, options=("--root", "yes"))
-            self.assertIn("consistency check ok", r.stdout)
+            self.assertIn("Constraints are satisfiable", r.stdout)
             r = self.run_model(source, options=("--root", "no"))
-            self.assertIn("consistency check failed", r.stdout)
+            self.assertIn("Constraints are inconsistent", r.stdout)
 
     def test_model_replacement_is_rejected(self):
         r = self.run_model("MODULE main\nVAR x:boolean;\nINIT x;\n",
-                           'read-model "missing.smv"\ncheck-init\nquit\n', code=2)
+                           'read-model "missing.smv"\ncheck init\nquit\n', code=2)
         self.assertIn("Model replacement", r.stderr)
-        self.assertIn("consistency check ok", r.stdout)
+        self.assertIn("Constraints are satisfiable", r.stdout)
 
     def test_long_and_empty_command_lines(self):
         r = self.run_model("MODULE main\nVAR x:boolean;\n",
-                           '\n# comment\necho "' + 'a' * 1500 + '"\ncheck-init\nquit\n')
+                           '\n# comment\necho "' + 'a' * 1500 + '"\ncheck init\nquit\n')
         self.assertIn('a' * 1500, r.stdout)
-        self.assertIn("consistency check ok", r.stdout)
+        self.assertIn("Constraints are satisfiable", r.stdout)
 
 
 class HarnessTests(unittest.TestCase):

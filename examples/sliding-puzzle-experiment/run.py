@@ -29,11 +29,11 @@ def main():
     successor = initial.copy()
     successor[63], successor[adjacent] = successor[adjacent], successor[63]
     target = ' && '.join(f'cell_{i} = {v}' for i,v in enumerate(successor))
-    jobs = [('initial', dict(operation='check-init')),
-            ('one-slide', dict(operation='reach', target=target, limits=dict(depth=1))),
-            *[(f'induction-{k}', dict(operation='prove-property',
-                    property=dict(name='safe', expression='!GOAL'), limits=dict(depth=k))) for k in (1, 2, 4)],
-            ('interpolation', dict(operation='reach', strategy='interpolation', target='GOAL'))]
+    jobs = [('initial', dict(operation='check', variant='init')),
+            ('one-slide', dict(operation='check', variant='reachable', method='bmc', target=target, limits=dict(depth=1))),
+            *[(f'induction-{k}', dict(operation='check', variant='invariant', method='induction',
+                    target='!GOAL', limits=dict(depth=k))) for k in (1, 2, 4)],
+            ('interpolation', dict(operation='check', variant='reachable', method='interpolation', target='GOAL'))]
     report = dict(version=1, model_sha256=benchmark.digest(model), binary_sha256=benchmark.digest(ROOT/'yasmv'),
                   side=8, complete=False, runs=[])
     for name, query in jobs:

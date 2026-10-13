@@ -1,0 +1,8 @@
+Unreleased — unified checking interface
+
+  Breaking: check init/trans/reachable/invariant/progress replaces all old
+  checking commands and operation names. BMC and induction share -depth;
+  interpolation is the unbounded default for reachable/invariant checks.
+  Typed interactive settings provide persistent timeout, execution-mode and
+  progress-state defaults. See docs/COMMAND_INTERFACE.md.
+  Legacy reach-direction command-line switches are removed; select -method.

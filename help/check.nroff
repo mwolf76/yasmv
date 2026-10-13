@@ -1,0 +1,47 @@
+.nf
+YASMV manual                                                 check
+
+SYNOPSIS
+  check init [options]
+  check trans [-depth N] [options]
+  check reachable EXPR [options]
+  check invariant EXPR [options]
+  check progress EXPR [options]
+
+DESCRIPTION
+.fi
+Checks model consistency, reachability, safety, or universal eventual progress.
+A validated model is required. init checks INIT and INVAR for satisfiability.
+trans checks for a path of N transitions without INIT (default N=1); it does
+not establish freedom from deadlocks. reachable asks whether some initialized
+execution reaches EXPR. invariant checks EXPR in every reachable state.
+progress requires every maximal execution to visit EXPR at least once:
+non-goal dead ends and cycles violate it, and no fairness is assumed.
+
+Operands are model expressions. Instead, use -name NAME to select a saved
+property for invariant, or a saved goal for reachable/progress. Names never
+implicitly shadow model symbols.
+
+-method bmc|induction|interpolation applies to reachable and invariant.
+Interpolation is the default and has no depth cap. BMC requires -depth N
+(N=0..10000); induction requires -depth N (N=1..10000) for its base checks
+and induction length. Interpolation rejects -depth. -shortest requires BMC.
+A failed induction step can start in unreachable states and is not a concrete
+counterexample. Bounded negative results never establish an unbounded proof.
+
+-c EXPR adds an assumption (repeatable). BMC reachability also supports timed
+path constraints @N{EXPR} and $N{EXPR}; all conclusions retain the constraints.
+-wall-ms N (or unlimited), -conflicts N, and -propagations N bound work.
+-states N applies only to progress. -sync and -async override execution mode.
+Unsupported options and methods fail explicitly. Options use one dash; --
+starts an SMV comment.
+
+Default timeout, execution mode, and progress state limit come from settings.
+Built-ins are 30s, sync, and 10000. Resource exhaustion is UNKNOWN, not a proof.
+Use job wait to retrieve background results and select their validated traces;
+job show -full displays the resolved request and complete evidence. dump-trace
+inspects a selected witness. Failed checks preserve the current trace unless
+they supply a replay-validated counterexample.
+
+SEE ALSO
+  help settings, help job, help property, help goal, help validate-progress.

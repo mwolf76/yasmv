@@ -194,7 +194,7 @@ class MemoryBenchmark(unittest.TestCase):
         model.write_text('MODULE main\n#inertial VAR x : boolean;\n#inertial VAR y : boolean;\n'
                          'INIT !x && !y;\nTRANS x := !x;\nTRANS y := !y;\nDEFINE GOAL := x != y;\n')
         request=self.path/(name+'.json')
-        request.write_text(json.dumps(dict(version=1,model=str(model),query=dict(operation='reach',strategy='interpolation',target=target))))
+        request.write_text(json.dumps(dict(version=1,model=str(model),query=dict(operation='check', variant='reachable', method='interpolation',target=target))))
         diagnostics=self.path/name
         env={k:v for k,v in os.environ.items() if not k.startswith('YASMV_IMC_')}
         env.update(YASMV_HOME=str(ROOT),YASMV_IMC_DIAGNOSTICS=str(diagnostics),YASMV_IMC_CAPTURE='all')

@@ -132,10 +132,6 @@ void interpolation_reach(const QuerySpec& spec, QueryResult& r, QueryContext& co
     r.strategy = context.selected_strategy = "interpolation";
     r.scope = spec.operation == Operation::prove_property ? "through_depth" : "unbounded";
     imc::Limits limits;
-    if (spec.operation == Operation::prove_property) {
-        if (spec.limits.depth < 1) throw std::invalid_argument("Interpolation proof requires a positive depth");
-        limits.horizon = spec.limits.depth - 1;
-    }
     algorithms::Algorithm algorithm(model::ModelMgr::INSTANCE().model());
     imc::ModelSystem system(algorithm, spec.target, spec.assumptions);
     auto result = imc::search(system, limits);
@@ -152,17 +148,6 @@ void interpolation_reach(const QuerySpec& spec, QueryResult& r, QueryContext& co
     data["circuit_nodes"] = Json::UInt64(stats.circuit_nodes);
     data["image_limit_reached"] = result.stop == imc::Stop::image_limit;
     if (result.outcome == imc::Outcome::unknown) {
-        if (result.stop == imc::Stop::horizon_limit && spec.operation == Operation::prove_property &&
-            r.checked_depths.size() == static_cast<uint64_t>(spec.limits.depth) + 1 &&
-            r.checked_depths.back() == spec.limits.depth) {
-            r.status = ExecutionStatus::completed;
-            r.outcome = Outcome::unreachable;
-            r.scope = "through_depth";
-            r.reason = StopReason::depth_limit;
-            r.complete = true;
-            r.proof_method = "bounded-exhaustion";
-            return;
-        }
         r.reason = result.query_stop == StopReason::none ? StopReason::solver_unknown : result.query_stop;
         return;
     }

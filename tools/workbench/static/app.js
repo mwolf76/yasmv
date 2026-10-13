@@ -84,16 +84,18 @@ action('save', async () => {
 action('search', async () => {
   const target = $('target').value.trim();
   if (!target) throw new Error('Enter a target expression.');
-  await submit({operation: 'reach', target, limits: {depth: number('depth', 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
+  await submit({operation: 'check', variant: 'reachable', method: 'bmc', target, limits: {depth: number('depth', 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
 });
 action('shortest', async () => {
   const target = $('target').value.trim();
   if (!target) throw new Error('Enter a target expression.');
-  await submit({operation: 'shortest-reach', target, limits: {depth: number('depth', 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
+  await submit({operation: 'check', variant: 'reachable', method: 'bmc', shortest: true, target, limits: {depth: number('depth', 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
 });
-for (const operation of ['check-property', 'prove-property']) action(operation, () => {
+for (const actionName of ['check-bounded', 'check-proof']) action(actionName, () => {
   if (!$('property').value) throw new Error('Save and select a named safety property.');
-  return submit({operation, strategy: operation === 'prove-property' ? $('proof-strategy').value : 'auto', property: $('property').value, limits: {depth: number('depth', operation === 'prove-property' ? 1 : 0, 10000)}, assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)});
+  const method = actionName === 'check-proof' ? $('proof-strategy').value : 'bmc';
+  const limits = method === 'interpolation' ? {} : {depth: number('depth', method === 'induction' ? 1 : 0, 10000)};
+  return submit({operation: 'check', variant: 'invariant', method, name: $('property').value, limits, assumptions: assumptions()});
 });
 action('pick', () => submit({operation: 'pick-state', assumptions: $('assumptions').value.split('\n').map(s => s.trim()).filter(Boolean)}));
 action('cancel', () => api('jobs/' + state.job + '/cancel', {}));
@@ -103,7 +105,7 @@ function describeResult(result, query) {
   if (result.outcome === 'proven') return ['Safety property proved', result.proof_method === 'interpolation' ? 'A verified inductive invariant establishes the property under the recorded assumptions.' : 'Verified k-induction establishes the selected property for all reachable states under the recorded assumptions.', 'success'];
   if (result.outcome === 'violated') return ['Safety property violated at depth ' + (result.trace.steps.length - 1), 'A shortest reachable counterexample passed model replay.', 'error'];
   if (result.outcome === 'holds_bounded') return ['Property holds through depth ' + query.limits.depth, result.proof?.step_status === 'satisfiable' ? 'Induction was inconclusive. Its step assignment may be unreachable; unbounded safety is unknown.' : 'No counterexample within this bound. Unbounded safety is unknown.', 'unknown'];
-  if (query.operation === 'shortest-reach' && result.outcome === 'reachable') return ['Shortest witness at depth ' + result.optimality.depth, 'Every smaller depth was UNSAT. This witness passed model replay; the certificate measures transitions.', 'success'];
+  if (query.operation === 'check' && query.shortest && result.outcome === 'reachable') return ['Shortest witness at depth ' + result.optimality.depth, 'Every smaller depth was UNSAT. This witness passed model replay; the certificate measures transitions.', 'success'];
   if (query.operation.startsWith('explain-')) {
     if (result.outcome === 'satisfiable') return ['Query is feasible', 'No impossibility explanation applies. Run a search to obtain a concrete trace.', 'success'];
     return [query.operation === 'explain-step' ? 'No valid next transition' : query.operation === 'explain-init' ? 'Initial constraints are inconsistent' : 'Goal impossible through depth ' + query.limits.depth,

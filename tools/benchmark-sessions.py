@@ -29,7 +29,7 @@ def main():
     args = parser.parse_args()
     if not 1 <= args.runs <= 100:
         parser.error('--runs must be from 1 to 100')
-    query = dict(request_id='benchmark', operation='shortest-reach', target=args.target, limits={'depth': args.depth})
+    query = dict(request_id='benchmark', operation='check', variant='reachable', method='bmc', shortest=True, target=args.target, limits={'depth': args.depth})
     binary = ROOT / 'yasmv'
     source = args.model.read_text()
     report = dict(machine=platform.platform(), processor=platform.machine(), python=platform.python_version(),

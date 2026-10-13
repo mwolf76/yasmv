@@ -29,42 +29,20 @@ states, even when bounded search has found no violation.
 
 ## Native query contract
 
-Use the existing `--query-file` envelope:
+The current interface is [unified check](COMMAND_INTERFACE.md). Both native and
+workbench queries use `operation: "check"`, a `variant`, and a `method` for
+reachable/invariant checks. Native predicates use `target`; workbench requests
+can use `name` to resolve a saved property or goal. BMC and induction require
+`limits.depth`; interpolation rejects depth and is unbounded.
 
 ```json
-{
-  "version": 1,
-  "model": "examples/retry-protocol/deduplicating.smv",
-  "query": {
-    "operation": "prove-property",
-    "property": {"name": "At most once", "expression": "!DUPLICATE"},
-    "limits": {"depth": 12, "wall_ms": 60000}
-  }
-}
+{"version":1,"model":"examples/retry-protocol/deduplicating.smv","query":{"operation":"check","variant":"invariant","method":"induction","target":"!DUPLICATE","limits":{"depth":12}}}
 ```
 
-| Operation | Required query fields | Completed outcomes |
-| --- | --- | --- |
-| `shortest-reach` | Boolean state `target`, nonnegative depth | `reachable`, `unreachable` |
-| `check-property` | Named Boolean state `property`, nonnegative depth | `violated`, `holds_bounded` |
-| `prove-property` | Named Boolean state `property`, positive depth | `violated`, `holds_bounded`, `proven` |
-
-Untimed Boolean state assumptions and Boolean watches are supported. All
-operations honor the existing cancellation, deadline, conflict, and propagation
-budgets. Errors and interrupted queries never publish a proof or optimality
-claim. A wall limit includes loading for fresh CLI requests; the workbench hard
-deadline covers loading, cache validation, waiting, analysis, and witness replay.
-
-Workbench requests name a property from the immutable revision rather than
-sending a new expression:
-
-```json
-{"operation": "prove-property", "property": "At most once", "limits": {"depth": 12}}
-```
-
-Unknown property names are rejected before starting a worker. Native generating
-queries in exported traces contain the resolved name and expression, preserving
-replay without the workbench. Replay checks the violation at the final state.
+Untimed state assumptions restrict every state. Results are `violated`,
+`holds_bounded`, or `proven` for invariants; reachable checks use `reachable`
+and `unreachable` with explicit bounded or unbounded scope. Budgets and
+cancellation apply to verification as well as search.
 
 ### Shortest-witness evidence
 
@@ -273,33 +251,27 @@ process ownership refinement and the remaining in-process migration separately.
 
 ## Guaranteed progress (M6)
 
-Universal eventuality is available through `check-progress`. Its graph proofs,
+Universal eventuality is available through `check progress`. Its graph proofs,
 loop/dead-end evidence, and resource semantics are documented separately in
 [the progress guide](PROGRESS_CHECKING.md). It complements safety induction and
 does not add general LTL/CTL or fairness.
 
 ## Interpolation
 
-Select `strategy: "interpolation"` on native `reach` with no depth cap, or on
-`prove-property` with a positive `limits.depth`. `auto` retains the existing
-algorithms. Bounded `reach`, `shortest-reach`, and `check-property` reject the
-interpolation strategy. The workbench job API uses the same selection; unbounded
-workbench reach omits `limits.depth` and can supply a wall or solver budget.
-The browser offers **Interpolation** under **Proof method**. In the terminal:
+Interpolation is the default for `check reachable` and `check invariant`,
+or can be selected with `-method interpolation`. Both run without a depth cap.
+A spurious approximate path increases the suffix horizon and restarts search;
+only a replay-validated concrete path becomes a counterexample. A fixed point
+must pass fresh initial-containment, closure and target-exclusion checks.
 
 ```text
-property set safe !bad
-prove-property safe -strategy interpolation -depth 12 -wall-ms 60000
+check invariant !bad -method interpolation -wall-ms 60000
 job show -full
 ```
 
-An interpolating property query may prove safety before its depth cap. At cap
-exhaustion it returns `holds_bounded` only after concrete UNSAT checks at every
-depth from zero through the cap. Interruption returns `unknown`. A reachable
-violation is a shortest concrete path, decoded to normal trace v1 and replayed
-by the workbench. An approximation-started SAT result never becomes a trace.
-`checked_depths` and `optimality.unsat_depths` describe actual concrete checks;
-image iterations and suffix horizons are separate statistics.
+Resource interruption returns unknown. Image iterations and suffix horizons are
+separate from actual concrete `checked_depths` and shortest-witness evidence.
+There is no depth-cap bounded fallback for interpolation in the current API.
 
 The initial fragment requires deterministic, untimed Boolean INIT, INVAR,
 target/property, and assumptions, expanding defines, parameters, and effective

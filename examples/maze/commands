@@ -1,5 +1,4 @@
-# Plain reachability. The retired -f option was previously ignored by the parser.
-# Timed constraints, when desired, use: reach GOAL -c @32{!GOAL}
-reach GOAL
-on failure echo "Help, I'm trapped into a maze!"
+# These legacy models contain NEXT in INVAR; select bounded checking explicitly.
+check reachable GOAL -method bmc -depth 100
+on failure echo "No route found through 100 transitions."
 quit

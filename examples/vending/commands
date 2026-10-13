@@ -1,4 +1,4 @@
 set due-amount 1255
 set credit 2000
-reach GOAL
+check reachable GOAL -method bmc -depth 100
 quit

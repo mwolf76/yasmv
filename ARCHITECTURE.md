@@ -1,5 +1,8 @@
 # yasmv: architecture, assessment, and development roadmap
 
+Command interface update (2026-10-13): see [unified checking and settings](docs/COMMAND_INTERFACE.md).
+Command spellings in the historical review below belong to that baseline.
+
 Review baseline: commit `970f6484`, inspected on 2026-09-25.
 
 Implementation update (2026-09-26): the first correctness milestone addresses

@@ -13,8 +13,8 @@ DESCRIPTION
 
 .fi
 .in 3
-Save a named Boolean safety property. Use check-property for bounded
-counterexample search or prove-property for verified induction.
+Save a named Boolean safety property. Use check invariant -name NAME to check
+it with interpolation, or select BMC or induction with -method and -depth.
 
 Requires a loaded model. set saves a new immutable revision; reusing a name
 replaces its expression in that revision. list displays the saved expressions.
@@ -27,11 +27,11 @@ EXAMPLES
 .nf
 .in 3
 >> property set once !DUPLICATE
->> check-property once -depth 12
+>> check invariant -name once -method bmc -depth 12
 
 .ti 0
 SEE ALSO
 
 .fi
 .in 3
-help workspace, help check-property, help prove-property.
+help workspace, help check.

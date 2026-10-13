@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from llvm2smv_artifact import check_artifact
 
-METHODS = ('bounded', 'simple-path', 'k-induction', 'interpolation')
+METHODS = ('bounded', 'k-induction', 'interpolation')
 
 
 def digest(path):
@@ -27,12 +27,9 @@ def digest(path):
 
 def query_for(case, method, wall_ms):
     query = dict(assumptions=case.get('assumptions', []), limits=dict(wall_ms=wall_ms))
-    if method == 'simple-path':
-        query.update(operation='reach', strategy='forward', target=case['target'])
-    else:
-        query.update(operation='check-property' if method == 'bounded' else 'prove-property',
-                     property=dict(name='safe', expression='!(' + case['target'] + ')'),
-                     strategy='interpolation' if method == 'interpolation' else 'auto')
+    query.update(operation='check', variant='invariant', target='!(' + case['target'] + ')',
+                 method={'bounded': 'bmc', 'k-induction': 'induction', 'interpolation': 'interpolation'}[method])
+    if method != 'interpolation':
         query['limits']['depth'] = case['depth']
     return query
 
@@ -182,7 +179,7 @@ def main():
             report['cases'].append(row)
             identity = None
             for repeat in range(args.runs):
-                for method in METHODS[repeat % 4:] + METHODS[:repeat % 4]:
+                for method in METHODS[repeat % len(METHODS):] + METHODS[:repeat % len(METHODS)]:
                     group = row['methods'][method]
                     measurement, result = run_query(binary, model, case, group['query'], directory,
                                                     args.hard_timeout, args.home)

@@ -1,5 +1,10 @@
 # M6 design and implementation plan: guaranteed progress
 
+> Historical design/measurement record. The checking interface was replaced by
+> [unified check and settings](COMMAND_INTERFACE.md). Old command/API spellings,
+> defaults and interpolation depth caps below describe the recorded milestone.
+> The current benchmark runner compares BMC, induction and unbounded interpolation.
+
 Status: core and CLI/agent implementation delivered on `feat/guaranteed-progress`,
 branched from master `672db218`. Prepared 2026-09-26 against `e7ccf081`.
 The [user guide](PROGRESS_CHECKING.md) describes implemented behavior; browser

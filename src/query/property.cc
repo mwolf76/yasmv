@@ -13,7 +13,7 @@ namespace query {
             throw std::invalid_argument("Safety property must be a Boolean state expression");
         for (auto e : spec.assumptions)
             if (!state_expression(e) || !mm.type(e)->is_boolean()) throw std::invalid_argument("Safety assumptions must be Boolean state expressions");
-        if (spec.operation == Operation::prove_property && spec.limits.depth < 1)
+        if (spec.operation == Operation::prove_property && spec.strategy != "interpolation" && spec.limits.depth < 1)
             throw std::invalid_argument("Property proof requires a positive depth");
         auto search = spec;
         search.target = em.make_not(property);

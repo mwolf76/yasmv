@@ -26,7 +26,7 @@ EXAMPLES
 >> pick-state
 -- Simulation initialized, registered witness `sim_2`
 
->> reach GOAL
+>> check reachable GOAL
 -- Target is reachable, registered witness `reach_1`, 8 steps.
 
 >> list-traces

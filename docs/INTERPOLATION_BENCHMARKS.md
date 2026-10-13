@@ -1,5 +1,10 @@
 # Interpolation benchmark baseline
 
+> Historical design/measurement record. The checking interface was replaced by
+> [unified check and settings](COMMAND_INTERFACE.md). Old command/API spellings,
+> defaults and interpolation depth caps below describe the recorded milestone.
+> The current benchmark runner compares BMC, induction and unbounded interpolation.
+
 Run the four-method comparison from a built tree on Linux:
 
 ```sh

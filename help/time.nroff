@@ -26,7 +26,7 @@ EXAMPLES
 
 .nf
 >> read-model 'examples/hanoi/hanoi3.smv'
->> time; reach GOAL; time
+>> time; check reachable GOAL; time
 -- Session time: 3.35s
 -- Target is reachable, registered witness `reach_1`, 8 steps.
 -- Session time: 12s
