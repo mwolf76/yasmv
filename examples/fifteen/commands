@@ -1,2 +1,2 @@
-check reachable GOAL -method bmc -depth 100
+check reachable GOAL -method interpolation
 quit

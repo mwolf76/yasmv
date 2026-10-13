@@ -45,6 +45,16 @@ is no silent fallback for unsupported fragments. `-shortest` requires BMC;
 current BMC and interpolation concrete witnesses also carry shortest-path
 certificates whenever their preceding concrete depth checks completed.
 
+Interpolation requires deterministic Boolean state predicates in INIT, INVAR,
+targets, and assumptions. These may use definitions and effective inputs, but
+must not contain `next(...)`, absolute time references, or nondeterministic
+sets. Transition rules may use next-state references and nondeterministic
+assignments. In Yasmv, TRANS uses guarded assignments to `#inertial` variables;
+for example, write `TRANS x := x + 1;` rather than `INVAR next(x) = x + 1;`.
+Moving a rule is not equivalent in every model: INVAR also constrains the
+terminal frame, whereas TRANS applies only between frames. The shipped maze,
+bridge, and fifteen-puzzle examples express movement with TRANS assignments.
+
 Positional operands are always model expressions. Saved expressions require
 an explicit name, so saved metadata never shadows a model symbol:
 
@@ -151,8 +161,10 @@ their existing process-supervision policy.
 
 Explanation, trace, artifact validation/export, and diameter commands remain
 separate. The schemas, browser, C verification tools, examples and tests use
-the new contract. Legacy maze and bridge examples containing NEXT in INVAR
-select BMC explicitly and label their negative conclusions as bounded.
+the new contract. Maze, bridge, and fifteen-puzzle models support interpolation.
+The shared maze script still selects BMC for faster route finding on larger
+mazes and labels its negative conclusions as bounded; use interpolation to
+prove that no route exists.
 Historical benchmark reports retain their original requests and hashes as
 historical evidence, not runnable current API examples.
 

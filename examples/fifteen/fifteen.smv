@@ -27,6 +27,7 @@ DEFINE
 VAR
   move : { UP, RIGHT, LEFT, DOWN };
 
+#inertial
 VAR row: uint;
 INIT row =
   case
@@ -39,13 +40,14 @@ INIT row =
 INVAR
     row < 4;
 
-INVAR
-    next(row) = case
+TRANS
+    row := case
         move = UP    : row - 1;
         move = DOWN  : row + 1;
         else         : row;
     end;
 
+#inertial
 VAR col: uint;
 INIT col =
   case
@@ -58,8 +60,8 @@ INIT col =
 INVAR
     col < 4;
 
-INVAR
-    next(col) = case
+TRANS
+    col := case
         move = LEFT  : col - 1;
         move = RIGHT : col + 1;
         else         : col;

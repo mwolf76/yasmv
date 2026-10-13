@@ -3,6 +3,7 @@
 #word-width 8
 MODULE maze
 
+#inertial
 VAR
     x, y : uint;
 
@@ -55,23 +56,14 @@ DEFINE
 INVAR
   !  SPACE [position];
 
--- can move one step at the time on the X axis
-INVAR
-   x < next(x) -> next(x) - x = 1;
-
-INVAR
-   next(x) < x -> x - next(x) = 1;
-
--- ... or the Y axis,
-INVAR
-   y < next(y) -> next(y) - y = 1;
-INVAR
-   next(y) < y -> y - next(y) = 1;
-
--- ... not both
-INVAR
-   (next(x) != x) && (next(y)  = y) ||
-   (next(x)  = x) && (next(y) != y) ;
+-- Move one cell along exactly one axis. Bounds and obstacles remain
+-- state constraints; movement is a transition between two states.
+TRANS
+  x := {x - 1, x, x + 1};
+TRANS
+  next(x) = x ?: y := {y - 1, y + 1};
+TRANS
+  next(x) != x ?: y := y;
 
 -- his target is the bottom-right corner
 #hidden

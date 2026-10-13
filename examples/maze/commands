@@ -1,4 +1,5 @@
-# These legacy models contain NEXT in INVAR; select bounded checking explicitly.
+# BMC finds routes faster on the larger mazes. For an unbounded proof use
+# check invariant !GOAL -method interpolation
 check reachable GOAL -method bmc -depth 100
 on failure echo "No route found through 100 transitions."
 quit
