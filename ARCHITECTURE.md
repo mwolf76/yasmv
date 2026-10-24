@@ -1,20 +1,21 @@
 # yasmv: architecture, assessment, and development roadmap
 
-Command interface update (2026-10-13): see [unified checking and settings](docs/COMMAND_INTERFACE.md).
-Command spellings in the historical review below belong to that baseline.
+Command interface update (2026-10-13): checking moved to the unified `check`
+command and typed settings. Command spellings in the historical review below
+belong to that baseline.
 
 Review baseline: commit `970f6484`, inspected on 2026-09-25.
 
 Implementation update (2026-09-26): the first correctness milestone addresses
-several findings below. See [current behavior and migration notes](docs/CORRECTNESS_BASELINE.md).
+several findings below.
 The review findings below retain their original baseline context.
 
 SAT migration update (2026-09-28): the current engine uses pinned CaDiCaL 3.0.1,
-not MiniSat. See [the backend guide](docs/CADICAL_BACKEND.md) and
-[migration plan](cadical_integration.md). MiniSat references below describe the
+not MiniSat. See the [migration plan](cadical_integration.md). MiniSat
+references below describe the
 historical review baseline, not current build requirements.
 
-The accepted development direction is broken down into work packages and completion gates in the [implementation plan](docs/IMPLEMENTATION_PLAN.md).
+The accepted development direction was broken down into work packages and completion gates in a separate implementation plan.
 
 This document describes the implementation in this checkout, distinguishes working capabilities from incomplete ones, and proposes an incremental development direction. Findings marked **observed** were exercised with the existing binaries; findings marked **inspection** come from source review. Proposed interfaces and features are designs, not existing commands.
 

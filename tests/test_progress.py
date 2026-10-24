@@ -204,7 +204,7 @@ class ProgressTests(unittest.TestCase):
             import jsonschema
         except ImportError:
             self.skipTest('optional jsonschema is not installed')
-        directory=ROOT/'docs/formats'
+        directory=ROOT/'formats'
         store={p.as_uri():json.loads(p.read_text()) for p in directory.glob('*.json')}
         def validate(name,value):
             schema=json.loads((directory/name).read_text())

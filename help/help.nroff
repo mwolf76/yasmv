@@ -16,8 +16,7 @@ With no argument, list all available help topics. Use help followed by a
 command name to read that command's syntax, behavior, and examples.
 
 Each exploration command has its own page. workspace describes artifact
-storage. See docs/CLI_WORKBENCH.md for the exploration overview and a complete
-retry-protocol investigation.
+storage.
 
 .ti 0
 EXAMPLES

@@ -54,8 +54,7 @@ flags are `-O3 -DNDEBUG -fPIC`, independent of yasmv's own compiler flags.
 
 Configure verifies the API, version, and full revision and links the archive
 statically. For an externally managed solver, use `CADICAL_PREFIX` or
-`--with-cadical-prefix` to skip the automatic bootstrap. See the
-[CaDiCaL backend guide](docs/CADICAL_BACKEND.md) for manual and diagnostic builds.
+`--with-cadical-prefix` to skip the automatic bootstrap.
 
 ### Quick start (recommended)
 
@@ -102,10 +101,6 @@ If you do not need the LLVM frontend, omit the LLVM packages and disable it:
 See [the LLVM frontend guide](llvm2smv/README.md) for LLVM 18 toolchain detection,
 supported semantics, C verification commands, and limitations.
 
-For manual configuration or sanitizer builds, see
-[the build and testing guide](docs/CORRECTNESS_BASELINE.md) and
-[the solver validation guide](docs/CADICAL_MIGRATION_VALIDATION.md).
-
 ## Run
 
 Set `YASMV_HOME` to the directory containing `microcode/`. If you did not use
@@ -135,9 +130,8 @@ The shortest witness reaches duplicate execution after five transitions.
 Use `help`, `help check`, or `help workspace` for commands and artifact storage.
 Shell command options use a single dash; `--` starts an SMV comment.
 
-The [CLI guide](docs/CLI_WORKBENCH.md) walks through named goals, properties,
-watches, explanations, simulation, background jobs, and scenario replay.
-See also the [retry-protocol example](examples/retry-protocol/README.md).
+See the [retry-protocol example](examples/retry-protocol/README.md) for a complete
+investigation.
 
 ### Agent and browser interfaces
 
@@ -180,19 +174,13 @@ Run `make dist` to check the distribution manifests and create a source archive.
 
 CI validates the pinned CaDiCaL API, builds the core, and runs SAT literal and
 adapter checks plus CLI/agent smoke tests. Full regression, LLVM, sanitizer,
-and browser acceptance remain local gates. See
-[the testing guide](docs/CORRECTNESS_BASELINE.md#ci-and-local-pre-commit-gates).
+and browser acceptance remain local gates.
 
 ## Documentation
 
-- [CLI and agent protocol](docs/CLI_WORKBENCH.md)
-- [Browser and HTTP workbench](docs/WORKBENCH.md)
-- [Query and trace contracts](docs/QUERY_AND_TRACE_CONTRACTS.md)
-- [Explanations and executable scenarios](docs/EXPLANATIONS_AND_SCENARIOS.md)
-- [Shortest witnesses, safety proofs, and compiled sessions](docs/STRONGER_ANALYSIS.md)
-- [Guaranteed progress](docs/PROGRESS_CHECKING.md)
-- [SAT configuration and migration notes](docs/SAT_SOLVER_PARAMETERS.md)
-- [CaDiCaL performance comparison](docs/benchmarks/cadical-m6.md)
+- [Retry-protocol example](examples/retry-protocol/README.md)
+- [Guaranteed progress examples](examples/progress/README.md)
+- [CaDiCaL migration plan](cadical_integration.md)
 - [LLVM frontend](llvm2smv/README.md)
 
 ## License and disclaimer
@@ -203,5 +191,3 @@ PARTICULAR PURPOSE. See the GNU Lesser General Public License for details.
 
 yasmv is in no way related to, or endorsed by, the NuSMV development board or
 FBK. yasmv does not contain any code from NuSMV's code base.
-
-Checking and interactive preferences are documented in the [unified command guide](docs/COMMAND_INTERFACE.md).
