@@ -1,7 +1,7 @@
 # -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.60)
-AC_INIT([yasmv], [0.2.0], [marco.pensallorto@gmail.com])
+AC_INIT([yasmv], [0.3.0], [marco.pensallorto@gmail.com])
 
 # where to look for install.sh and other helpers
 AC_CONFIG_AUX_DIR([helpers])
@@ -182,8 +182,7 @@ AC_CONFIG_FILES([Makefile
                  src/witness/out/Makefile
                  src/test/Makefile
                  doc/Makefile
-                 man/Makefile
-                 yasmv.pc])
+                 man/Makefile])
 
 if test "$enable_llvm2smv" = "yes"; then
   AC_CONFIG_FILES([llvm2smv/Makefile])

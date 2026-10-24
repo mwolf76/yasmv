@@ -1,0 +1,94 @@
+name: Debian packages
+
+# Builds the .deb packages for each supported distribution. A version tag
+# also attaches them to a draft release of the same name, which is
+# published by hand.
+on:
+  push:
+    tags: [ "[0-9]*" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - distro: debian-13
+          image: debian:trixie
+        - distro: ubuntu-24.04
+          image: ubuntu:24.04
+    runs-on: ubuntu-24.04
+    container: ${{ matrix.image }}
+    timeout-minutes: 90
+
+    steps:
+    - name: install packaging tools
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends \
+          build-essential ca-certificates curl devscripts equivs git lintian xz-utils
+
+    - uses: actions/checkout@v4
+
+    - name: install build dependencies
+      run: mk-build-deps --install --remove --tool 'apt-get -y --no-install-recommends' debian/control
+
+    - name: check the tag matches the package version
+      if: github.ref_type == 'tag'
+      run: |
+        version=$(dpkg-parsechangelog -S Version)
+        test "${version%-*}" = "$GITHUB_REF_NAME" || {
+          echo "Tag $GITHUB_REF_NAME does not match debian/changelog version $version" >&2
+          exit 1
+        }
+
+    - name: build and lint
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        tools/build-deb.sh HEAD build-deb
+
+    # Both distributions produce the same file names, so the distribution
+    # goes into the binary package names before they meet in the release.
+    # Debug symbol packages stay out of the release.
+    - name: collect packages
+      run: |
+        mkdir dist
+        for deb in build-deb/*.deb; do
+          case "$deb" in *-dbgsym_*) continue ;; esac
+          name=$(basename "$deb" .deb)
+          cp "$deb" "dist/${name%_*}_${{ matrix.distro }}_${name##*_}.deb"
+        done
+        if [ "${{ matrix.distro }}" = debian-13 ]; then
+          cp build-deb/*.dsc build-deb/*.orig*.tar.* build-deb/*.debian.tar.* dist/
+        fi
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: yasmv-${{ matrix.distro }}
+        path: dist/
+        if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        path: dist
+        merge-multiple: true
+
+    - name: attach packages to the draft release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 ||
+          gh release create "$GITHUB_REF_NAME" --draft --verify-tag \
+            --title "yasmv $GITHUB_REF_NAME" --notes "Debian and Ubuntu packages for yasmv $GITHUB_REF_NAME."
+        gh release upload "$GITHUB_REF_NAME" dist/* --clobber

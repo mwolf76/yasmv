@@ -101,10 +101,26 @@ If you do not need the LLVM frontend, omit the LLVM packages and disable it:
 See [the LLVM frontend guide](llvm2smv/README.md) for LLVM 18 toolchain detection,
 supported semantics, C verification commands, and limitations.
 
+### Debian packages
+
+Tagged releases ship `.deb` packages for Debian 13 and Ubuntu 24.04: `yasmv`,
+its data files in `yasmv-data`, and the optional `llvm2smv` frontend. To build
+them from a checkout, install the build dependencies listed in
+`debian/control` and run:
+
+```sh
+tools/build-deb.sh
+```
+
+The script packs `HEAD`, fetches the pinned CaDiCaL release and checks its
+checksum, builds the packages into `build-deb/` and runs lintian on them.
+
 ## Run
 
-Set `YASMV_HOME` to the directory containing `microcode/`. If you did not use
-`setup.sh` and the directory is absent, extract the bundled data first:
+yasmv looks for `microcode/` next to its binary, in the installed data
+directory, and in the source tree. Set `YASMV_HOME` to the directory
+containing `microcode/` to use another one. If you did not use `setup.sh` and
+the directory is absent, extract the bundled data first:
 
 ```sh
 tar xfj microcode.tar.bz2

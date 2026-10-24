@@ -1,0 +1,15 @@
+Description: Let the build supply CaDiCaL's git revision
+ CaDiCaL stamps its revision from `git show`, so a build from the release
+ tarball reports no revision and fails yasmv's check for the pinned
+ build. Use CADICAL_GIT_ID when it is set, and git otherwise.
+Author: Marco Pensallorto <marco.pensallorto@gmail.com>
+Forwarded: not-needed
+Last-Update: 2026-10-24
+---
+--- a/cadical/scripts/get-git-id.sh
++++ b/cadical/scripts/get-git-id.sh
+@@ -1,3 +1,4 @@
+ #!/bin/sh
+ # print current SHA1 git id which uniquely identifies the source code
++[ -n "$CADICAL_GIT_ID" ] && { echo "$CADICAL_GIT_ID"; exit 0; }
+ git show 2>/dev/null |awk '{print $2;exit}'

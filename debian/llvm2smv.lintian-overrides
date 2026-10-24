@@ -1,0 +1,5 @@
+# llvm2smv documents its options in --help; it has no manual page yet.
+llvm2smv: no-manual-page [usr/bin/llvm2smv]
+
+# Released through GitHub, not the Debian archive, so there is no ITP bug to close.
+llvm2smv: initial-upload-closes-no-bugs [usr/share/doc/llvm2smv/changelog.Debian.gz:1]
