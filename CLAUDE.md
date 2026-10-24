@@ -12,8 +12,7 @@ The project now includes **llvm2smv**, a C-to-SMV translator that enables formal
 
 ### Building the Project
 
-Build the pinned static CaDiCaL dependency first using
-[the backend guide](docs/CADICAL_BACKEND.md). Pass
+Build the pinned static CaDiCaL dependency first. Pass
 `--with-cadical-prefix=/path/to/cadical-prefix` to setup/configure when it is not
 installed in `/usr/local`; no MiniSat package is required.
 
