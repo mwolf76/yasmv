@@ -41,22 +41,12 @@ microcode/
 .gitconfig
 
 yasmv_query_tests
-!docs/formats/*.json
+!formats/*.json
 
 .yasmv-workbench/
 !examples/retry-protocol/scenario.json
 
-!docs/benchmarks/m4-sessions.json
-!docs/benchmarks/m6-progress.json
-!docs/benchmarks/interpolation-m5.json
-!docs/benchmarks/interpolation-memory-baseline.json
-!docs/benchmarks/interpolation-clause-storage.json
-!docs/benchmarks/interpolation-lifetimes.json
-!docs/benchmarks/interpolation-traversal.json
-!docs/benchmarks/interpolation-allocator.json
 !tests/benchmarks/interpolation/cases.json
-!docs/benchmarks/cadical-m1-minisat-reachable.json
-!docs/benchmarks/cadical-m1-minisat-unreachable.json
 
 /yasmv_interpolation_search_tests
 /interpolation_replay

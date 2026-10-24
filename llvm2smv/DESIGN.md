@@ -1,7 +1,8 @@
 # LLVM to SMV Compiler Design
 
-> Historical design sketch. The [current implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md)
-> supersedes this document, including its loop-bounding, assignment, and
+> Historical design sketch. The current implementation, described in
+> [README.md](README.md), supersedes this document, including its
+> loop-bounding, assignment, and
 > assertion-encoding proposals. The current translator remains a prototype.
 
 ## Overview

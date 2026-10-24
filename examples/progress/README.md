@@ -27,4 +27,3 @@ finite; its progress artifact records the closing transition back to loop_start.
 
 For the bounded retry example, check `SUCCEEDED || EXHAUSTED` for eventual
 completion. Checking `SUCCEEDED` alone fails because giving up is possible.
-See [the progress guide](../../docs/PROGRESS_CHECKING.md).

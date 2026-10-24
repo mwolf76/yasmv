@@ -1,0 +1,684 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "model": {
+      "type": "string"
+    },
+    "query": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "enum": [
+            "validate-model",
+            "pick-state",
+            "simulate",
+            "diameter",
+            "validate-trace",
+            "explain-init",
+            "explain-step",
+            "explain-reach",
+            "validate-progress",
+            "check"
+          ]
+        },
+        "request_id": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        },
+        "until": {
+          "type": "string"
+        },
+        "assumptions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "depth": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10000
+            },
+            "states": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "wall_ms": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "conflicts": {
+              "type": "integer",
+              "minimum": -1
+            },
+            "propagations": {
+              "type": "integer",
+              "minimum": -1
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "count": {
+          "type": "boolean"
+        },
+        "enumerate": {
+          "type": "boolean"
+        },
+        "trace_id": {
+          "type": "string"
+        },
+        "trace": {
+          "type": "object"
+        },
+        "parent_trace": {
+          "type": "object"
+        },
+        "prefix_length": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "watches": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "Named Boolean state expressions, evaluated on result trace frames."
+        },
+        "explanation": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "minimize": {
+              "type": "boolean"
+            },
+            "checks": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "wall_ms": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1000000
+            },
+            "exact_depth": {
+              "type": "boolean"
+            },
+            "active_ids": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "progress": {
+          "oneOf": [
+            {
+              "$ref": "progress-proof-v1.schema.json"
+            },
+            {
+              "$ref": "progress-counterexample-v1.schema.json"
+            }
+          ]
+        },
+        "variant": {
+          "enum": [
+            "init",
+            "trans",
+            "reachable",
+            "invariant",
+            "progress"
+          ]
+        },
+        "method": {
+          "enum": [
+            "bmc",
+            "induction",
+            "interpolation"
+          ]
+        },
+        "shortest": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "operation"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "required": [
+              "variant"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "variant"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "shortest"
+                  ]
+                },
+                {
+                  "required": [
+                    "name"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "init",
+                  "trans"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "target"
+                  ]
+                },
+                {
+                  "required": [
+                    "name"
+                  ]
+                },
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "shortest"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "reachable",
+                  "invariant",
+                  "progress"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "required": [
+              "target"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "method": {
+                "enum": [
+                  "bmc",
+                  "induction"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "method"
+            ]
+          },
+          "then": {
+            "required": [
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "depth"
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "method": {
+                "enum": [
+                  "induction"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "method"
+            ]
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "properties": {
+                  "depth": {
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "reachable",
+                  "invariant"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "if": {
+              "anyOf": [
+                {
+                  "not": {
+                    "required": [
+                      "method"
+                    ]
+                  }
+                },
+                {
+                  "properties": {
+                    "method": {
+                      "enum": [
+                        "interpolation"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "method"
+                  ]
+                }
+              ]
+            },
+            "then": {
+              "properties": {
+                "limits": {
+                  "not": {
+                    "required": [
+                      "depth"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "shortest"
+            ]
+          },
+          "then": {
+            "required": [
+              "method"
+            ],
+            "properties": {
+              "method": {
+                "const": "bmc"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "init",
+                  "progress"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "not": {
+                  "required": [
+                    "depth"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "trans"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "properties": {
+                  "depth": {
+                    "minimum": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "init",
+                  "trans",
+                  "reachable",
+                  "invariant"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "properties": {
+              "limits": {
+                "not": {
+                  "required": [
+                    "states"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "enum": [
+                  "check"
+                ]
+              },
+              "variant": {
+                "enum": [
+                  "progress"
+                ]
+              }
+            },
+            "required": [
+              "operation",
+              "variant"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "method"
+                  ]
+                },
+                {
+                  "required": [
+                    "shortest"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "validate-progress"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "progress"
+            ],
+            "not": {
+              "required": [
+                "target"
+              ]
+            }
+          },
+          "else": {
+            "not": {
+              "required": [
+                "progress"
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "check"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "until"
+                  ]
+                },
+                {
+                  "required": [
+                    "trace"
+                  ]
+                },
+                {
+                  "required": [
+                    "trace_id"
+                  ]
+                },
+                {
+                  "required": [
+                    "parent_trace"
+                  ]
+                },
+                {
+                  "required": [
+                    "prefix_length"
+                  ]
+                },
+                {
+                  "required": [
+                    "explanation"
+                  ]
+                },
+                {
+                  "required": [
+                    "progress"
+                  ]
+                },
+                {
+                  "required": [
+                    "count"
+                  ]
+                },
+                {
+                  "required": [
+                    "enumerate"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "operation": {
+                "const": "validate-progress"
+              }
+            },
+            "required": [
+              "operation"
+            ]
+          },
+          "then": {
+            "required": [
+              "limits"
+            ],
+            "properties": {
+              "limits": {
+                "required": [
+                  "states",
+                  "wall_ms"
+                ],
+                "not": {
+                  "required": [
+                    "depth"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "version",
+    "model",
+    "query"
+  ],
+  "additionalProperties": false
+}

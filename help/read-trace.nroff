@@ -18,7 +18,6 @@ transitions, and generating query are validated before it is registered and
 selected. The matching model and input bindings must already be loaded.
 
 Other extensions use the legacy plain-text reader; YAML is unsupported.
-See docs/QUERY_AND_TRACE_CONTRACTS.md for the JSON format and migration notes.
 
 NOTICE: due to a limitation of the parser, file paths must ALWAYS be specified
 enclosed in either single or double quotes. Paths not enclosed in quotes will

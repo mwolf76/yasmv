@@ -19,8 +19,6 @@ For machine-readable operation schemas and supported limits, run
 JSON Lines requests, run "yasmv --agent --store <directory>". Agent analysis
 requests use explicit revision and artifact IDs.
 
-See docs/CLI_WORKBENCH.md for the agent protocol and examples.
-
 .ti 0
 EXAMPLES
 

@@ -222,12 +222,12 @@ TRANS x := x + 1;
             import jsonschema
         except ImportError:
             self.skipTest('optional jsonschema is not installed')
-        schemas = {p.name: json.loads(p.read_text()) for p in (ROOT / 'docs/formats').glob('*.schema.json')}
+        schemas = {p.name: json.loads(p.read_text()) for p in (ROOT / 'formats').glob('*.schema.json')}
         def validate(name, value):
             schema = schemas[name]
             jsonschema.Draft202012Validator(schema, resolver=jsonschema.RefResolver(
-                base_uri=(ROOT / 'docs/formats').as_uri() + '/', referrer=schema,
-                store={(ROOT / 'docs/formats' / key).as_uri(): val for key, val in schemas.items()})).validate(value)
+                base_uri=(ROOT / 'formats').as_uri() + '/', referrer=schema,
+                store={(ROOT / 'formats' / key).as_uri(): val for key, val in schemas.items()})).validate(value)
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory); (path / 'model.smv').write_text(model([1, 2, 2, 3]))
             for target in ('x = 3', 'x = 2'):

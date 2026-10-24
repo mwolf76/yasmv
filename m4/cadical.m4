@@ -5,12 +5,12 @@ AC_DEFUN([AC_CADICAL], [
       [CaDiCaL 3.0.1 prefix containing include/{cadical,tracer}.hpp and lib/libcadical.a (default /usr/local)])],
     [cadical_prefix="$withval"], [cadical_prefix="/usr/local"])
   AS_IF([test ! -d "$cadical_prefix"],
-    [AC_MSG_ERROR([CaDiCaL prefix does not exist; see docs/CADICAL_BACKEND.md])])
+    [AC_MSG_ERROR([CaDiCaL prefix does not exist; see README.md])])
   cadical_prefix=`cd "$cadical_prefix" && pwd`
   CADICAL_CPPFLAGS="-I$cadical_prefix/include"
   CADICAL_LIBS="$cadical_prefix/lib/libcadical.a"
   AS_IF([test ! -f "$CADICAL_LIBS"],
-    [AC_MSG_ERROR([Pinned static libcadical.a not found; see docs/CADICAL_BACKEND.md])])
+    [AC_MSG_ERROR([Pinned static libcadical.a not found; see README.md])])
   AS_IF([test ! -f "$cadical_prefix/include/tracer.hpp"],
     [AC_MSG_ERROR([Matching pinned tracer.hpp not found; rerun setup.sh or install src/tracer.hpp from the pinned checkout])])
   cadical_save_CPPFLAGS="$CPPFLAGS"
@@ -66,7 +66,7 @@ struct Proof : CaDiCaL::Tracer {
   } >conftest.cadical-build
   cat conftest.cadical-build >&AS_MESSAGE_LOG_FD
   AS_IF([test "$cadical_api_ok" != yes],
-    [AC_MSG_ERROR([CaDiCaL API/version check failed; see config.log and docs/CADICAL_BACKEND.md])])
+    [AC_MSG_ERROR([CaDiCaL API/version check failed; see config.log and README.md])])
   AS_IF([grep -F "Version 3.0.1 c60730422e758ef1cebe7aeddf2dda31c996bf04" conftest.cadical-build >/dev/null],
     [AC_MSG_RESULT([yes])],
     [AC_MSG_ERROR([CaDiCaL library does not report the required full build revision; see config.log])])
