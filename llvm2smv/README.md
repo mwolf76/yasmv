@@ -6,8 +6,7 @@ stack objects. See the [call-stack contract](CALL_STACK.md) and
 The workflow includes direct-call inlining, verifier
 hooks, source locations, and replayed model evidence. Start with the
 [C workflow guide](C_WORKFLOW.md). The [scalar contract](SCALAR_MODEL.md)
-describes integer operations, control flow, scalar memory, and poison semantics;
-the [implementation plan](../docs/LLVM2SMV_IMPLEMENTATION_PLAN.md) tracks heap support and source evidence.
+describes integer operations, control flow, scalar memory, and poison semantics.
 
 The historical incorrect writer remains excluded. The M0 inventory interface
 and M1 [typed model foundation](MODEL_FORMAT.md) remain available. Direct raw

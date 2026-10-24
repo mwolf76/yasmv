@@ -4,5 +4,5 @@ Unreleased — unified checking interface
   checking commands and operation names. BMC and induction share -depth;
   interpolation is the unbounded default for reachable/invariant checks.
   Typed interactive settings provide persistent timeout, execution-mode and
-  progress-state defaults. See docs/COMMAND_INTERFACE.md.
+  progress-state defaults.
   Legacy reach-direction command-line switches are removed; select -method.

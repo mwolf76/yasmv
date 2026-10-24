@@ -11,37 +11,31 @@ PACKAGE = $(PACKAGE_NAME)
 VERSION = $(PACKAGE_VERSION)
 
 READMES = LGPL-2.1 NEWS README
-EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py docs/CADICAL_API_VALIDATION.md docs/CADICAL_OWNED_TYPES.md docs/CADICAL_BACKEND.md docs/CADICAL_MIGRATION_VALIDATION.md docs/SAT_SOLVER_PARAMETERS.md
-EXTRA_DIST_CADICAL += cadical_integration.md docs/benchmarks/cadical-m1-minisat.md \
-    docs/benchmarks/cadical-m1-minisat-reachable.json docs/benchmarks/cadical-m1-minisat-unreachable.json \
-    docs/benchmarks/cadical-m6.md docs/benchmarks/cadical-m6-reachable.json docs/benchmarks/cadical-m6-unreachable.json
-EXTRA_DIST_CADICAL += docs/benchmarks/cadical-release.md \
-    docs/benchmarks/cadical-release-reachable.json docs/benchmarks/cadical-release-unreachable.json
-EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/verify-c.py tools/llvm2smv_c.py tests/test_llvm2smv_c.py tools/llvm2smv_translate.py tests/test_llvm2smv_scalar.py tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv docs/LLVM2SMV_IMPLEMENTATION_PLAN.md \
-    tests/test_progress.py docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json \
+EXTRA_DIST_CADICAL = tests/test_cadical_api.cc tests/test_cadical_runner.py tools/test-cadical-api.py
+EXTRA_DIST_CADICAL += cadical_integration.md
+EXTRA_DIST = tests/test_llvm2smv_stack.py tests/test_llvm2smv_memory.py tools/verify-c.py tools/llvm2smv_c.py tests/test_llvm2smv_c.py tools/llvm2smv_translate.py tests/test_llvm2smv_scalar.py tests/test_llvm2smv_model.py tools/llvm2smv_artifact.py tests/test_llvm2smv.py tests/llvm2smv \
+    tests/test_progress.py \
     examples/progress/README.md examples/progress/complete.smv examples/progress/stalled.smv examples/progress/retry-forever.smv \
-    docs/formats/progress-counterexample-v1.schema.json docs/formats/progress-proof-v1.schema.json \
+    formats/progress-counterexample-v1.schema.json formats/progress-proof-v1.schema.json \
     tools/test-support.sh tools/run-short-tests.sh tools/run-functional-tests.sh \
-    tools/build-provenance.py tests/test_regressions.py docs/CORRECTNESS_BASELINE.md \
+    tools/build-provenance.py tests/test_regressions.py \
     src/query/query.hh src/query/runtime.hh src/query/source.hh src/query/trace.hh src/query/expressions.hh \
     tools/run-query.py tests/test_query.py tests/models/query.smv \
-    docs/QUERY_AND_TRACE_CONTRACTS.md \
-    docs/formats/query-v1.schema.json docs/formats/trace-v1.schema.json \
-    docs/WORKBENCH.md docs/formats/workbench-v1.schema.json docs/formats/scenario-v1.schema.json \
+    formats/query-v1.schema.json formats/trace-v1.schema.json \
+    formats/workbench-v1.schema.json formats/scenario-v1.schema.json \
     tools/workbench/__init__.py tools/workbench/__main__.py tools/workbench/protocol.py \
     tools/workbench/engine.py tools/workbench/server.py tools/workbench/static/index.html \
     tools/workbench/static/style.css tools/workbench/static/app.js \
     examples/retry-protocol/README.md examples/retry-protocol/faulty.smv \
     examples/retry-protocol/deduplicating.smv examples/retry-protocol/scenario.json \
     examples/retry-protocol/runner.py tests/test_workbench.py tests/workbench-browser.cjs \
-    tests/test_explanations.py tests/test_scenarios.py docs/EXPLANATIONS_AND_SCENARIOS.md \
-    docs/formats/explanation-v1.schema.json docs/formats/executable-scenario-v1.schema.json \
+    tests/test_explanations.py tests/test_scenarios.py \
+    formats/explanation-v1.schema.json formats/executable-scenario-v1.schema.json \
     tools/scenario/__init__.py tools/scenario/__main__.py tools/scenario/format.py tools/scenario/replay.py tools/workbench/sessions.py tests/test_analysis.py tests/test_sessions.py \
-    docs/STRONGER_ANALYSIS.md docs/formats/analysis-v1.schema.json tools/benchmark-sessions.py \
-    docs/benchmarks/m4-sessions.json src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tools/workbench/settings.py tests/test_cli.py tests/test_functional_check.py docs/CLI_WORKBENCH.md docs/COMMAND_INTERFACE.md docs/formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
+    formats/analysis-v1.schema.json tools/benchmark-sessions.py \
+    src/workbench.hh tools/workbench/client.py tools/workbench/cli.py tools/workbench/launch.py tools/workbench/native.py tools/workbench/settings.py tests/test_cli.py tests/test_functional_check.py formats/cli-v1.schema.json $(EXTRA_DIST_CADICAL)
 EXTRA_DIST += README.md setup.sh tests/test_setup.py
 EXTRA_DIST += tests/test_cadical_configure.py
-EXTRA_DIST += docs/INTERPOLATION_PLAN.md docs/INTERPOLATION_PROOF_VALIDATION.md
 
 AM_CPPFLAGS = -DYASMV_CLIENT_SOURCE=\"$(abs_top_srcdir)\" -DYASMV_CLIENT_DATA=\"$(pkgdatadir)\" \
 -I$(top_srcdir)/src -I$(top_srcdir)/src/dd            \
@@ -68,12 +62,7 @@ interpolation_replay_LDADD = $(CADICAL_LIBS) $(LIBJSONCPP_LIBS)
 interpolation-memory-test: yasmv interpolation_replay
 	YASMV_HOME="$(abs_top_srcdir)" python3 tests/test_interpolation_memory.py
 .PHONY: interpolation-memory-test
-EXTRA_DIST += tools/benchmark-interpolation-memory.py tests/test_interpolation_memory.py docs/INTERPOLATION_MEMORY_BENCHMARK.md
-EXTRA_DIST += docs/benchmarks/interpolation-memory-baseline.json docs/benchmarks/interpolation-memory-baseline.md
-EXTRA_DIST += docs/benchmarks/interpolation-clause-storage.json docs/benchmarks/interpolation-clause-storage.md
-EXTRA_DIST += docs/benchmarks/interpolation-lifetimes.json docs/benchmarks/interpolation-lifetimes.md
-EXTRA_DIST += docs/benchmarks/interpolation-traversal.json docs/benchmarks/interpolation-traversal.md
-EXTRA_DIST += docs/benchmarks/interpolation-allocator.json docs/benchmarks/interpolation-allocator.md
+EXTRA_DIST += tools/benchmark-interpolation-memory.py tests/test_interpolation_memory.py
 
 cadical_proof_tests_SOURCES = tests/test_cadical_proof.cc src/sat/proof.cc src/sat/proof.hh src/sat/proof_tracer.hh src/sat/circuit.cc src/sat/circuit.hh src/sat/interpolation_diagnostics.cc src/sat/interpolation_diagnostics.hh
 cadical_proof_tests_CPPFLAGS = -I$(top_srcdir)/src $(CADICAL_CPPFLAGS)
@@ -97,9 +86,9 @@ sat-types-test: sat_literal_tests
 	./sat_literal_tests
 
 .PHONY: sat-types-test
-nobase_dist_pkgdata_DATA = docs/PROGRESS_CHECKING.md docs/PROGRESS_CHECKING_PLAN.md docs/benchmarks/m6-progress.json examples/progress/*.smv examples/progress/README.md microcode/* help/* tools/workbench/*.py tools/scenario/*.py \
+nobase_dist_pkgdata_DATA = examples/progress/*.smv examples/progress/README.md microcode/* help/* tools/workbench/*.py tools/scenario/*.py \
     tools/workbench/static/* examples/retry-protocol/*.smv examples/retry-protocol/*.json \
-    examples/retry-protocol/runner.py examples/retry-protocol/README.md docs/formats/*.json
+    examples/retry-protocol/runner.py examples/retry-protocol/README.md formats/*.json
 
 # test target helper
 short-test: yasmv
@@ -284,10 +273,9 @@ yasmv_interpolation_search_tests_LDADD = $(yasmv_tests_LDADD)
 yasmv_interpolation_search_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
 EXTRA_DIST += tests/models/interpolation-search.smv
 
-EXTRA_DIST += docs/formats/invariant-v1.schema.json
+EXTRA_DIST += formats/invariant-v1.schema.json
 
 EXTRA_DIST += tests/test_interpolation_query.py
 EXTRA_DIST += tools/benchmark-interpolation.py tests/test_interpolation_benchmark.py \
     tests/benchmarks/interpolation/cases.json tests/benchmarks/interpolation/*.smv \
-    tests/benchmarks/interpolation/*.ll docs/INTERPOLATION_BENCHMARKS.md \
-    docs/benchmarks/interpolation-m5.json
+    tests/benchmarks/interpolation/*.ll

@@ -75,7 +75,6 @@ jobs:
       run: make -j2
 
     # Full regression, LLVM, sanitizer, and browser gates run locally.
-    # See docs/CORRECTNESS_BASELINE.md for the pre-commit checks.
     - name: CLI and agent smoke tests
       env:
         YASMV_HOME: ${{ github.workspace }}

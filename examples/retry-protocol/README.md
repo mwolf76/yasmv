@@ -69,7 +69,7 @@ with this oracle and retain the expected graph sizes and shortest failure path.
   substitution and is not used as a time-varying action channel.
 - `scenario.json` names goals, Boolean watches, controllable labels, observed
   state, and argument bindings. Its schema is
-  [`scenario-v1.schema.json`](../../docs/formats/scenario-v1.schema.json).
+  [`scenario-v1.schema.json`](../../formats/scenario-v1.schema.json).
 - Durable deduplication, receiver crashes/restarts, multiple job IDs, concurrent
   senders, timers, and real network delivery are outside this tiny model. They
   are natural future variants, with explicit bounds and persistence assumptions.
@@ -92,8 +92,7 @@ python3 -m tools.scenario replay scenario.json --implementation deduplicating
 
 Implementation replay is distinct from checker validation. The adapter drives
 the independent state machine described above; it does not reinterpret the SMV
-model. See [the M3 guide](../../docs/EXPLANATIONS_AND_SCENARIOS.md) for standalone
-export, explicit mappings, result semantics, and the full acceptance workflow.
+model.
 
 ## Safety proofs and shortest witnesses
 
@@ -102,4 +101,3 @@ The faulty model has a certified shortest violation at depth 5. With Max depth
 set to 12, **Prove by induction** proves the deduplicating model safe. Smaller
 induction depths can be inconclusive because the step starts from arbitrary
 states. The result shows that distinction and records every proof obligation.
-See [the M4 guide](../../docs/STRONGER_ANALYSIS.md) for CLI requests and reuse.
