@@ -60,6 +60,10 @@
 #include <query/query.hh>
 
 #include <boost/chrono.hpp>
+
+#include <cstdlib>
+#include <filesystem>
+
 static const std::string heading_msg =
     "yasmv - Yet Another Symbolic Model Verifier\n"
     "(c) 2011-2021, Marco Pensallorto < marco DOT pensallorto AT gmail DOT com >\n"
@@ -91,10 +95,36 @@ void batch(cmd::Command_ptr cmd)
     }
 }
 
+/* Unless YASMV_HOME is set, point it at the first data directory that
+   holds the microcode, searched like the workbench client: next to the
+   binary, the installed data directory, then the source tree. */
+static void default_yasmv_home()
+{
+    namespace fs = std::filesystem;
+    if (getenv(YASMV_HOME_PATH))
+        return;
 
+    std::error_code error;
+    const auto binary = fs::read_symlink("/proc/self/exe", error);
+    std::vector<fs::path> roots;
+    if (!error) {
+        roots.push_back(binary.parent_path());
+        roots.push_back(binary.parent_path().parent_path() / "share/yasmv");
+    }
+    roots.push_back(fs::path(YASMV_CLIENT_DATA));
+    roots.push_back(fs::path(YASMV_CLIENT_SOURCE));
+
+    for (const auto& root : roots) {
+        if (fs::is_directory(root / "microcode", error)) {
+            setenv(YASMV_HOME_PATH, root.c_str(), 0);
+            return;
+        }
+    }
+}
 
 int main(int argc, const char* argv[])
 {
+    default_yasmv_home();
     if (argc > 1 && (std::string(argv[1]) == "--agent" || std::string(argv[1]) == "--capabilities")) {
         std::vector<std::string> arguments(argv + 2, argv + argc);
         arguments.push_back(std::string(argv[1]) == "--agent" ? "agent" : "capabilities");

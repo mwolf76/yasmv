@@ -1,5 +1,6 @@
-yasmv (1.0-1) UNRELEASED; urgency=medium
+yasmv (0.3.0-1) unstable; urgency=medium
 
-  * Initial release. (Closes: #XXXXXX)
+  * Package yasmv 0.3.0 as yasmv, yasmv-data and llvm2smv.
+  * Ship the pinned CaDiCaL 3.0.1 as the cadical upstream component.
 
- -- Marco Pensallorto <marco.pensallorto@gmail.com>  Sat, 24 Dec 2016 09:48:12 +0100
+ -- Marco Pensallorto <marco.pensallorto@gmail.com>  Sat, 24 Oct 2026 12:37:52 +0200

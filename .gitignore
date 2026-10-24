@@ -25,7 +25,6 @@ stamp-h1
 yasmv
 llvm2smv/llvm2smv
 llvm2smv/llvm2smv_model_tests
-yasmv.pc
 yasmv_tests
 sat_literal_tests
 cadical_proof_tests
@@ -56,3 +55,6 @@ yasmv_query_tests
 commit.txt
 mr.txt
 
+
+# Debian package builds
+/build-deb/

@@ -1,25 +1,70 @@
 Source: yasmv
-Maintainer: Marco Pensallorto <marco.pensallorto@gmail.com>
-Section: misc
+Section: science
 Priority: optional
-Standards-Version: 3.9.2
-Build-Depends: debhelper (>= 9)
+Maintainer: Marco Pensallorto <marco.pensallorto@gmail.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ antlr3,
+ clang-18,
+ default-jre-headless,
+ libantlr3c-dev,
+ libboost-chrono-dev,
+ libboost-filesystem-dev,
+ libboost-program-options-dev,
+ libboost-system-dev,
+ libboost-test-dev,
+ libboost-thread-dev,
+ libjsoncpp-dev,
+ libreadline-dev,
+ llvm-18-dev,
+ python3,
+ zlib1g-dev,
+Standards-Version: 4.7.2
+Homepage: https://github.com/mwolf76/yasmv
+Vcs-Browser: https://github.com/mwolf76/yasmv
+Vcs-Git: https://github.com/mwolf76/yasmv.git
+Rules-Requires-Root: no
 
 Package: yasmv
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: Yet Another Symbolic Model Verifier
- The yasmv project started off in fall 2011 as a tentative and partial C++
- re-implementation of the NuSMV2 model checker. As a former member of the NuSMV2
- development team (in the years between 2008 and 2011) I was never completely
- happy with a few architectural choices, inherited from the long history of the
- NuSMV model checker and/or due to the amount of legacy code and tools that
- relied on it. Overtime, however, the project has significantly diverged from
- the original goal of making a NuSMV re-implementation. The input language for
- yasmv is now a dialect of the smv language which retains only partial
- compatibility with NuSMV's original input language. In this area, my interest
- is all about exploring ways to improve language expressiveness and usability.
- The project has now approached a stage in which the program is usable to
- perform basic reachability analysis and step-by-step simulation. The source
- distribution includes a few examples to demonstrate how the program can be used
- to solve planning problems.
+Depends:
+ python3 (>= 3.10),
+ yasmv-data (= ${source:Version}),
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: SAT-based symbolic model checker for an SMV dialect
+ yasmv (Yet Another Symbolic Model Verifier) checks models written in a
+ dialect of the SMV language. It decides reachability and invariants
+ with bounded model checking, k-induction and interpolation, checks
+ guaranteed progress, and simulates models step by step.
+ .
+ Models can be explored from an interactive shell, through a JSON agent
+ protocol, or in a local browser workbench.
+
+Package: yasmv-data
+Architecture: all
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+Recommends:
+ yasmv,
+Description: SAT-based symbolic model checker for an SMV dialect (data files)
+ yasmv (Yet Another Symbolic Model Verifier) checks models written in a
+ dialect of the SMV language.
+ .
+ This package contains the architecture-independent files yasmv needs:
+ the arithmetic microcode, the help pages, the JSON schemas, the
+ workbench client and the example models.
+
+Package: llvm2smv
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Recommends:
+ clang-18,
+ yasmv,
+Description: LLVM frontend translating C programs into yasmv models
+ llvm2smv reads LLVM 18 IR or bitcode compiled from a supported subset
+ of sequential C and translates it into models that yasmv can check.
+ Unsupported constructs are rejected with diagnostics.

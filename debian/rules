@@ -1,3 +1,38 @@
 #!/usr/bin/make -f
+
+include /usr/share/dpkg/buildopts.mk
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+# The supported build (setup.sh) compiles yasmv as C++20.
+export DEB_CXXFLAGS_MAINT_APPEND = -std=c++20
+
+# The pinned CaDiCaL ships as the cadical upstream component. Build it
+# like setup.sh does: a static release library with its own flags.
+CADICAL_REVISION = c60730422e758ef1cebe7aeddf2dda31c996bf04
+CADICAL_PREFIX = $(CURDIR)/debian/cadical-prefix
+
 %:
 	dh $@
+
+override_dh_auto_configure:
+	cd cadical && CC=gcc CXX=g++ CFLAGS= CXXFLAGS= ./configure -fPIC
+	CADICAL_GIT_ID=$(CADICAL_REVISION) \
+	    $(MAKE) $(addprefix -j,$(DEB_BUILD_OPTION_PARALLEL)) -C cadical/build libcadical.a
+	install -D -m 644 -t $(CADICAL_PREFIX)/include \
+	    cadical/src/cadical.hpp cadical/src/tracer.hpp
+	install -D -m 644 -t $(CADICAL_PREFIX)/lib cadical/build/libcadical.a
+	tar -xjf microcode.tar.bz2
+	dh_auto_configure -- --enable-llvm2smv --with-cadical-prefix=$(CADICAL_PREFIX)
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	$(MAKE) short-test unit-test
+endif
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf microcode $(CADICAL_PREFIX)
+	rm -rf cadical/build cadical/makefile cadical/src/makefile
+
+override_dh_missing:
+	dh_missing --fail-missing

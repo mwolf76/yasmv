@@ -1,27 +1,261 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: yasmv
+Upstream-Contact: Marco Pensallorto <marco.pensallorto@gmail.com>
 Source: https://github.com/mwolf76/yasmv
 
 Files: *
-Copyright: Copyright 2010-2016 Marco Pensallorto <marco.pensallorto@gmail.com>
+Copyright: 2011-2026 Marco Pensallorto <marco.pensallorto@gmail.com>
+License: LGPL-2.1+
+Comment: Most source files carry LGPL-2.1+ notices, and files without a
+ notice are listed under the same license. COPYING holds the GPL-3 text.
+ Three headers in src/compiler/ name the "GNU General Public License"
+ with version 2.1 and refer to the Lesser GPL, and are read as LGPL-2.1+.
+
+Files: help/*
+ man/yasmv-lang.1
+ man/yasmv-usage.1
+Copyright: 2011-2018 Marco Pensallorto <marco.pensallorto@gmail.com>
+License: GPL-3
+
+Files: src/parser/grammars/smv.g
+Copyright: 2011-2018 Marco Pensallorto <marco.pensallorto@gmail.com>
+License: GPL-3+
+
+Files: m4/antlr.m4
+ m4/libjsoncpp.m4
+Copyright: 2011-2026 Marco Pensallorto <marco.pensallorto@gmail.com>
+License: GPL-3+ with Autoconf exception
+
+Files: m4/boost.m4
+Copyright: 2007-2011, 2014 Benoit Sigoure <tsuna@lrde.epita.fr>
+License: GPL-3+ with Autoconf exception
+
+Files: m4/ax_check_zlib.m4
+Copyright: 2008 Loic Dachary <loic@senga.org>
+ 2010 Bastien Chevreux <bach@chevreux.org>
+License: GPL-2+ with Autoconf Archive exception
+
+Files: m4/ax_pthread.m4
+Copyright: 2008 Steven G. Johnson <stevenj@alum.mit.edu>
+ 2011 Daniel Richard G. <skunk@iSKUNK.ORG>
+ 2019 Marc Stevens <marc.stevens@cwi.nl>
+License: GPL-3+ with Autoconf Archive exception
+
+Files: m4/ax_lib_readline.m4
+Copyright: 2008 Ville Laurikari <vl@iki.fi>
+License: FSFAP
+
+Files: src/dd/cudd-2.5.0/*
+Copyright: 1995-2004 Regents of the University of Colorado
+License: BSD-3-clause
+
+Files: src/3rdparty/ezlogger/*
+Copyright: 2006 David Maisonave (Axter)
+License: EzLogger
+Comment: EzLogger is due to be replaced.
+
+Files: cadical/*
+Copyright: 2016-2021 Armin Biere, Johannes Kepler University Linz, Austria
+ 2020-2021 Mathias Fleury, Johannes Kepler University Linz, Austria
+ 2020-2021 Nils Froleyks, Johannes Kepler University Linz, Austria
+ 2022-2026 Katalin Fazekas, Vienna University of Technology, Austria
+ 2021-2026 Armin Biere, University of Freiburg, Germany
+ 2021-2026 Mathias Fleury, University of Freiburg, Germany
+ 2023-2026 Florian Pollitt, University of Freiburg, Germany
+ 2024-2026 Tobias Faller, University of Freiburg, Germany
+License: Expat
+
+Files: debian/*
+Copyright: 2016-2026 Marco Pensallorto <marco.pensallorto@gmail.com>
 License: GPL-2+
- This program is free software; you can redistribute it
- and/or modify it under the terms of the GNU General Public
- License as published by the Free Software Foundation; either
- version 2 of the License, or (at your option) any later
- version.
+
+License: LGPL-2.1+
+ This library is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation; either version 2.1 of the
+ License, or (at your option) any later version.
  .
- This program is distributed in the hope that it will be
- useful, but WITHOUT ANY WARRANTY; without even the implied
- warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- PURPOSE.  See the GNU General Public License for more
- details.
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
  .
- You should have received a copy of the GNU General Public
- License along with this package; if not, write to the Free
- Software Foundation, Inc., 51 Franklin St, Fifth Floor,
- Boston, MA  02110-1301 USA
+ On Debian systems, the complete text of the GNU Lesser General Public
+ License version 2.1 can be found in "/usr/share/common-licenses/LGPL-2.1".
+
+License: GPL-3
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License version 3 as
+ published by the Free Software Foundation.
  .
- On Debian systems, the full text of the GNU General Public
- License version 2 can be found in the file
- `/usr/share/common-licenses/GPL-2'.
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ General Public License for more details.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or (at
+ your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ General Public License for more details.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: GPL-3+ with Autoconf exception
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or (at
+ your option) any later version.
+ .
+ Additional permission under section 7 of the GNU General Public
+ License, version 3 ("GPLv3"):
+ .
+ If you convey this file as part of a work that contains a
+ configuration script generated by Autoconf, you may do so under
+ terms of your choice.
+ .
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ General Public License for more details.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: GPL-2+ with Autoconf Archive exception
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or (at
+ your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ General Public License for more details.
+ .
+ As a special exception, the respective Autoconf Macro's copyright
+ owner gives unlimited permission to copy, distribute and modify the
+ configure scripts that are the output of Autoconf when processing the
+ Macro. You need not follow the terms of the GNU General Public License
+ when using or distributing such scripts, even though portions of the
+ text of the Macro appear in them. The GNU General Public License (GPL)
+ does govern all other use of the material that constitutes the
+ Autoconf Macro.
+ .
+ This special exception to the GPL applies to versions of the Autoconf
+ Macro released by the Autoconf Archive. When you make and distribute a
+ modified version of the Autoconf Macro, you may extend this special
+ exception to the GPL to apply to your modified version as well.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 can be found in "/usr/share/common-licenses/GPL-2".
+
+License: GPL-3+ with Autoconf Archive exception
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or (at
+ your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ General Public License for more details.
+ .
+ As a special exception, the respective Autoconf Macro's copyright
+ owner gives unlimited permission to copy, distribute and modify the
+ configure scripts that are the output of Autoconf when processing the
+ Macro. You need not follow the terms of the GNU General Public License
+ when using or distributing such scripts, even though portions of the
+ text of the Macro appear in them. The GNU General Public License (GPL)
+ does govern all other use of the material that constitutes the
+ Autoconf Macro.
+ .
+ This special exception to the GPL applies to versions of the Autoconf
+ Macro released by the Autoconf Archive. When you make and distribute a
+ modified version of the Autoconf Macro, you may extend this special
+ exception to the GPL to apply to your modified version as well.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: FSFAP
+ Copying and distribution of this file, with or without modification,
+ are permitted in any medium without royalty provided the copyright
+ notice and this notice are preserved. This file is offered as-is,
+ without any warranty.
+
+License: BSD-3-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ .
+ Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ .
+ Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ .
+ Neither the name of the University of Colorado nor the names of its
+ contributors may be used to endorse or promote products derived from
+ this software without specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+License: Expat
+ Permission is hereby granted, free of charge, to any person obtaining a
+ copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+License: EzLogger
+ The EzLogger files carry only the notice "Copyright (C) 2006" and the
+ author's name. They state no license.
+
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or (at
+ your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ General Public License for more details.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 can be found in "/usr/share/common-licenses/GPL-2".

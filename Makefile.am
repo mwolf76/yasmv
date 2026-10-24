@@ -264,9 +264,6 @@ yasmv_reliability_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc
 yasmv_reliability_tests_LDADD = $(yasmv_tests_LDADD)
 yasmv_reliability_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
 
-pkgconfdir = $(libdir)/pkgconfig
-pkgconf_DATA = yasmv.pc
-
 yasmv_query_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc src/test/test_query.cc
 yasmv_query_tests_LDADD = $(yasmv_tests_LDADD)
 yasmv_query_tests_LDFLAGS = $(yasmv_tests_LDFLAGS)
