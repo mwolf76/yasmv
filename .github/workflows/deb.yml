@@ -13,12 +13,16 @@ jobs:
   build:
     strategy:
       fail-fast: false
+      # Debian 13 has the lintian that matches our Standards-Version, so only
+      # its findings fail the build. Ubuntu's older lintian still reports.
       matrix:
         include:
         - distro: debian-13
           image: debian:trixie
+          lintian-fail-on: error
         - distro: ubuntu-24.04
           image: ubuntu:24.04
+          lintian-fail-on: none
     runs-on: ubuntu-24.04
     container: ${{ matrix.image }}
     timeout-minutes: 90
@@ -45,6 +49,8 @@ jobs:
         }
 
     - name: build and lint
+      env:
+        LINTIAN_FAIL_ON: ${{ matrix.lintian-fail-on }}
       run: |
         git config --global --add safe.directory "$GITHUB_WORKSPACE"
         tools/build-deb.sh HEAD build-deb

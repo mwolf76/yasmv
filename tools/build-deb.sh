@@ -8,6 +8,9 @@
 # pinned CaDiCaL release as the cadical component, builds unsigned source
 # and binary packages, and runs lintian. Output goes to OUTPUT-DIR (default
 # build-deb/). The build dependencies in debian/control must be installed.
+#
+# LINTIAN_FAIL_ON (default error) is passed to lintian --fail-on. Set it to
+# none to report lintian's findings without failing the build.
 
 set -eu
 
@@ -47,4 +50,5 @@ git archive --format=tar "$tree" debian | tar -x -C "$out/$source"
 
 (cd "$out/$source" && dpkg-buildpackage -us -uc)
 # The packaging follows Debian conventions on every distribution.
-lintian --profile debian "$out/yasmv_${version}"_*.changes
+lintian --profile debian --fail-on "${LINTIAN_FAIL_ON:-error}" \
+    "$out/yasmv_${version}"_*.changes
