@@ -151,6 +151,15 @@ cadical-configure-test:
 
 .PHONY: cadical-configure-test
 
+# Opt-in Emacs mode tests. Emacs is not a build dependency.
+EMACS ?= emacs
+smv-mode-test:
+	$(EMACS) -Q --batch -l $(srcdir)/tools/smv-mode.el \
+	    -l $(srcdir)/tests/test_smv_mode.el -f ert-run-tests-batch-and-exit
+
+.PHONY: smv-mode-test
+EXTRA_DIST += tools/smv-mode.el tests/test_smv_mode.el
+
 # Opt-in raw API probe against an explicit upstream checkout. Never downloads code.
 CADICAL_SOURCE ?=
 cadical-runner-test:
