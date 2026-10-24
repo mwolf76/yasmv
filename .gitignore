@@ -61,3 +61,8 @@ yasmv_query_tests
 /yasmv_interpolation_search_tests
 /interpolation_replay
 /.yasmv-benchmarks/
+
+# workflow
+commit.txt
+mr.txt
+
