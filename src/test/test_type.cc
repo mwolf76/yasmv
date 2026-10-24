@@ -35,6 +35,8 @@
 #include <type/type.hh>
 #include <type/type_mgr.hh>
 
+#include "model_fixture.hh"
+
 BOOST_AUTO_TEST_SUITE(tests)
 
 BOOST_AUTO_TEST_CASE(boolean_type)
@@ -228,23 +230,11 @@ BOOST_AUTO_TEST_CASE(enum_array_type)
     BOOST_CHECK(!type->is_instance());
 }
 
-BOOST_AUTO_TEST_CASE(type_checking)
+BOOST_FIXTURE_TEST_CASE(type_checking, ModelFixture)
 {
-    /* a rather rough setup... */
     model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
     expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
     type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
-
-    /* set word width to 16 bits */
-    opts::OptsMgr& om { opts::OptsMgr::INSTANCE() };
-    om.set_word_width(16);
-
-    model::Model& model { mm.model() };
-    expr::Atom a_main { "main" };
-    model::Module& main {
-        *new model::Module(em.make_identifier(a_main))
-    };
-    model.add_module(main);
 
     /* A few types */
     type::Type_ptr boolean { tm.find_boolean() };
@@ -252,40 +242,7 @@ BOOST_AUTO_TEST_CASE(type_checking)
     type::Type_ptr int16 { tm.find_signed(16) };
     type::Type_ptr const16 { tm.find_constant(16) };
 
-    /*
-       A pair of variables for each type:
-       (x, y) are booleans;
-       (s, t) are unsigned(16);
-       (u, v) are signed(16)
-    */
-    expr::Atom a_x { "x" };
-    expr::Expr_ptr x { em.make_identifier(a_x) };
-    main.add_var(x, new symb::Variable(main.name(), x, boolean));
-
-    expr::Atom a_y { "y" };
-    expr::Expr_ptr y { em.make_identifier(a_y) };
-    main.add_var(y, new symb::Variable(main.name(), y, boolean));
-
-    expr::Atom a_s { "s" };
-    expr::Expr_ptr s { em.make_identifier(a_s) };
-    main.add_var(s, new symb::Variable(main.name(), s, uint16));
-
-    expr::Atom a_t { "t" };
-    expr::Expr_ptr t { em.make_identifier(a_t) };
-    main.add_var(t, new symb::Variable(main.name(), t, uint16));
-
-    expr::Atom a_u { "u" };
-    expr::Expr_ptr u { em.make_identifier(a_u) };
-    main.add_var(u, new symb::Variable(main.name(), u, int16));
-
-    expr::Atom a_v { "v" };
-    expr::Expr_ptr v { em.make_identifier(a_v) };
-    main.add_var(v, new symb::Variable(main.name(), v, int16));
-
-    // add the main module to the model
-    model.add_module(main);
-
-    BOOST_CHECK(mm.analyze());
+    BOOST_REQUIRE(analyzed);
 
     BOOST_CHECK(boolean ==
                 mm.type(x));

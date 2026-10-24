@@ -36,6 +36,8 @@
 #include <model/model_mgr.hh>
 #include <model/module.hh>
 
+#include "model_fixture.hh"
+
 using LList = std::initializer_list<std::initializer_list<int>>;
 class DDChecker {
     std::list<std::list<int>> f_expected;
@@ -122,31 +124,13 @@ static void callback(void* obj, int* list, int size)
 }
 
 BOOST_AUTO_TEST_SUITE(tests)
-BOOST_AUTO_TEST_CASE(compiler_boolean)
+BOOST_FIXTURE_TEST_CASE(compiler_boolean, ModelFixture)
 {
     expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
-    model::ModelMgr& mm { model::ModelMgr::INSTANCE() };
-    type::TypeMgr& tm { type::TypeMgr::INSTANCE() };
+
+    BOOST_REQUIRE(analyzed);
 
     compiler::Compiler f_compiler;
-
-    model::Model& model { mm.model() };
-
-    expr::Atom a_main { "main" };
-    expr::Expr_ptr main_expr { em.make_identifier(a_main) };
-
-    model::Module_ptr main_module { new model::Module(main_expr) };
-    model.add_module(*main_module);
-
-    type::Type_ptr boolean { tm.find_boolean() };
-
-    expr::Atom a_x { "x" };
-    expr::Expr_ptr x { em.make_identifier(a_x) };
-    main_module->add_var(x, new symb::Variable(main_expr, x, boolean));
-
-    expr::Atom a_y { "y" };
-    expr::Expr_ptr y = em.make_identifier(a_y);
-    main_module->add_var(y, new symb::Variable(main_expr, y, boolean));
 
     expr::Expr_ptr ctx { em.make_empty() };
 

@@ -221,7 +221,8 @@ yasmv_LDFLAGS = $(BOOST_REGEX_LDFLAGS) -L/usr/local/lib
 yasmv_tests_SOURCES = $(query_sources) src/parse.cc src/test/main.cc		\
 		src/test/test_expr.cc src/test/test_parser.cc	\
 		src/test/test_type.cc src/test/test_dd.cc		\
-		src/test/test_enc.cc src/test/test_compiler.cc
+		src/test/test_enc.cc src/test/test_compiler.cc		\
+		src/test/model_fixture.cc src/test/model_fixture.hh
 
 yasmv_tests_LDADD = $(top_builddir)/src/parser/libparser.la			\
 		$(top_builddir)/src/cmd/commands/libcommands.la			\
