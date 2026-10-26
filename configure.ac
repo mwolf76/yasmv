@@ -6,7 +6,7 @@ AC_INIT([yasmv], [0.3.0], [marco.pensallorto@gmail.com])
 # where to look for install.sh and other helpers
 AC_CONFIG_AUX_DIR([helpers])
 AC_CONFIG_MACRO_DIR([m4])
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE
 
@@ -16,7 +16,7 @@ AC_CANONICAL_HOST
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_LIBTOOL
+LT_INIT
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CPP
@@ -25,9 +25,6 @@ AC_PROG_CXXCPP
 
 # (optional) Doxygen
 AC_CHECK_PROGS([DOXYGEN], [doxygen])
-if test -z "$DOXYGEN";
-   then AC_MSG_WARN([Doxygen not found - continuing without Doxygen support])
-fi
 
 AC_DEFINE_UNQUOTED(PACKAGE_BUILD_DATE, "`date -u`", Build date)
 
@@ -67,7 +64,6 @@ AM_CONDITIONAL([HAVE_DOXYGEN],
 
 # Checks for header files.
 AC_HEADER_DIRENT
-AC_HEADER_STDC
 AC_CHECK_HEADERS([float.h limits.h memory.h stddef.h stdlib.h string.h \
   sys/ioctl.h sys/param.h sys/time.h sys/resource.h unistd.h signal.h sys/signal.h \
   errno.h regex.h inttypes.h])
@@ -96,7 +92,7 @@ BOOST_REQUIRE([1.48])
 BOOST_FILESYSTEM
 BOOST_PROGRAM_OPTIONS
 BOOST_TEST
-BOOST_THREADS
+BOOST_THREAD
 BOOST_CHRONO
 
 # libjsoncpp
@@ -125,16 +121,13 @@ AC_TYPE_SIZE_T
 
 # Checks for program functions.
 AC_FUNC_CLOSEDIR_VOID
-AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
-AC_FUNC_SETVBUF_REVERSED
-AC_TYPE_SIGNAL
 AC_FUNC_STAT
 AC_FUNC_STRTOD
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([floor memmove memset pow strcasecmp strchr \
-                strrchr strstr strtol, random srandom getpid \
+                strrchr strstr strtol random srandom getpid \
                 mkstemp mktemp tmpnam getenv setvbuf system popen isatty])
 
 AM_CPPFLAGS="$BOOST_CPPFLAGS $ANTLR_CPPFLAGS"

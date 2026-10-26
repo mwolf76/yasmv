@@ -1488,7 +1488,10 @@ AC_LANG_POP([C++])dnl
       boost_cv_lib_tag="$boost_tag_x$boost_cv_lib_tag -${boost_tag_x}gcc"
       ;; #(
     unknown)
-      AC_MSG_WARN([[could not figure out which toolset name to use for $CXX]])
+      # Local change: no warning.  Since Boost 1.66 the versioned layout
+      # also tags the architecture (-x64), which the search above never
+      # tries, so a toolset tag could not find those libraries anyway.
+      # System layout libraries are found untagged.
       boost_cv_lib_tag=
       ;;
   esac
