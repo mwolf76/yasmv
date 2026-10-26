@@ -1469,6 +1469,19 @@ if test x$boost_cv_inc_path != xno; then
 #endif
 ]])], [boost_cv_lib_tag=$boost_tag; break], [])
   done
+  # Local addition: from GCC 5 on, Boost.Build tags GCC with the major
+  # version only (gcc14, see toolset-tag in its tools/common.jam).  The
+  # table above predates that scheme and ends at GCC 5.3.
+  if test "$boost_cv_lib_tag" = unknown; then
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#if !(defined __GNUC__ && __GNUC__ >= 5 && !defined __clang__ && !defined __ICC && !defined _WIN32)
+# error not GCC 5 or later
+#endif
+]])],
+      [AC_COMPUTE_INT([boost_gcc_major], [__GNUC__], [],
+                      [boost_gcc_major=])
+       test -n "$boost_gcc_major" && boost_cv_lib_tag=gcc$boost_gcc_major])
+  fi
 AC_LANG_POP([C++])dnl
   case $boost_cv_lib_tag in #(
     # Some newer (>= 1.35?) versions of Boost seem to only use "gcc" as opposed

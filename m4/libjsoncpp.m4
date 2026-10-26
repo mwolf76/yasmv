@@ -22,7 +22,7 @@
 AC_DEFUN([AC_LIBJSONCPP], [
   AC_ARG_WITH(
     [libjsoncpp-prefix],
-    AC_HELP_STRING(
+    AS_HELP_STRING(
     [--with-libjsoncpp-prefix=PATH],
     [find the libjsoncpp headers and libraries in `PATH/include` and `PATH/lib`. By default, checks in /usr.]),
     libjsoncpp_prefix="$withval",

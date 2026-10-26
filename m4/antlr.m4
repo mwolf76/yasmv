@@ -23,7 +23,7 @@ AC_DEFUN([AC_ANTLR3], [
 
     AC_ARG_WITH(
     [antlr-prefix],
-    AC_HELP_STRING(
+    AS_HELP_STRING(
       [--with-antlr-prefix=PATH],
       [find the ANTLR3 headers and libraries in `PATH/include` and `PATH/lib`. By default, checks in /usr.]),
             antlr_prefix="$withval",
