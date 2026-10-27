@@ -63,6 +63,12 @@ namespace sat {
                 // Repeated incremental solves spend excessive time in the
                 // inprobe simplification schedule on bounded LLVM models.
                 !solver.set("inprobing", Engine::solver_inprobing()) ||
+                // Lucky phases run on every solve(): eight full-assignment
+                // trials over the whole formula, repeated before and after
+                // preprocessing. Incremental BMC formulas are never lucky,
+                // so each depth paid them for nothing (measured 2026-10-27:
+                // up to 24x on bounded LLVM safety checks).
+                !solver.set("lucky", Engine::solver_lucky()) ||
                 !solver.set("seed", opts::OptsMgr::INSTANCE().sat_random_seed()))
                 throw std::runtime_error("Invalid CaDiCaL configuration");
             solver.connect_terminator(this);
@@ -102,6 +108,7 @@ namespace sat {
     const char* Engine::solver_version() { return CaDiCaL::Solver::version(); }
     const char* Engine::solver_signature() { return CaDiCaL::Solver::signature(); }
     bool Engine::solver_inprobing() { return false; }
+    bool Engine::solver_lucky() { return false; }
 
     std::ostream& operator<<(std::ostream& os, const Engine& engine)
     {

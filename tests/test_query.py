@@ -274,7 +274,7 @@ class QueryTests(unittest.TestCase):
         self.assertEqual(identity['solver']['revision'], 'c60730422e758ef1cebe7aeddf2dda31c996bf04')
         self.assertEqual(identity['solver']['propagation_counter'], 'search')
         self.assertEqual(identity['solver']['propagation_limit'], 'cooperative')
-        self.assertEqual(identity['solver']['settings'], {'inprobing': False})
+        self.assertEqual(identity['solver']['settings'], {'inprobing': False, 'lucky': False})
         self.assertEqual(identity['options']['sat_random_seed'], 0)
         self.assertNotIn('sat_var_decay', identity['options'])
         self.assertEqual(result['trace']['identity'], identity)

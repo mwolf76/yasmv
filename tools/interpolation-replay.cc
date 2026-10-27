@@ -72,7 +72,7 @@ struct Input {
         for (auto [var,atom]:shared) atoms.emplace(atom,var);
         for (auto atom:circuit.support(root)) require(atoms.count(atom), "Foreign interpolant atom");
         for (auto side:{proof::Partition::a,proof::Partition::b}) {
-            CaDiCaL::Solver solver; solver.set("quiet",1); solver.set("seed",0); solver.set("inprobing",0);
+            CaDiCaL::Solver solver; solver.set("quiet",1); solver.set("seed",0); solver.set("inprobing",0); solver.set("lucky",0);
             for (int i=0;i<variables;++i) solver.declare_one_more_variable();
             for (const auto& c:originals) if (c.side==side) { for (int lit:c.literals) solver.add(lit); solver.add(0); }
             int last=variables;

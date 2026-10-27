@@ -199,6 +199,7 @@ namespace opts {
             info["revision"] = CADICAL_BUILD_REVISION;
             info["linkage"] = "static";
             info["settings"]["inprobing"] = sat::Engine::solver_inprobing();
+            info["settings"]["lucky"] = sat::Engine::solver_lucky();
             Json::StreamWriterBuilder writer;
             writer["indentation"] = "";
             std::cout << Json::writeString(writer, info) << std::endl;
