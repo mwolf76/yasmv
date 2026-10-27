@@ -3,10 +3,12 @@
 yasmv-sat \- SAT solver configuration for yasmv
 .SH DESCRIPTION
 yasmv uses a pinned, statically linked CaDiCaL 3.0.1 solver.
-Native solver output is suppressed. The inprobing simplification schedule is
-disabled for incremental workloads. Other options retain upstream initialization.
-Native CADICAL_* environment overrides are unsupported; unset them for
-reproducible runs. Explicit quiet, seed, and inprobing settings take precedence.
+Native solver output is suppressed. The inprobing simplification schedule and
+the lucky phases are disabled for incremental workloads: lucky phases run on
+every solve and cost a full pass over the formula per BMC depth. Other options
+retain upstream initialization. Native CADICAL_* environment overrides are
+unsupported; unset them for reproducible runs. Explicit quiet, seed, inprobing,
+and lucky settings take precedence.
 .SH OPTIONS
 .TP
 .BI --sat-random-seed= SEED
