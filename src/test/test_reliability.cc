@@ -228,6 +228,25 @@ BOOST_AUTO_TEST_CASE(engine_outlives_query_context)
     BOOST_CHECK(!engine->value(second));
     engine.reset();
 
+    // A secondary attachment, as explanation shrinking does, dying with the
+    // engine still attached must not clear the owner's back-pointer.
+    {
+        query::QueryContext owner;
+        query::ContextScope scope(owner);
+        sat::Engine shared("shared");
+        const auto v = shared.new_sat_var(true);
+        shared.add_clause({sat::mkLit(v)});
+        BOOST_REQUIRE(shared.solve() == sat::STATUS_SAT);
+        const auto before = owner.cnf_digest;
+        {
+            query::QueryContext secondary;
+            secondary.attach(&shared);
+        }
+        shared.add_clause({sat::mkLit(v), sat::mkLit(shared.new_sat_var(true))});
+        BOOST_REQUIRE(shared.solve() == sat::STATUS_SAT);
+        BOOST_CHECK(owner.cnf_digest != before);
+    }
+
     // The same clauses in the same order give the same digest in a new query.
     query::QueryContext again;
     query::ContextScope scope(again);

@@ -145,8 +145,14 @@ namespace sat {
         static const char* solver_signature();
         static bool solver_inprobing();
         static bool solver_lucky();
-        // Called by the owning QueryContext when it is destroyed first.
-        void release_context() { f_context = nullptr; }
+        // Called by a QueryContext being destroyed with this engine still
+        // attached. Only the context the engine was created under owns the
+        // back-pointer; a secondary attachment (explanation shrinking) must
+        // not clear it, or the engine could never detach from its owner.
+        void release_context(const query::QueryContext* context)
+        {
+            if (f_context == context) f_context = nullptr;
+        }
 
         /**
 	 * @brief TCBI -> SAT variable mapping
