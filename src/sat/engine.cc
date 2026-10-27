@@ -152,13 +152,17 @@ namespace sat {
             opts_mgr.cnf_blocked_clause()))
             enable_cnf_optimization(true);
 
+        // The digest pointer is set before the first clause so the proof
+        // unit below is counted. Attaching to the context for interruption
+        // waits until the constructor can no longer throw: new_sat_var and
+        // add_proof_clause checkpoint, and a cancelled construction must
+        // not leave this engine registered with no destructor to detach it.
+        f_context = query::current();
+
         // Internal zero remains the main group/true microcode constant.
         f_groups.push_back(new_sat_var(true));
         if (mode == Mode::proof) add_proof_clause({mkLit(0)}, proof::Partition::a);
-        if (auto context = query::current()) {
-            context->attach(this);
-            f_context = context;
-        }
+        if (f_context) f_context->attach(this);
         EngineMgr::INSTANCE().register_instance(this);
     }
 
