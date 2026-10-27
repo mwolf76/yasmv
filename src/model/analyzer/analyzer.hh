@@ -36,11 +36,16 @@
 #include <type/type_mgr.hh>
 
 #include <boost/unordered_map.hpp>
+#include <utility>
+#include <vector>
 
 namespace model {
 
     /* guard -> identifier map (first pass) */
-    typedef boost::unordered_multimap<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> DependencyTrackingMap;
+    /* guard -> assigned identifier, in source order. A pointer-hashed
+       multimap walked this in bucket order, so the generated frame
+       conditions depended on heap addresses. */
+    typedef std::vector<std::pair<expr::Expr_ptr, expr::Expr_ptr>> DependencyTrackingMap;
 
     /* identifier -> framing condition clause */
     typedef boost::unordered_map<expr::Expr_ptr, expr::Expr_ptr, utils::PtrHash, utils::PtrEq> FramingConditionMap;

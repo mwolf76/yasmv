@@ -109,6 +109,7 @@ namespace model {
                                  utils::PtrHash, utils::PtrEq>;
 
         ProcessingMap map;
+        expr::ExprVector idents; /* keys of map, in first-use order */
 
         /* pass 1: build a scheleton map */
         for (DependencyTrackingMap::const_iterator i = f_dependency_tracking_map.begin();
@@ -118,6 +119,7 @@ namespace model {
             ProcessingMap::const_iterator pmi { map.find(ident) };
 
             if (map.end() == pmi) {
+                idents.push_back(ident);
                 map.insert(
                     std::pair<expr::Expr_ptr, expr::ExprVector>(
 			ident, expr::ExprVector())
@@ -187,11 +189,8 @@ namespace model {
         std::vector<compiler::Unit> compiled_invars; // Empty vector
         
         // Collect and compile all check expressions
-        for (ProcessingMap::iterator i = map.begin();
-             i != map.end(); ++i) {
-
-            expr::Expr_ptr ident { i->first };
-            const expr::ExprVector& ev { i->second };
+        for (expr::Expr_ptr ident : idents) {
+            const expr::ExprVector& ev { map.find(ident)->second };
 
             auto input_length { ev.size() };
             if (2 <= input_length) {
@@ -328,15 +327,19 @@ namespace model {
            <var> := var. */
         Module& main { mm.model().main_module() };
 
-        for (ProcessingMap::iterator i = map.begin();
-             i != map.end(); ++i) {
+        for (expr::Expr_ptr ident : idents) {
+            expr::ExprVector& ev { map.find(ident)->second };
 
-            expr::Expr_ptr ident { i->first };
-            expr::ExprVector& ev { i->second };
-
+            /* Newest guard first. The conjunction order decides the ADD
+               construction order, and with dynamic reordering enabled
+               that decides the variable order the whole CNF inherits:
+               on examples/fifteen the source order gives a 7x larger
+               formula (1.57M against 0.22M clauses) and a 7x slower
+               interpolation run than this order or the old hash order.
+               Measured 2026-10-27; see the solver comparison notes. */
             expr::Expr_ptr guard { NULL };
-            for (expr::ExprVector::const_iterator j = ev.begin();
-                 j != ev.end(); ++j) {
+            for (expr::ExprVector::const_reverse_iterator j = ev.rbegin();
+                 j != ev.rend(); ++j) {
 
                 expr::Expr_ptr expr { *j };
 

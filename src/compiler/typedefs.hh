@@ -34,6 +34,7 @@
 
 #include <expr/expr.hh>
 #include <expr/time/timed_expr.hh>
+#include <symb/typedefs.hh>
 
 #include <utils/pool.hh>
 
@@ -239,8 +240,10 @@ namespace compiler {
     using MultiwaySelectionDescriptors =
         std::vector<MultiwaySelectionDescriptor>;
 
+    /* Walked by the compiler's mux post-processing and by Engine::push.
+       Declaration order, see symb::OrderedPtrMap. */
     using Expr2BinarySelectionDescriptorsMap =
-        boost::unordered_map<expr::Expr_ptr, BinarySelectionDescriptors>;
+        symb::OrderedPtrMap<BinarySelectionDescriptors>;
 
     class Unit {
     public:

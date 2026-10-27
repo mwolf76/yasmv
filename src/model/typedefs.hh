@@ -30,6 +30,7 @@
 #include <common/common.hh>
 
 #include <boost/unordered_map.hpp>
+#include <symb/typedefs.hh>
 #include <utils/pool.hh>
 
 namespace model {
@@ -38,8 +39,8 @@ namespace model {
     using Module_ptr = class Module*;
 
 
-    using Modules = boost::unordered_map<expr::Expr_ptr, Module_ptr,
-					 utils::PtrHash, utils::PtrEq>;
+    /* declaration order, see symb::OrderedPtrMap */
+    using Modules = symb::OrderedPtrMap<Module_ptr>;
 
     using SymbolIndexMap = boost::unordered_map<expr::Expr_ptr, unsigned,
 						utils::PtrHash, utils::PtrEq>;

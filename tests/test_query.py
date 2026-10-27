@@ -265,6 +265,15 @@ class QueryTests(unittest.TestCase):
                 replay = self.job(model, {'operation': 'validate-trace', 'trace': trace}, options=options)
                 self.assertEqual(replay['outcome'], 'valid')
 
+    def test_cnf_is_identical_across_processes(self):
+        # Symbol, module and frame-condition order used to follow pointer
+        # hashes, so the CNF changed with the heap layout under ASLR.
+        maze = (ROOT / 'examples/maze/solvable8x8.smv').read_text()
+        query = dict(operation='check', variant='reachable', method='bmc', target='GOAL', limits={'depth': 6})
+        digests = {self.job(maze, query)['statistics']['cnf_digest'] for _ in range(3)}
+        self.assertEqual(len(digests), 1, digests)
+        self.assertTrue(next(iter(digests)).startswith('fnv1a64:'))
+
     def test_cadical_provenance(self):
         result = self.reach()
         identity = result['identity']
