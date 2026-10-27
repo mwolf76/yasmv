@@ -145,6 +145,8 @@ namespace sat {
         static const char* solver_signature();
         static bool solver_inprobing();
         static bool solver_lucky();
+        // Called by the owning QueryContext when it is destroyed first.
+        void release_context() { f_context = nullptr; }
 
         /**
 	 * @brief TCBI -> SAT variable mapping

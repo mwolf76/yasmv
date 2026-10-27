@@ -14,6 +14,7 @@
 #include <fstream>
 #include <sstream>
 #include <limits>
+#include <memory>
 #include <thread>
 #include <random>
 #include <set>
@@ -198,6 +199,43 @@ BOOST_AUTO_TEST_CASE(cadical_result_lifetime_and_limits)
     canceller.join();
     BOOST_CHECK(limited.solve() == sat::STATUS_UNKNOWN);
     BOOST_CHECK_THROW(limited.value(0), std::logic_error);
+}
+
+BOOST_AUTO_TEST_CASE(engine_outlives_query_context)
+{
+    // Clauses committed under a query feed its CNF digest. An engine that
+    // outlives the query must keep working and must not touch the dead
+    // context; the context clears the back-pointer when it goes.
+    const uint64_t basis = 14695981039346656037ull;
+    std::unique_ptr<sat::Engine> engine;
+    uint64_t digested = basis;
+    sat::Var first = 0;
+    {
+        query::QueryContext context;
+        query::ContextScope scope(context);
+        engine = std::make_unique<sat::Engine>("outliving");
+        first = engine->new_sat_var(true);
+        engine->add_clause({sat::mkLit(first)});
+        // Clauses are committed at solve time, which is when they are digested.
+        BOOST_REQUIRE(engine->solve() == sat::STATUS_SAT);
+        digested = context.cnf_digest;
+        BOOST_CHECK(digested != basis);
+    }
+    const auto second = engine->new_sat_var(true);
+    engine->add_clause({sat::mkLit(second, true)});
+    BOOST_REQUIRE(engine->solve() == sat::STATUS_SAT);
+    BOOST_CHECK(engine->value(first));
+    BOOST_CHECK(!engine->value(second));
+    engine.reset();
+
+    // The same clauses in the same order give the same digest in a new query.
+    query::QueryContext again;
+    query::ContextScope scope(again);
+    sat::Engine twin("outliving");
+    const auto x = twin.new_sat_var(true);
+    twin.add_clause({sat::mkLit(x)});
+    BOOST_REQUIRE(twin.solve() == sat::STATUS_SAT);
+    BOOST_CHECK(again.cnf_digest == digested);
 }
 
 BOOST_AUTO_TEST_CASE(cadical_search_budgets_and_accounting)

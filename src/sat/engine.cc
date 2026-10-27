@@ -168,7 +168,7 @@ namespace sat {
 
     Engine::~Engine()
     {
-        if (auto context = query::current()) context->detach(this);
+        if (f_context) f_context->detach(this);
         EngineMgr::INSTANCE().unregister_instance(this);
     }
 
