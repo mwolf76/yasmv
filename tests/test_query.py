@@ -38,6 +38,33 @@ class QueryTests(unittest.TestCase):
     def replay(self, trace, model=TOGGLE, expected=0, **kwargs):
         return self.job(model, {'operation': 'validate-trace', 'trace': trace, **kwargs}, expected)
 
+    def test_microcode_revision_is_cached_by_directory_fingerprint(self):
+        with tempfile.TemporaryDirectory() as cache:
+            env = dict(ENV, XDG_CACHE_HOME=cache)
+            def identity():
+                with tempfile.TemporaryDirectory() as directory:
+                    path = Path(directory)
+                    (path / 'model.smv').write_text(TOGGLE)
+                    (path / 'request.json').write_text(json.dumps(dict(version=1, model=str(path / 'model.smv'),
+                                                                         query=dict(operation='check', variant='init'))))
+                    p = subprocess.run([str(ROOT / 'yasmv'), '--quiet', '--query-file', str(path / 'request.json')],
+                                       text=True, capture_output=True, env=env, timeout=25)
+                    self.assertEqual(p.returncode, 0, p.stderr)
+                    return json.loads(p.stdout)['identity']
+            first = identity()
+            files = list((Path(cache) / 'yasmv').glob('microcode-*.digest'))
+            self.assertEqual(len(files), 1)
+            self.assertEqual(files[0].read_text().strip(), first['microcode_revision'])
+            self.assertEqual(identity(), first)
+            # A valid-looking cached digest is trusted while the fingerprint matches.
+            bogus = 'sha1:' + '0' * 40
+            files[0].write_text(bogus + '\n')
+            self.assertEqual(identity()['microcode_revision'], bogus)
+            # A corrupt cache entry is ignored and rewritten.
+            files[0].write_text('garbage\n')
+            self.assertEqual(identity(), first)
+            self.assertEqual(files[0].read_text().strip(), first['microcode_revision'])
+
     def test_bounded_scope_and_depths(self):
         no = self.reach(0)
         self.assertEqual((no['status'], no['outcome'], no['scope']), ('completed', 'unreachable', 'through_depth'))
