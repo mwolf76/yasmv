@@ -91,6 +91,15 @@ class QueryTests(unittest.TestCase):
             time.sleep(3.2)
             self.assertEqual(identity()['microcode_revision'], changed)
             self.assertEqual(len(entries()), 2)
+            # A fragment that cannot be read yields no cache entry.
+            if os.geteuid() != 0:
+                fragment.chmod(0)
+                try:
+                    time.sleep(3.2)
+                    identity()
+                    self.assertEqual(len(entries()), 2)
+                finally:
+                    fragment.chmod(0o644)
 
     def test_bounded_scope_and_depths(self):
         no = self.reach(0)

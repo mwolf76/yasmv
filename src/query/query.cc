@@ -157,11 +157,20 @@ namespace query {
                 return cached;
         }
 
+        // A fragment that cannot be opened or read in full must not leave a
+        // digest of partial data in the cache for later processes to trust.
+        bool complete = true;
         std::ostringstream data;
         for (const auto& f : files) {
-            std::ifstream in(f, std::ios::binary);
             checkpoint(Phase::loading);
-            data << f.filename().string() << '\0' << in.rdbuf() << '\0';
+            std::error_code size_error;
+            const auto expected = fs::file_size(f, size_error);
+            std::string bytes(size_error ? 0 : expected, '\0');
+            std::ifstream in(f, std::ios::binary);
+            if (!bytes.empty()) in.read(bytes.data(), bytes.size());
+            if (size_error || !in.is_open() || in.bad() || size_t(in.gcount()) != bytes.size() || in.peek() != std::ifstream::traits_type::eof())
+                complete = false;
+            data << f.filename().string() << '\0' << bytes << '\0';
         }
         const std::string digest = source::digest(data.str());
 
@@ -169,7 +178,7 @@ namespace query {
         // hashing, or a fragment modified within the timestamp window, is
         // reported but not remembered.
         const Snapshot after = snapshot();
-        if (!cache.empty() && !before.racy && !after.racy && after.fingerprint == before.fingerprint) {
+        if (!cache.empty() && complete && !before.racy && !after.racy && after.fingerprint == before.fingerprint) {
             fs::create_directories(cache.parent_path(), error);
             const fs::path temp = cache.string() + "." + std::to_string(::getpid()) + ".tmp";
             std::ofstream out(temp, std::ios::binary | std::ios::trunc);
