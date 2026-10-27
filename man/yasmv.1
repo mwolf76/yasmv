@@ -188,8 +188,11 @@ directory costs about 1.5 seconds per process, so the digest is cached in
 .IR $XDG_CACHE_HOME/yasmv/
 (default
 .IR ~/.cache/yasmv/ ),
-keyed by a fingerprint of the directory listing: path, and name, size and
-modification time of every fragment. Any change to the fragments is rehashed.
+keyed by a fingerprint of the directory listing: the path, and for every
+fragment its name, inode, size, modification time and change time. Any edit,
+replacement, addition or removal of a fragment is rehashed, including a
+rewrite that preserves size and modification time, since the change time
+cannot be set from user space.
 The cached value equals the uncached digest. Without a writable cache
 directory the digest is computed on every run.
 .SH SEE ALSO

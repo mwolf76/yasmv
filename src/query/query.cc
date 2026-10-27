@@ -13,6 +13,7 @@
 #include <query/expressions.hh>
 #include <query/query.hh>
 #include <query/trace.hh>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <witness/witness_mgr.hh>
 namespace query {
@@ -84,9 +85,12 @@ namespace query {
     // The microcode digest is part of every identity and used to cost a
     // SHA-1 over the whole directory, about 1.5 s per process. The digest
     // is cached under the XDG cache directory, keyed by a fingerprint of
-    // the directory listing (path, and name, size and mtime of every
-    // fragment). An edited, added, removed or reinstalled fragment changes
-    // the fingerprint and is rehashed; an unchanged set is not. The cached
+    // the directory listing: the path, and for every fragment its name,
+    // device and inode, size, mtime and ctime. Size and mtime alone miss a
+    // rewrite that keeps both (a timestamp-preserving restore); the inode
+    // catches a replace by rename and the ctime catches an in-place
+    // rewrite, since user space cannot set it. An edited, added, removed
+    // or reinstalled fragment is rehashed; an unchanged set is not. The cached
     // value is the digest the uncached computation produces, so identities
     // and saved traces are unaffected. A missing or unwritable cache
     // directory falls back to hashing every time.
@@ -101,9 +105,17 @@ namespace query {
         std::error_code error;
         std::ostringstream listing;
         listing << fs::absolute(path, error).string() << '\0';
-        for (const auto& f : files)
-            listing << f.filename().string() << '\0' << fs::file_size(f, error) << '\0'
-                    << fs::last_write_time(f, error).time_since_epoch().count() << '\0';
+        for (const auto& f : files) {
+            struct stat st;
+            listing << f.filename().string() << '\0';
+            if (::stat(f.c_str(), &st) != 0) {
+                listing << "unreadable" << '\0';
+                continue;
+            }
+            listing << st.st_dev << ':' << st.st_ino << '\0' << st.st_size << '\0'
+                    << st.st_mtim.tv_sec << '.' << st.st_mtim.tv_nsec << '\0'
+                    << st.st_ctim.tv_sec << '.' << st.st_ctim.tv_nsec << '\0';
+        }
         const std::string fingerprint = source::digest(listing.str());
 
         fs::path cache;
