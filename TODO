@@ -10,9 +10,6 @@ Backward BMC strategy works ok (and strangely somewhat faster than forward
 strategy?) but it produces reversed CTX witnesses. It would be nice to have them
 straight.
 
-Name ordering not preserved in witnesses. It would be nice to preserve symbol
-declaration ordering.
-
 Unsynchronized logging output from concurrent threads can jumble up messages.
 Would be possible to synchronize logging without losing locality information?
 

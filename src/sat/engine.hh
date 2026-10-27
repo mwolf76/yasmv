@@ -145,6 +145,14 @@ namespace sat {
         static const char* solver_signature();
         static bool solver_inprobing();
         static bool solver_lucky();
+        // Called by a QueryContext being destroyed with this engine still
+        // attached. Only the context the engine was created under owns the
+        // back-pointer; a secondary attachment (explanation shrinking) must
+        // not clear it, or the engine could never detach from its owner.
+        void release_context(const query::QueryContext* context)
+        {
+            if (f_context == context) f_context = nullptr;
+        }
 
         /**
 	 * @brief TCBI -> SAT variable mapping
@@ -227,6 +235,8 @@ namespace sat {
 
     private:
         const char* f_instance_name;
+        // Query this engine was created under, if any; receives the CNF digest.
+        query::QueryContext* f_context { nullptr };
         Mode f_mode;
         LitsVector f_recorded_clauses;
 

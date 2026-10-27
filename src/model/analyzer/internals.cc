@@ -91,12 +91,12 @@ namespace model {
 
         // Handle single assignment
         if (const expr::Expr_ptr action = expr->rhs(); em.is_assignment(action)) {
-            f_dependency_tracking_map.insert(std::make_pair(guard, action->lhs()));
+            f_dependency_tracking_map.push_back(std::make_pair(guard, action->lhs()));
         } else if (em.is_and(action)) {
             expr::Expr_ptr current = action;
             while (em.is_and(current)) {
                 if (const expr::Expr_ptr inner_action { current->lhs() }; em.is_assignment(inner_action)) {
-                    f_dependency_tracking_map.insert(
+                    f_dependency_tracking_map.push_back(
                         std::make_pair(guard, inner_action->lhs())
                     );
                 }
@@ -104,7 +104,7 @@ namespace model {
             }
             // Process the last element
             if (em.is_assignment(current)) {
-                f_dependency_tracking_map.insert(std::make_pair(guard, current->lhs()));
+                f_dependency_tracking_map.push_back(std::make_pair(guard, current->lhs()));
             }
         }
     }

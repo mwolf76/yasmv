@@ -62,6 +62,11 @@ namespace query {
         {
             std::lock_guard<std::mutex> lock(mutex);
             finished = true;
+            // Engines may outlive the query they were created under. Clear
+            // their back-pointer so later clause commits stop reporting
+            // to freed memory; those clauses are simply not digested.
+            for (auto engine : engines) engine->release_context(this);
+            engines.clear();
         }
         cv.notify_all();
         timer.join();

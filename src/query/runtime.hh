@@ -60,6 +60,16 @@ namespace query {
         uint64_t conflicts_used = 0, propagations_used = 0;
         uint64_t variables = 0, clauses = 0;
         std::atomic<uint64_t> solver_calls { 0 };
+        // Order-sensitive FNV-1a over every literal committed to every
+        // engine of this query, in commit order; a clause ends with a 0.
+        // Two processes that build the same formula in the same order
+        // report the same value. Surfaced as statistics.cnf_digest.
+        uint64_t cnf_digest { 14695981039346656037ull };
+        void absorb(int64_t literal)
+        {
+            uint64_t value = uint64_t(literal);
+            for (int i = 0; i < 8; ++i, value >>= 8) cnf_digest = (cnf_digest ^ (value & 0xff)) * 1099511628211ull;
+        }
         double compile_ms = 0, encode_ms = 0, solve_ms = 0, decode_ms = 0;
         // Deterministic cancellation at actual work boundaries, also useful to embedders.
         std::function<void(Phase)> checkpoint_hook;
