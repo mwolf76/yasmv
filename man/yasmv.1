@@ -174,6 +174,29 @@ Witness: reach_1 [[ Reachability witness for target `GOAL` in module `ferryman` 
 << Bye
 .fi
 .PP
+.SH ENVIRONMENT
+.TP
+.B YASMV_HOME
+Data directory holding
+.IR microcode/ .
+When unset, the first directory holding the microcode is used: next to the
+binary, ../share/yasmv, the configured data directory, then the source tree.
+.TP
+.B XDG_CACHE_HOME
+Query identities include a digest of every microcode fragment. Hashing the
+directory costs about 1.5 seconds per process, so the digest is cached in
+.IR $XDG_CACHE_HOME/yasmv/
+(default
+.IR ~/.cache/yasmv/ ),
+keyed by a fingerprint of the directory listing: the path, and for every
+fragment its name, inode, size, modification time and change time. Any edit,
+replacement, addition or removal of a fragment is rehashed, including a
+rewrite that preserves size and modification time, since the change time
+cannot be set from user space. An entry is stored only when the listing is
+unchanged across the hash and no fragment was modified in the last three
+seconds, so a change inside one timestamp tick cannot be cached.
+The cached value equals the uncached digest. Without a writable cache
+directory the digest is computed on every run.
 .SH SEE ALSO
 .BR yasmv-lang (1),
 .BR yasmv-usage (1),

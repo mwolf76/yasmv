@@ -3,6 +3,7 @@
 #include <algorithms/reach/witness.hh>
 #include <algorithms/sim/simulation.hh>
 #include <cmath>
+#include <ctime>
 #include <env/environment.hh>
 #include <expr/time/analyzer/analyzer.hh>
 #include <expr/time/expander/expander.hh>
@@ -14,6 +15,8 @@
 #include <query/expressions.hh>
 #include <query/query.hh>
 #include <query/trace.hh>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <witness/witness_mgr.hh>
 namespace query {
     static const char* name(ExecutionStatus s)
@@ -81,6 +84,113 @@ namespace query {
             v["diagnostics"].append(d.json());
         return v;
     }
+    // The microcode digest is part of every identity and used to cost a
+    // SHA-1 over the whole directory, about 1.5 s per process. The digest
+    // is cached under the XDG cache directory, keyed by a fingerprint of
+    // the directory listing: the path, and for every fragment its name,
+    // device and inode, size, mtime and ctime. Size and mtime alone miss a
+    // rewrite that keeps both (a timestamp-preserving restore); the inode
+    // catches a replace by rename and the ctime catches an in-place
+    // rewrite, since user space cannot set it. An edited, added, removed
+    // or reinstalled fragment is rehashed; an unchanged set is not. The cached
+    // value is the digest the uncached computation produces, so identities
+    // and saved traces are unaffected. A missing or unwritable cache
+    // directory falls back to hashing every time.
+    //
+    // Timestamps have filesystem granularity, so a rewrite inside the same
+    // tick as the snapshot could hide behind identical metadata (the racy
+    // index problem git solves the same way). An entry is only stored when
+    // the listing is identical before and after hashing and no fragment was
+    // modified within the last three seconds; a fresh install is simply
+    // hashed on its first runs and cached once it has settled.
+    static std::string microcode_revision(const std::filesystem::path& path)
+    {
+        namespace fs = std::filesystem;
+        std::vector<fs::path> files;
+        for (const auto& f : fs::directory_iterator(path))
+            if (f.path().extension() == ".json") files.push_back(f.path());
+        std::sort(files.begin(), files.end());
+
+        std::error_code error;
+        struct Snapshot { std::string fingerprint; bool racy; };
+        const auto snapshot = [&]() {
+            // Compared at nanosecond precision against the realtime clock.
+            // Coarse filesystems truncate timestamps, which only makes a
+            // fragment look older, so the window covers a 2 s tick plus margin.
+            struct timespec now;
+            ::clock_gettime(CLOCK_REALTIME, &now);
+            const int64_t settled = int64_t(now.tv_sec) * 1000000000 + now.tv_nsec - 3000000000;
+            const auto stamp = [](const struct timespec& t) { return int64_t(t.tv_sec) * 1000000000 + t.tv_nsec; };
+            bool racy = false;
+            std::ostringstream listing;
+            listing << fs::absolute(path, error).string() << '\0';
+            for (const auto& f : files) {
+                struct stat st;
+                checkpoint(Phase::loading);
+                listing << f.filename().string() << '\0';
+                if (::stat(f.c_str(), &st) != 0) {
+                    listing << "unreadable" << '\0';
+                    racy = true;
+                    continue;
+                }
+                listing << st.st_dev << ':' << st.st_ino << '\0' << st.st_size << '\0'
+                        << st.st_mtim.tv_sec << '.' << st.st_mtim.tv_nsec << '\0'
+                        << st.st_ctim.tv_sec << '.' << st.st_ctim.tv_nsec << '\0';
+                if (stamp(st.st_mtim) > settled || stamp(st.st_ctim) > settled) racy = true;
+            }
+            return Snapshot { source::digest(listing.str()), racy };
+        };
+        const Snapshot before = snapshot();
+        const std::string& fingerprint = before.fingerprint;
+
+        fs::path cache;
+        if (const char* xdg = std::getenv("XDG_CACHE_HOME"); xdg && *xdg)
+            cache = fs::path(xdg) / "yasmv";
+        else if (const char* user_home = std::getenv("HOME"); user_home && *user_home)
+            cache = fs::path(user_home) / ".cache" / "yasmv";
+        if (!cache.empty()) {
+            cache /= "microcode-" + fingerprint.substr(fingerprint.find(':') + 1) + ".digest";
+            // A racy snapshot is neither stored nor trusted: metadata younger
+            // than the window could belong to a same-tick rewrite.
+            std::ifstream in(cache);
+            std::string cached;
+            if (!before.racy && in && std::getline(in, cached) && cached.rfind("sha1:", 0) == 0 && cached.size() == 45)
+                return cached;
+        }
+
+        // A fragment that cannot be opened or read in full must not leave a
+        // digest of partial data in the cache for later processes to trust.
+        bool complete = true;
+        std::ostringstream data;
+        for (const auto& f : files) {
+            checkpoint(Phase::loading);
+            std::error_code size_error;
+            const auto expected = fs::file_size(f, size_error);
+            std::string bytes(size_error ? 0 : expected, '\0');
+            std::ifstream in(f, std::ios::binary);
+            if (!bytes.empty()) in.read(bytes.data(), bytes.size());
+            if (size_error || !in.is_open() || in.bad() || size_t(in.gcount()) != bytes.size() || in.peek() != std::ifstream::traits_type::eof())
+                complete = false;
+            data << f.filename().string() << '\0' << bytes << '\0';
+        }
+        const std::string digest = source::digest(data.str());
+
+        // Store only a stable, settled snapshot. A listing that changed while
+        // hashing, or a fragment modified within the timestamp window, is
+        // reported but not remembered.
+        const Snapshot after = snapshot();
+        if (!cache.empty() && complete && !before.racy && !after.racy && after.fingerprint == before.fingerprint) {
+            fs::create_directories(cache.parent_path(), error);
+            const fs::path temp = cache.string() + "." + std::to_string(::getpid()) + ".tmp";
+            std::ofstream out(temp, std::ios::binary | std::ios::trunc);
+            out << digest << '\n';
+            out.close();
+            if (out) fs::rename(temp, cache, error);
+            fs::remove(temp, error);
+        }
+        return digest;
+    }
+
     Json::Value identity()
     {
         Json::Value v;
@@ -126,19 +236,7 @@ namespace query {
         static std::string fragments;
         if (fragments.empty()) {
             const char* home = std::getenv("YASMV_HOME");
-            std::filesystem::path path = home ? home : ".";
-            path = std::string(home ? home : ".") + om.cnf_microcode_directory();
-            std::vector<std::filesystem::path> files;
-            for (const auto& f : std::filesystem::directory_iterator(path))
-                if (f.path().extension() == ".json") files.push_back(f.path());
-            std::sort(files.begin(), files.end());
-            std::ostringstream data;
-            for (const auto& f : files) {
-                std::ifstream in(f, std::ios::binary);
-                checkpoint(Phase::loading);
-                data << f.filename().string() << '\0' << in.rdbuf() << '\0';
-            }
-            fragments = source::digest(data.str());
+            fragments = microcode_revision(std::string(home ? home : ".") + om.cnf_microcode_directory());
         }
         v["microcode_revision"] = fragments;
         Json::StreamWriterBuilder builder;

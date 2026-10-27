@@ -6,8 +6,10 @@ import itertools
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,6 +39,67 @@ class QueryTests(unittest.TestCase):
 
     def replay(self, trace, model=TOGGLE, expected=0, **kwargs):
         return self.job(model, {'operation': 'validate-trace', 'trace': trace, **kwargs}, expected)
+
+    def test_microcode_revision_is_cached_by_directory_fingerprint(self):
+        # An isolated data directory with a few fragments: the shipped
+        # microcode is shared build data and must not be touched by tests.
+        with tempfile.TemporaryDirectory() as cache, tempfile.TemporaryDirectory() as home:
+            fragments = Path(home) / 'microcode'
+            fragments.mkdir()
+            for source in sorted((ROOT / 'microcode').glob('*.json'))[:3]:
+                shutil.copy2(source, fragments / source.name)
+            (Path(home) / 'model.smv').write_text(TOGGLE)
+            (Path(home) / 'request.json').write_text(json.dumps(dict(version=1, model=str(Path(home) / 'model.smv'),
+                                                                     query=dict(operation='check', variant='init'))))
+            env = dict(ENV, YASMV_HOME=home, XDG_CACHE_HOME=cache)
+            def identity():
+                p = subprocess.run([str(ROOT / 'yasmv'), '--quiet', '--query-file', str(Path(home) / 'request.json')],
+                                   text=True, capture_output=True, env=env, timeout=25)
+                self.assertEqual(p.returncode, 0, p.stderr)
+                return json.loads(p.stdout)['identity']
+            def entries():
+                return sorted((Path(cache) / 'yasmv').glob('microcode-*.digest')) if (Path(cache) / 'yasmv').is_dir() else []
+            # Freshly written fragments are inside the timestamp window: the
+            # digest is computed but not stored, since a same-tick rewrite could
+            # hide behind identical metadata.
+            first = identity()
+            self.assertEqual(entries(), [])
+            time.sleep(3.2)
+            self.assertEqual(identity(), first)
+            files = entries()
+            self.assertEqual(len(files), 1)
+            self.assertEqual(files[0].read_text().strip(), first['microcode_revision'])
+            # A valid-looking cached digest is trusted while the fingerprint matches.
+            bogus = 'sha1:' + '0' * 40
+            files[0].write_text(bogus + '\n')
+            self.assertEqual(identity()['microcode_revision'], bogus)
+            # A corrupt cache entry is ignored and rewritten.
+            files[0].write_text('garbage\n')
+            self.assertEqual(identity(), first)
+            self.assertEqual(files[0].read_text().strip(), first['microcode_revision'])
+            # A same-size rewrite with the modification time restored is a new
+            # fingerprint: the change time cannot be set from user space.
+            fragment = sorted(fragments.glob('*.json'))[0]
+            stamp = fragment.stat()
+            data = bytearray(fragment.read_bytes())
+            data[data.rfind(b' ')] = ord('\t')
+            fragment.write_bytes(bytes(data))
+            os.utime(fragment, ns=(stamp.st_atime_ns, stamp.st_mtime_ns))
+            changed = identity()['microcode_revision']
+            self.assertNotEqual(changed, first['microcode_revision'])
+            self.assertEqual(len(entries()), 1)
+            time.sleep(3.2)
+            self.assertEqual(identity()['microcode_revision'], changed)
+            self.assertEqual(len(entries()), 2)
+            # A fragment that cannot be read yields no cache entry.
+            if os.geteuid() != 0:
+                fragment.chmod(0)
+                try:
+                    time.sleep(3.2)
+                    identity()
+                    self.assertEqual(len(entries()), 2)
+                finally:
+                    fragment.chmod(0o644)
 
     def test_bounded_scope_and_depths(self):
         no = self.reach(0)
