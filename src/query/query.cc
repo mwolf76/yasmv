@@ -125,6 +125,7 @@ namespace query {
             listing << fs::absolute(path, error).string() << '\0';
             for (const auto& f : files) {
                 struct stat st;
+                checkpoint(Phase::loading);
                 listing << f.filename().string() << '\0';
                 if (::stat(f.c_str(), &st) != 0) {
                     listing << "unreadable" << '\0';
