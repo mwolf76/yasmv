@@ -3,6 +3,7 @@
 #include <algorithms/reach/witness.hh>
 #include <algorithms/sim/simulation.hh>
 #include <cmath>
+#include <ctime>
 #include <env/environment.hh>
 #include <expr/time/analyzer/analyzer.hh>
 #include <expr/time/expander/expander.hh>
@@ -94,6 +95,13 @@ namespace query {
     // value is the digest the uncached computation produces, so identities
     // and saved traces are unaffected. A missing or unwritable cache
     // directory falls back to hashing every time.
+    //
+    // Timestamps have filesystem granularity, so a rewrite inside the same
+    // tick as the snapshot could hide behind identical metadata (the racy
+    // index problem git solves the same way). An entry is only stored when
+    // the listing is identical before and after hashing and no fragment was
+    // modified within the last two seconds; a fresh install is simply
+    // hashed on its first runs and cached once it has settled.
     static std::string microcode_revision(const std::filesystem::path& path)
     {
         namespace fs = std::filesystem;
@@ -103,20 +111,29 @@ namespace query {
         std::sort(files.begin(), files.end());
 
         std::error_code error;
-        std::ostringstream listing;
-        listing << fs::absolute(path, error).string() << '\0';
-        for (const auto& f : files) {
-            struct stat st;
-            listing << f.filename().string() << '\0';
-            if (::stat(f.c_str(), &st) != 0) {
-                listing << "unreadable" << '\0';
-                continue;
+        struct Snapshot { std::string fingerprint; bool racy; };
+        const auto snapshot = [&]() {
+            const time_t settled = ::time(nullptr) - 2;
+            bool racy = false;
+            std::ostringstream listing;
+            listing << fs::absolute(path, error).string() << '\0';
+            for (const auto& f : files) {
+                struct stat st;
+                listing << f.filename().string() << '\0';
+                if (::stat(f.c_str(), &st) != 0) {
+                    listing << "unreadable" << '\0';
+                    racy = true;
+                    continue;
+                }
+                listing << st.st_dev << ':' << st.st_ino << '\0' << st.st_size << '\0'
+                        << st.st_mtim.tv_sec << '.' << st.st_mtim.tv_nsec << '\0'
+                        << st.st_ctim.tv_sec << '.' << st.st_ctim.tv_nsec << '\0';
+                if (st.st_mtim.tv_sec >= settled || st.st_ctim.tv_sec >= settled) racy = true;
             }
-            listing << st.st_dev << ':' << st.st_ino << '\0' << st.st_size << '\0'
-                    << st.st_mtim.tv_sec << '.' << st.st_mtim.tv_nsec << '\0'
-                    << st.st_ctim.tv_sec << '.' << st.st_ctim.tv_nsec << '\0';
-        }
-        const std::string fingerprint = source::digest(listing.str());
+            return Snapshot { source::digest(listing.str()), racy };
+        };
+        const Snapshot before = snapshot();
+        const std::string& fingerprint = before.fingerprint;
 
         fs::path cache;
         if (const char* xdg = std::getenv("XDG_CACHE_HOME"); xdg && *xdg)
@@ -139,7 +156,11 @@ namespace query {
         }
         const std::string digest = source::digest(data.str());
 
-        if (!cache.empty()) {
+        // Store only a stable, settled snapshot. A listing that changed while
+        // hashing, or a fragment modified within the timestamp window, is
+        // reported but not remembered.
+        const Snapshot after = snapshot();
+        if (!cache.empty() && !before.racy && !after.racy && after.fingerprint == before.fingerprint) {
             fs::create_directories(cache.parent_path(), error);
             const fs::path temp = cache.string() + "." + std::to_string(::getpid()) + ".tmp";
             std::ofstream out(temp, std::ios::binary | std::ios::trunc);

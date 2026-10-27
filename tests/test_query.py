@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +65,16 @@ class QueryTests(unittest.TestCase):
             files[0].write_text('garbage\n')
             self.assertEqual(identity(), first)
             self.assertEqual(files[0].read_text().strip(), first['microcode_revision'])
+            # A fragment modified within the timestamp window is hashed but not
+            # cached, since a rewrite inside the same tick could hide behind
+            # identical metadata; once it has settled the entry is stored.
+            fragment = sorted((ROOT / 'microcode').glob('*.json'))[0]
+            os.utime(fragment, None)
+            self.assertEqual(identity(), first)
+            self.assertEqual(len(list((Path(cache) / 'yasmv').glob('microcode-*.digest'))), 1)
+            time.sleep(2.2)
+            self.assertEqual(identity(), first)
+            self.assertEqual(len(list((Path(cache) / 'yasmv').glob('microcode-*.digest'))), 2)
 
     def test_bounded_scope_and_depths(self):
         no = self.reach(0)
