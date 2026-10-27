@@ -6,6 +6,7 @@ import itertools
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import time
@@ -40,23 +41,34 @@ class QueryTests(unittest.TestCase):
         return self.job(model, {'operation': 'validate-trace', 'trace': trace, **kwargs}, expected)
 
     def test_microcode_revision_is_cached_by_directory_fingerprint(self):
-        with tempfile.TemporaryDirectory() as cache:
-            env = dict(ENV, XDG_CACHE_HOME=cache)
+        # An isolated data directory with a few fragments: the shipped
+        # microcode is shared build data and must not be touched by tests.
+        with tempfile.TemporaryDirectory() as cache, tempfile.TemporaryDirectory() as home:
+            fragments = Path(home) / 'microcode'
+            fragments.mkdir()
+            for source in sorted((ROOT / 'microcode').glob('*.json'))[:3]:
+                shutil.copy2(source, fragments / source.name)
+            (Path(home) / 'model.smv').write_text(TOGGLE)
+            (Path(home) / 'request.json').write_text(json.dumps(dict(version=1, model=str(Path(home) / 'model.smv'),
+                                                                     query=dict(operation='check', variant='init'))))
+            env = dict(ENV, YASMV_HOME=home, XDG_CACHE_HOME=cache)
             def identity():
-                with tempfile.TemporaryDirectory() as directory:
-                    path = Path(directory)
-                    (path / 'model.smv').write_text(TOGGLE)
-                    (path / 'request.json').write_text(json.dumps(dict(version=1, model=str(path / 'model.smv'),
-                                                                         query=dict(operation='check', variant='init'))))
-                    p = subprocess.run([str(ROOT / 'yasmv'), '--quiet', '--query-file', str(path / 'request.json')],
-                                       text=True, capture_output=True, env=env, timeout=25)
-                    self.assertEqual(p.returncode, 0, p.stderr)
-                    return json.loads(p.stdout)['identity']
+                p = subprocess.run([str(ROOT / 'yasmv'), '--quiet', '--query-file', str(Path(home) / 'request.json')],
+                                   text=True, capture_output=True, env=env, timeout=25)
+                self.assertEqual(p.returncode, 0, p.stderr)
+                return json.loads(p.stdout)['identity']
+            def entries():
+                return sorted((Path(cache) / 'yasmv').glob('microcode-*.digest')) if (Path(cache) / 'yasmv').is_dir() else []
+            # Freshly written fragments are inside the timestamp window: the
+            # digest is computed but not stored, since a same-tick rewrite could
+            # hide behind identical metadata.
             first = identity()
-            files = list((Path(cache) / 'yasmv').glob('microcode-*.digest'))
+            self.assertEqual(entries(), [])
+            time.sleep(3.2)
+            self.assertEqual(identity(), first)
+            files = entries()
             self.assertEqual(len(files), 1)
             self.assertEqual(files[0].read_text().strip(), first['microcode_revision'])
-            self.assertEqual(identity(), first)
             # A valid-looking cached digest is trusted while the fingerprint matches.
             bogus = 'sha1:' + '0' * 40
             files[0].write_text(bogus + '\n')
@@ -65,16 +77,20 @@ class QueryTests(unittest.TestCase):
             files[0].write_text('garbage\n')
             self.assertEqual(identity(), first)
             self.assertEqual(files[0].read_text().strip(), first['microcode_revision'])
-            # A fragment modified within the timestamp window is hashed but not
-            # cached, since a rewrite inside the same tick could hide behind
-            # identical metadata; once it has settled the entry is stored.
-            fragment = sorted((ROOT / 'microcode').glob('*.json'))[0]
-            os.utime(fragment, None)
-            self.assertEqual(identity(), first)
-            self.assertEqual(len(list((Path(cache) / 'yasmv').glob('microcode-*.digest'))), 1)
-            time.sleep(2.2)
-            self.assertEqual(identity(), first)
-            self.assertEqual(len(list((Path(cache) / 'yasmv').glob('microcode-*.digest'))), 2)
+            # A same-size rewrite with the modification time restored is a new
+            # fingerprint: the change time cannot be set from user space.
+            fragment = sorted(fragments.glob('*.json'))[0]
+            stamp = fragment.stat()
+            data = bytearray(fragment.read_bytes())
+            data[data.rfind(b' ')] = ord('\t')
+            fragment.write_bytes(bytes(data))
+            os.utime(fragment, ns=(stamp.st_atime_ns, stamp.st_mtime_ns))
+            changed = identity()['microcode_revision']
+            self.assertNotEqual(changed, first['microcode_revision'])
+            self.assertEqual(len(entries()), 1)
+            time.sleep(3.2)
+            self.assertEqual(identity()['microcode_revision'], changed)
+            self.assertEqual(len(entries()), 2)
 
     def test_bounded_scope_and_depths(self):
         no = self.reach(0)

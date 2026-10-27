@@ -100,7 +100,7 @@ namespace query {
     // tick as the snapshot could hide behind identical metadata (the racy
     // index problem git solves the same way). An entry is only stored when
     // the listing is identical before and after hashing and no fragment was
-    // modified within the last two seconds; a fresh install is simply
+    // modified within the last three seconds; a fresh install is simply
     // hashed on its first runs and cached once it has settled.
     static std::string microcode_revision(const std::filesystem::path& path)
     {
@@ -113,7 +113,13 @@ namespace query {
         std::error_code error;
         struct Snapshot { std::string fingerprint; bool racy; };
         const auto snapshot = [&]() {
-            const time_t settled = ::time(nullptr) - 2;
+            // Compared at nanosecond precision against the realtime clock.
+            // Coarse filesystems truncate timestamps, which only makes a
+            // fragment look older, so the window covers a 2 s tick plus margin.
+            struct timespec now;
+            ::clock_gettime(CLOCK_REALTIME, &now);
+            const int64_t settled = int64_t(now.tv_sec) * 1000000000 + now.tv_nsec - 3000000000;
+            const auto stamp = [](const struct timespec& t) { return int64_t(t.tv_sec) * 1000000000 + t.tv_nsec; };
             bool racy = false;
             std::ostringstream listing;
             listing << fs::absolute(path, error).string() << '\0';
@@ -128,7 +134,7 @@ namespace query {
                 listing << st.st_dev << ':' << st.st_ino << '\0' << st.st_size << '\0'
                         << st.st_mtim.tv_sec << '.' << st.st_mtim.tv_nsec << '\0'
                         << st.st_ctim.tv_sec << '.' << st.st_ctim.tv_nsec << '\0';
-                if (st.st_mtim.tv_sec >= settled || st.st_ctim.tv_sec >= settled) racy = true;
+                if (stamp(st.st_mtim) > settled || stamp(st.st_ctim) > settled) racy = true;
             }
             return Snapshot { source::digest(listing.str()), racy };
         };
@@ -142,9 +148,11 @@ namespace query {
             cache = fs::path(user_home) / ".cache" / "yasmv";
         if (!cache.empty()) {
             cache /= "microcode-" + fingerprint.substr(fingerprint.find(':') + 1) + ".digest";
+            // A racy snapshot is neither stored nor trusted: metadata younger
+            // than the window could belong to a same-tick rewrite.
             std::ifstream in(cache);
             std::string cached;
-            if (in && std::getline(in, cached) && cached.rfind("sha1:", 0) == 0 && cached.size() == 45)
+            if (!before.racy && in && std::getline(in, cached) && cached.rfind("sha1:", 0) == 0 && cached.size() == 45)
                 return cached;
         }
 

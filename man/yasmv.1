@@ -193,7 +193,7 @@ fragment its name, inode, size, modification time and change time. Any edit,
 replacement, addition or removal of a fragment is rehashed, including a
 rewrite that preserves size and modification time, since the change time
 cannot be set from user space. An entry is stored only when the listing is
-unchanged across the hash and no fragment was modified in the last two
+unchanged across the hash and no fragment was modified in the last three
 seconds, so a change inside one timestamp tick cannot be cached.
 The cached value equals the uncached digest. Without a writable cache
 directory the digest is computed on every run.
