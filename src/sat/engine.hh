@@ -227,6 +227,8 @@ namespace sat {
 
     private:
         const char* f_instance_name;
+        // Query this engine was created under, if any; receives the CNF digest.
+        query::QueryContext* f_context { nullptr };
         Mode f_mode;
         LitsVector f_recorded_clauses;
 

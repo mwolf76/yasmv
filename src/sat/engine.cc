@@ -41,14 +41,6 @@ namespace sat {
         std::vector<int> variables;
         std::atomic<bool> interrupted {false};
         uint64_t solves = 0, clauses = 0;
-        // Order-sensitive FNV-1a over every literal of every committed
-        // clause, so two processes that built the same formula in the
-        // same order report the same value. Surfaced as cnf_digest.
-        uint64_t digest = 14695981039346656037ull;
-        void absorb(uint64_t value)
-        {
-            for (int i = 0; i < 8; ++i, value >>= 8) digest = (digest ^ (value & 0xff)) * 1099511628211ull;
-        }
         int64_t configured_conflicts = -1, configured_propagations = -1;
         uint64_t configured_conflict_base = 0, configured_propagation_base = 0;
         uint64_t conflict_base = 0, propagation_base = 0;
@@ -163,7 +155,10 @@ namespace sat {
         // Internal zero remains the main group/true microcode constant.
         f_groups.push_back(new_sat_var(true));
         if (mode == Mode::proof) add_proof_clause({mkLit(0)}, proof::Partition::a);
-        if (auto context = query::current()) context->attach(this);
+        if (auto context = query::current()) {
+            context->attach(this);
+            f_context = context;
+        }
         EngineMgr::INSTANCE().register_instance(this);
     }
 
@@ -255,8 +250,10 @@ namespace sat {
         for (auto literal : literals) b.solver.add(b.literal(literal));
         b.solver.add(0);
         ++b.clauses;
-        for (auto literal : literals) b.absorb(uint64_t(int64_t(b.literal(literal))));
-        b.absorb(0);
+        if (f_context) {
+            for (auto literal : literals) f_context->absorb(b.literal(literal));
+            f_context->absorb(0);
+        }
         if (f_mode == Mode::record) f_recorded_clauses.push_back(literals);
         if (b.tracer) b.tracer->check();
     }
@@ -369,7 +366,6 @@ namespace sat {
             context->propagations_used += b.counter("propagations") - b.propagation_base;
             context->variables = std::max(context->variables, uint64_t(b.variables.size()));
             context->clauses = std::max(context->clauses, b.clauses);
-            context->cnf_digest = (context->cnf_digest ^ b.digest) * 1099511628211ull;
             if (reason != query::StopReason::none) context->cancel(reason);
             else if (b.interrupted.load(std::memory_order_relaxed)) context->cancel();
             else if (f_status == STATUS_UNKNOWN) context->cancel(query::StopReason::solver_unknown);
