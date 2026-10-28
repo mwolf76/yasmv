@@ -1,3 +1,4 @@
+#include <set>
 #include <query/runtime.hh>
 #include <atomic>
 /**
@@ -183,14 +184,24 @@ namespace compiler {
             InlinedOperatorDescriptors iods {
                 f_inlined_operator_descriptors.begin() + marks.iod,
                 f_inlined_operator_descriptors.end() };
+            /* The log may hold a mux chain more than once when a cached
+               ITE was replayed inside this subtree. A chain's activation
+               constraints depend on its order, so each descriptor is kept
+               once, at its first position; the auxiliary variable is
+               unique per descriptor. */
             Expr2BinarySelectionDescriptorsMap bsds;
+            std::set<std::pair<expr::Expr_ptr, DdNode*>> seen;
             for (std::size_t b = marks.bsd; b < f_bsd_log.size(); ++b) {
                 const expr::Expr_ptr parent { f_bsd_log[b].first };
+                const BinarySelectionDescriptor& d { f_bsd_log[b].second };
+                if (!seen.insert(std::make_pair(parent, d.aux().getNode())).second) {
+                    continue;
+                }
                 if (bsds.end() == bsds.find(parent)) {
                     bsds.insert(std::pair<expr::Expr_ptr, BinarySelectionDescriptors>(
                         parent, BinarySelectionDescriptors()));
                 }
-                bsds.find(parent)->second.push_back(f_bsd_log[b].second);
+                bsds.find(parent)->second.push_back(d);
             }
             MultiwaySelectionDescriptors msds {
                 f_multiway_selection_descriptors.begin() + marks.msd,
@@ -259,12 +270,15 @@ namespace compiler {
                     unit.binary_selection_descriptors_map()
                 };
 
+                /* The map keeps the first chain installed for a key in
+                   this unit. The log records the dependency in any case,
+                   so an enclosing memoization carries the mux even when
+                   the same key was already installed earlier in the unit. */
                 Expr2BinarySelectionDescriptorsMap::const_iterator i;
                 for (i = map.begin(); map.end() != i; ++i) {
-                    if (f_expr2bsd_map.insert(*i).second) {
-                        for (const auto& d : i->second) {
-                            f_bsd_log.push_back(std::make_pair(i->first, d));
-                        }
+                    f_expr2bsd_map.insert(*i);
+                    for (const auto& d : i->second) {
+                        f_bsd_log.push_back(std::make_pair(i->first, d));
                     }
                 }
             }
