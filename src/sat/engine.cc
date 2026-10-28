@@ -69,6 +69,14 @@ namespace sat {
                 // so each depth paid them for nothing (measured 2026-10-27:
                 // up to 24x on bounded LLVM safety checks).
                 !solver.set("lucky", Engine::solver_lucky()) ||
+                // Initial decision phase. CaDiCaL defaults to positive;
+                // MiniSat decides negative first, and the formulas yasmv
+                // emits (Tseitin over ADDs, microcode operators, selectors,
+                // muxes) are mostly false in any model. Measured 2026-10-28
+                // over four seeds: hanoi5 median 106 s to 22 s, hanoi4 and
+                // maze8 1.4x faster, mazes and LLVM about 10% slower, and
+                // the seed instability of the positive phase is gone.
+                !solver.set("phase", Engine::solver_phase()) ||
                 !solver.set("seed", opts::OptsMgr::INSTANCE().sat_random_seed()))
                 throw std::runtime_error("Invalid CaDiCaL configuration");
             solver.connect_terminator(this);
@@ -109,6 +117,7 @@ namespace sat {
     const char* Engine::solver_signature() { return CaDiCaL::Solver::signature(); }
     bool Engine::solver_inprobing() { return false; }
     bool Engine::solver_lucky() { return false; }
+    int Engine::solver_phase() { return 0; }
 
     std::ostream& operator<<(std::ostream& os, const Engine& engine)
     {

@@ -215,6 +215,7 @@ namespace query {
         v["solver"]["revision"] = CADICAL_BUILD_REVISION;
         v["solver"]["settings"]["inprobing"] = sat::Engine::solver_inprobing();
         v["solver"]["settings"]["lucky"] = sat::Engine::solver_lucky();
+        v["solver"]["settings"]["phase"] = sat::Engine::solver_phase();
         v["solver"]["propagation_counter"] = "search";
         v["solver"]["propagation_limit"] = "cooperative";
         // JSON clients may rewrite 2.0 as 2. Normalize integral options before
