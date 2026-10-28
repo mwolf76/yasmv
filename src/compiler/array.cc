@@ -153,6 +153,7 @@ namespace compiler {
 
             assert(f_expr2bsd_map.end() != mi);
             mi->second.push_back(md);
+            f_bsd_log.push_back(std::make_pair(parent, md));
         }
     }
 } // namespace compiler

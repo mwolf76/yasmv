@@ -330,13 +330,10 @@ namespace model {
         for (expr::Expr_ptr ident : idents) {
             expr::ExprVector& ev { map.find(ident)->second };
 
-            /* Newest guard first. The conjunction order decides the ADD
-               construction order, and with dynamic reordering enabled
-               that decides the variable order the whole CNF inherits:
-               on examples/fifteen the source order gives a 7x larger
-               formula (1.57M against 0.22M clauses) and a 7x slower
-               interpolation run than this order or the old hash order.
-               Measured 2026-10-27; see the solver comparison notes. */
+            /* Newest guard first. Any fixed order gives the same formula
+               size since the compiler memoizes only each subtree's own
+               microcode descriptors (2026-10-28, CUDD_VARIABLE_ORDER.md);
+               this one is kept for stable digests and witnesses. */
             expr::Expr_ptr guard { NULL };
             for (expr::ExprVector::const_reverse_iterator j = ev.rbegin();
                  j != ev.rend(); ++j) {

@@ -213,5 +213,45 @@ class HarnessTests(unittest.TestCase):
                     self.assertIn("FAILED", result.stdout)
 
 
+class CompilerCacheTests(unittest.TestCase):
+    """The compilation cache memoizes each subtree with the descriptors it
+    produced. A reused ITE mux must stay a dependency of every enclosing
+    subtree, even when the same mux was already installed earlier in the
+    unit; otherwise a later cache hit on the enclosing subtree would leave
+    the mux outputs unconstrained."""
+
+    MODEL = """#word-width 4
+MODULE main
+#inertial
+VAR a : uint; b : uint; x : uint; c : boolean;
+INIT
+  a = 1 && b = 2 && c && x = 3
+  && (c ? a : b) > 0
+  && !(x + (c ? a : b) = 5);
+TRANS a := a;
+TRANS b := b;
+TRANS c := c;
+TRANS x := x;
+"""
+
+    def test_reused_ite_mux_stays_a_subtree_dependency(self):
+        import json
+        with tempfile.TemporaryDirectory(prefix="yasmv-test-") as directory:
+            model = Path(directory) / "model.smv"
+            model.write_text(self.MODEL)
+            request = Path(directory) / "request.json"
+            request.write_text(json.dumps(dict(version=1, model=str(model), query=dict(
+                request_id="mux", operation="check", variant="reachable", method="bmc",
+                target="x + (c ? a : b) = 5", limits=dict(depth=3, wall_ms=60000)))))
+            result = subprocess.run([str(BINARY), "--quiet", "--query-file", str(request)],
+                                    text=True, capture_output=True, env=ENV, cwd=ROOT, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        response = json.loads(result.stdout)
+        self.assertEqual(response["status"], "completed", response.get("diagnostics"))
+        # x + (c ? a : b) is 4 in every reachable state; the target is false.
+        self.assertEqual(response["outcome"], "unreachable")
+        self.assertEqual(response["checked_depths"], [0, 1, 2, 3])
+
+
 if __name__ == "__main__":
     unittest.main()
