@@ -198,6 +198,21 @@ namespace compiler {
 
         /* -- data -------------------------------------------------------------- */
 
+        /* Sizes of the descriptor logs when a node was entered. A memoized
+           unit carries only the descriptors its own subtree produced; before,
+           it carried every descriptor accumulated so far in the toplevel
+           unit, and each cache hit replayed them all (CUDD_VARIABLE_ORDER.md). */
+        struct Marks {
+            std::size_t iod;
+            std::size_t bsd;
+            std::size_t msd;
+        };
+        std::vector<Marks> f_marks;
+
+        /* Binary selection descriptors in creation order, mirroring
+           f_expr2bsd_map, so a slice of them can be memoized. */
+        std::vector<std::pair<expr::Expr_ptr, BinarySelectionDescriptor>> f_bsd_log;
+
         /* TimedExpr -> Compilation Unit cache */
         using CompilationMap = boost::unordered_map<expr::TimedExpr, Unit,
                                                     expr::TimedExprHash, expr::TimedExprEq>;

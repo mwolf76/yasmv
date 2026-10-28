@@ -77,6 +77,11 @@ namespace compiler {
 
     void Compiler::pre_node_hook(expr::Expr_ptr expr)
     {
+        f_marks.push_back(Marks {
+            f_inlined_operator_descriptors.size(),
+            f_bsd_log.size(),
+            f_multiway_selection_descriptors.size() });
+
         query::checkpoint(query::Phase::compilation);
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
 
@@ -105,6 +110,10 @@ namespace compiler {
     void Compiler::post_node_hook(expr::Expr_ptr expr)
     {
         expr::ExprMgr& em { expr::ExprMgr::INSTANCE() };
+
+        assert(!f_marks.empty());
+        const Marks marks { f_marks.back() };
+        f_marks.pop_back();
 
         /* cache is disabled for SETs, COMMAs and CONDs. This allows for
        anonymous determinization variables on the fly. */
@@ -170,12 +179,26 @@ namespace compiler {
                 em.make_at(em.make_instant(time), em.make_dot(ctx, expr))
             };
 
-            /* memoize result */
+            /* memoize result: only what this subtree produced */
+            InlinedOperatorDescriptors iods {
+                f_inlined_operator_descriptors.begin() + marks.iod,
+                f_inlined_operator_descriptors.end() };
+            Expr2BinarySelectionDescriptorsMap bsds;
+            for (std::size_t b = marks.bsd; b < f_bsd_log.size(); ++b) {
+                const expr::Expr_ptr parent { f_bsd_log[b].first };
+                if (bsds.end() == bsds.find(parent)) {
+                    bsds.insert(std::pair<expr::Expr_ptr, BinarySelectionDescriptors>(
+                        parent, BinarySelectionDescriptors()));
+                }
+                bsds.find(parent)->second.push_back(f_bsd_log[b].second);
+            }
+            MultiwaySelectionDescriptors msds {
+                f_multiway_selection_descriptors.begin() + marks.msd,
+                f_multiway_selection_descriptors.end() };
+
             f_compilation_cache.insert(
                 std::pair<expr::TimedExpr, Unit>(
-                    key,
-                    Unit(timedExpression, dv, f_inlined_operator_descriptors,
-                         f_expr2bsd_map, f_multiway_selection_descriptors)));
+                    key, Unit(timedExpression, dv, iods, bsds, msds)));
 
             return;
         }
@@ -238,7 +261,11 @@ namespace compiler {
 
                 Expr2BinarySelectionDescriptorsMap::const_iterator i;
                 for (i = map.begin(); map.end() != i; ++i) {
-                    f_expr2bsd_map.insert(*i);
+                    if (f_expr2bsd_map.insert(*i).second) {
+                        for (const auto& d : i->second) {
+                            f_bsd_log.push_back(std::make_pair(i->first, d));
+                        }
+                    }
                 }
             }
 
@@ -282,6 +309,8 @@ namespace compiler {
         f_expr2bsd_map.clear();
         f_multiway_selection_descriptors.clear();
         f_bsuf_map.clear();
+        f_marks.clear();
+        f_bsd_log.clear();
     }
 
     void Compiler::build_encodings(expr::Expr_ptr ctx, expr::Expr_ptr body)
