@@ -145,6 +145,7 @@ namespace sat {
         static const char* solver_signature();
         static bool solver_inprobing();
         static bool solver_lucky();
+        static int solver_phase();
         // Called by a QueryContext being destroyed with this engine still
         // attached. Only the context the engine was created under owns the
         // back-pointer; a secondary attachment (explanation shrinking) must

@@ -200,6 +200,7 @@ namespace opts {
             info["linkage"] = "static";
             info["settings"]["inprobing"] = sat::Engine::solver_inprobing();
             info["settings"]["lucky"] = sat::Engine::solver_lucky();
+            info["settings"]["phase"] = sat::Engine::solver_phase();
             Json::StreamWriterBuilder writer;
             writer["indentation"] = "";
             std::cout << Json::writeString(writer, info) << std::endl;
